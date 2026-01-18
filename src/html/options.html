@@ -2,30 +2,29 @@
 <html lang="zh">
 
 <head>
-    <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="https://cdn.staticfile.org/bootstrap/4.6.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../vendor/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="../vendor/jquery-resizable-columns/css/jquery.resizableColumns.css">
-    <link rel="stylesheet" href="https://cdn.staticfile.org/bootstrap-table/1.19.1/bootstrap-table.min.css">
-    <link rel="stylesheet" href="https://cdn.staticfile.org/tempusdominus-bootstrap-4/5.39.0/css/tempusdominus-bootstrap-4.min.css">
+    <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap-table.min.css">
+    <link rel="stylesheet" href="../vendor/tempusdominus/tempusdominus-bootstrap-4.min.css">
     <link rel="stylesheet" href="../vendor/bootstrap-select/css/bootstrap-select.min.css">
     <link rel="stylesheet" href="../css/options.css">
     <link rel="icon" href="../img/icon-128.png">
     <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>QQ空间导出助手-选项</title>
-    <script src="https://cdn.staticfile.org/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdn.staticfile.org/popper.js/2.9.3/umd/popper.min.js"></script>
-    <script src="https://cdn.staticfile.org/bootstrap/4.6.1/js/bootstrap.bundle.min.js"></script>
+    <script src="../vendor/jquery/jquery.min.js"></script>
+    <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="../vendor/bootstrap-select/js/bootstrap-select.min.js"></script>
     <script src="../vendor/bootstrap-select/js/i18n/defaults-zh_CN.min.js"></script>
     <script src="../vendor/jquery-resizable-columns/js/jquery.resizableColumns.min.js"></script>
-    <script src="https://cdn.staticfile.org/bootstrap-table/1.19.1/bootstrap-table.min.js"></script>
-    <script src="https://cdn.staticfile.org/bootstrap-table/1.19.1/locale/bootstrap-table-zh-CN.min.js"></script>
-    <script src="https://cdn.staticfile.org/moment.js/2.27.0/moment.min.js"></script>
-    <script src="https://cdn.staticfile.org/moment.js/2.27.0/locale/zh-cn.min.js"></script>
+    <script src="../vendor/bootstrap/js/bootstrap-table.min.js"></script>
+    <script src="../vendor/bootstrap/js/bootstrap-table-zh-CN.min.js"></script>
+    <script src="../vendor/moment/moment.min.js"></script>
+    <script src="../vendor/moment/zh-cn.min.js"></script>
     <script src="../vendor/x-editable-4-bs4/js/bootstrap-editable.min.js"></script>
-    <script src="https://cdn.staticfile.org/bootstrap-table/1.19.1/extensions/resizable/bootstrap-table-resizable.min.js"></script>
-    <script src="https://cdn.staticfile.org/tempusdominus-bootstrap-4/5.39.0/js/tempusdominus-bootstrap-4.min.js"></script>
-    <script src="https://cdn.staticfile.org/lodash.js/4.17.21/lodash.min.js"></script>
+    <script src="../vendor/bootstrap/js/bootstrap-table-resizable.min.js"></script>
+    <script src="../vendor/tempusdominus/tempusdominus-bootstrap-4.min.js"></script>
+    <script src="../vendor/lodash/lodash.min.js"></script>
 </head>
 
 <body>
@@ -882,8 +881,8 @@
                                     <div class="col-sm-2">
                                         <select id="photos_images_rename_type" class="form-control selectpicker custom-select" data-actions-box="true">
                                             <optgroup label="相片名">
-                                                <option value="Name" selected >序号_相片名</option>
-											    <option value="Default" selected >序号_相片名_随机码</option>
+                                                <option value="Name">序号_相片名</option>
+											    <option value="Default">序号_相片名_随机码</option>
                                             </optgroup>
                                             <optgroup label="智能合成">
                                                 <option value="Time">序号_相片名_拍摄/上传时间</option>    
@@ -898,7 +897,7 @@
                                                 <option value="ShootTime">序号_相片名_拍摄时间</option>
                                             </optgroup>
                                             <optgroup label="拍摄时间">
-                                                <option value="ShootTime_ShootLbs">序号_相片名_拍摄时间_拍摄地点</option>
+                                                <option value="ShootTime_ShootLbs" selected>序号_相片名_拍摄时间_拍摄地点</option>
                                                 <option value="ShootTime_Lbs1">序号_相片名_拍摄时间_拍摄/上传地点</option>
                                                 <option value="ShootTime_Lbs2">序号_相片名_拍摄时间_上传/拍摄地点</option>
                                             </optgroup>
@@ -2093,6 +2092,74 @@
                                     </div>
                                     <div class="col-sm-auto">
                                         <small id="common_aria2_token_help" class="text-muted">连接RPC服务的Secret令牌，不开启授权认证的无需填写此项！</small>
+                                    </div>
+                                </div>
+                                <!-- Aria2队列控制配置 -->
+                                <div id="common_aria2_queue_control_row" class="form-group row" style="display: none;">
+                                    <div class="col-sm-auto">队列控制：</div>
+                                    <div class="col-sm-2">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="common_aria2_queue_control" checked>
+                                            <label class="custom-control-label" for="common_aria2_queue_control"></label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-auto">
+                                        <small id="common_aria2_queue_control_help" class="text-muted">启用队列控制后，插件会监控Aria2的任务队列状态，<span style="color: green;">当队列任务过多时暂停添加新任务，避免任务堆积导致下载卡住</span></small>
+                                    </div>
+                                </div>
+                                <div id="common_aria2_max_waiting_row" class="form-group row" style="display: none;">
+                                    <label for="common_aria2_max_waiting" class="col-sm-auto col-form-label">最大队列任务：</label>
+                                    <div class="col-sm-2">
+                                        <input type="number" min="10" max="1000" class="form-control" id="common_aria2_max_waiting" value="100">
+                                    </div>
+                                    <div class="col-sm-auto">
+                                        <small id="common_aria2_max_waiting_help" class="text-muted">Aria2中活跃+等待任务数超过此值时，暂停添加新任务。<span style="color: red;">建议Motrix设置为50-200，原生Aria2可设置更大</span></small>
+                                    </div>
+                                </div>
+                                <div id="common_aria2_check_interval_row" class="form-group row" style="display: none;">
+                                    <label for="common_aria2_check_interval" class="col-sm-auto col-form-label">队列检查间隔：</label>
+                                    <div class="col-sm-2">
+                                        <input type="number" min="1" max="60" class="form-control" id="common_aria2_check_interval" value="3">
+                                    </div>
+                                    <div class="col-sm-auto">
+                                        <small id="common_aria2_check_interval_help" class="text-muted">检查Aria2队列状态的间隔（秒），队列繁忙时每隔此时间检查一次</small>
+                                    </div>
+                                </div>
+                                <div id="common_aria2_auto_clean_row" class="form-group row" style="display: none;">
+                                    <div class="col-sm-auto">自动清理卡住任务：</div>
+                                    <div class="col-sm-2">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="common_aria2_auto_clean" checked>
+                                            <label class="custom-control-label" for="common_aria2_auto_clean"></label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-auto">
+                                        <small id="common_aria2_auto_clean_help" class="text-muted">自动检测并移除卡住的下载任务（下载速度为0且无连接），<span style="color: green;">解决失效链接导致下载卡死的问题</span></small>
+                                    </div>
+                                </div>
+                                <!-- 失效URL处理 -->
+                                <div class="form-group row">
+                                    <div class="col-sm-auto">跳过失效CDN链接：</div>
+                                    <div class="col-sm-2">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="common_skip_deprecated_urls" checked>
+                                            <label class="custom-control-label" for="common_skip_deprecated_urls"></label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-auto">
+                                        <small class="text-muted">跳过已知失效的CDN域名（如imgcache.qzoneapp.com等），<span style="color: orange;">这些旧域名的资源可能已被删除无法恢复</span></small>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-sm-auto">尝试修复失效URL：</div>
+                                    <div class="col-sm-2">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="common_try_fix_deprecated_urls">
+                                            <label class="custom-control-label" for="common_try_fix_deprecated_urls"></label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-auto">
+                                        <small class="text-muted">尝试将失效CDN域名替换为新域名（<span style="color: red;">实验性功能，不保证有效</span>）</small>
                                     </div>
                                 </div>
                                 <!-- 其他配置 -->

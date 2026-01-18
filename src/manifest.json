@@ -1,17 +1,16 @@
 {
-    "manifest_version": 2,
+    "manifest_version": 3,
     "name": "QQ空间导出助手",
     "description": "QQ空间导出助手，用于导出备份QQ空间的说说、日志、日记、相册、视频、留言、好友、收藏、分享、访客为文件，便于迁移与保存",
-    "version": "2.0",
+    "version": "3.0",
     "icons": {
+        "16": "img/icon-128.png",
+        "48": "img/icon-128.png",
         "128": "img/icon-128.png"
     },
     "homepage_url": "https://github.com/ShunCai/QZoneExport",
     "background": {
-        "persistent": false,
-        "scripts": [
-            "js/background.js"
-        ]
+        "service_worker": "js/background.js"
     },
     "content_scripts": [
         {
@@ -19,7 +18,6 @@
                 "https://*.qzone.qq.com/*"
             ],
             "js": [
-                "vendor/thunder/thunder-link.js",
                 "vendor/jquery/jquery.min.js",
                 "vendor/bootstrap/js/bootstrap.bundle.min.js",
                 "vendor/bootstrap/js/bootstrap-table.min.js",
@@ -53,21 +51,30 @@
                 "vendor/bootstrap/css/bootstrap.min.css",
                 "vendor/bootstrap/css/bootstrap-table.min.css",
                 "css/content.css"
-            ]
+            ],
+            "run_at": "document_idle"
         }
     ],
-    "page_action": {
-        "default_icon": "img/icon-128.png",
+    "action": {
+        "default_icon": {
+            "16": "img/icon-128.png",
+            "48": "img/icon-128.png",
+            "128": "img/icon-128.png"
+        },
         "default_title": "QQ空间导出助手",
         "default_popup": "html/popup.html"
     },
     "options_page": "html/options.html",
-    "content_security_policy": "script-src 'self' 'unsafe-eval' https://open.thunderurl.com/ https://res-etl-ssl.xunlei.com/ https://cdn.jsdelivr.net/ https://fastly.jsdelivr.net/ https://gcore.jsdelivr.net/ https://cdn.staticfile.org/ http://127.0.0.1; frame-src 'self' https://open.thunderurl.com/ https://res-etl-ssl.xunlei.com/ https://cdn.jsdelivr.net/ https://fastly.jsdelivr.net/ https://gcore.jsdelivr.net/ https://cdn.staticfile.org/; object-src 'self'",
     "web_accessible_resources": [
-        "html/indicator.html",
-        "export/*.*",
-        "templates/*.*",
-        "vendor/*.*"
+        {
+            "resources": [
+                "html/indicator.html",
+                "export/*",
+                "templates/*",
+                "vendor/*"
+            ],
+            "matches": ["https://*.qzone.qq.com/*"]
+        }
     ],
     "permissions": [
         "activeTab",
@@ -76,10 +83,15 @@
         "storage",
         "unlimitedStorage",
         "downloads",
-        "downloads.shelf",
-        "declarativeContent",
-        "clipboardWrite",
         "declarativeNetRequest",
+        "declarativeNetRequestWithHostAccess"
+    ],
+    "host_permissions": [
+        "https://*.qzone.qq.com/*",
+        "https://*.qq.com/*",
         "<all_urls>"
-    ]
+    ],
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'self'"
+    }
 }

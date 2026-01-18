@@ -217,13 +217,17 @@
     // 监听个人中心菜单点击事件
     $('#v-pills-tab a').on('click', function(e) {
         e.preventDefault();
-        window.location.hash = "#" + this.id;
+        $(this).tab('show');  // 手动触发选项卡切换
+        // 使用 history.replaceState 更新URL，避免浏览器自动滚动
+        history.replaceState(null, null, "#" + this.id);
     })
 
     // 监听配置Tab点击事件
     $('#nav-tab a').on('click', function(e) {
         e.preventDefault();
-        window.location.hash = "#" + this.id;
+        $(this).tab('show');  // 手动触发选项卡切换
+        // 使用 history.replaceState 更新URL，避免浏览器自动滚动
+        history.replaceState(null, null, "#" + this.id);
     });
 
     // 监听下载工具选择事件
@@ -239,6 +243,11 @@
         // Aria2
         const $common_aria2_rpc_row = $('#common_aria2_rpc_row');
         const $common_aria2_token_row = $('#common_aria2_token_row');
+        // Aria2队列控制
+        const $common_aria2_queue_control_row = $('#common_aria2_queue_control_row');
+        const $common_aria2_max_waiting_row = $('#common_aria2_max_waiting_row');
+        const $common_aria2_check_interval_row = $('#common_aria2_check_interval_row');
+        const $common_aria2_auto_clean_row = $('#common_aria2_auto_clean_row');
 
         // 提示信息
         const $download_type_help = $('#common_download_type_help');
@@ -251,6 +260,10 @@
                 // 隐藏Aria2配置
                 $common_aria2_rpc_row.hide();
                 $common_aria2_token_row.hide();
+                $common_aria2_queue_control_row.hide();
+                $common_aria2_max_waiting_row.hide();
+                $common_aria2_check_interval_row.hide();
+                $common_aria2_auto_clean_row.hide();
 
                 $file_suffix_row.show();
                 $suffix_timeout_row.show();
@@ -272,16 +285,25 @@
                 $download_sleep_row.show();
                 $common_aria2_rpc_row.show();
                 $common_aria2_token_row.show();
+                // 显示Aria2队列控制配置
+                $common_aria2_queue_control_row.show();
+                $common_aria2_max_waiting_row.show();
+                $common_aria2_check_interval_row.show();
+                $common_aria2_auto_clean_row.show();
                 $file_suffix_row.show();
                 $suffix_timeout_row.show();
 
-                $download_type_help.html('老司机可用Aria2，小白建议用Motrix，请确保Aria2/Motrix服务处于启动中！');
+                $download_type_help.html('老司机可用Aria2，小白建议用Motrix，请确保Aria2/Motrix服务处于启动中！<span style="color:green">建议开启队列控制和自动清理卡住任务</span>');
                 break;
             case 'Thunder':
                 $download_status_row.hide();
                 // 隐藏Aria2配置
                 $common_aria2_rpc_row.hide();
                 $common_aria2_token_row.hide();
+                $common_aria2_queue_control_row.hide();
+                $common_aria2_max_waiting_row.hide();
+                $common_aria2_check_interval_row.hide();
+                $common_aria2_auto_clean_row.hide();
                 $common_refererUrls.hide();
                 $download_sleep_row.hide();
 
@@ -298,6 +320,10 @@
                 // 隐藏Aria2配置
                 $common_aria2_rpc_row.hide();
                 $common_aria2_token_row.hide();
+                $common_aria2_queue_control_row.hide();
+                $common_aria2_max_waiting_row.hide();
+                $common_aria2_check_interval_row.hide();
+                $common_aria2_auto_clean_row.hide();
                 $common_refererUrls.hide();
                 $download_sleep_row.hide();
 
@@ -314,6 +340,10 @@
                 // 隐藏Aria2配置
                 $common_aria2_rpc_row.hide();
                 $common_aria2_token_row.hide();
+                $common_aria2_queue_control_row.hide();
+                $common_aria2_max_waiting_row.hide();
+                $common_aria2_check_interval_row.hide();
+                $common_aria2_auto_clean_row.hide();
                 $common_refererUrls.hide();
 
                 $task_count_row.show();
@@ -331,6 +361,10 @@
                 // 隐藏Aria2配置
                 $common_aria2_rpc_row.hide();
                 $common_aria2_token_row.hide();
+                $common_aria2_queue_control_row.hide();
+                $common_aria2_max_waiting_row.hide();
+                $common_aria2_check_interval_row.hide();
+                $common_aria2_auto_clean_row.hide();
 
                 $download_status_row.show();
                 $file_suffix_row.show();
@@ -353,6 +387,10 @@
                 // 隐藏Aria2配置
                 $common_aria2_rpc_row.hide();
                 $common_aria2_token_row.hide();
+                $common_aria2_queue_control_row.hide();
+                $common_aria2_max_waiting_row.hide();
+                $common_aria2_check_interval_row.hide();
+                $common_aria2_auto_clean_row.hide();
 
                 $download_type_help.html('不下载图片，直接使用QQ空间的图片地址，<span style="color:red">不推荐使用，可能会存在图片过期、禁止访问等问题</span>');
                 break;
@@ -818,13 +856,21 @@
         $("#common_rest_sleep_url").selectpicker('val', options.Common.RestSleepUrls);
         $("#common_download_type").val(options.Common.downloadType).change();
         $('#common_download_status').prop("checked", options.Common.disabledShelf);
-        chrome.downloads.setShelfEnabled && chrome.downloads.setShelfEnabled(!options.Common.disabledShelf);
+        // chrome.downloads.setShelfEnabled 在 Manifest V3 中已移除
         $("#common_thunder_task_count").val(options.Common.thunderTaskNum);
         $("#common_thunder_task_sleep").val(options.Common.thunderTaskSleep);
         $("#common_download_thread").val(options.Common.downloadThread);
         $("#common_download_sleep").val(options.Common.downloadSleep);
         $("#common_aria2_rpc").val(options.Common.Aria2.rpc);
         $("#common_aria2_token").val(options.Common.Aria2.token || '');
+        // Aria2队列控制配置
+        $('#common_aria2_queue_control').prop("checked", options.Common.Aria2.enableQueueControl !== false);
+        $("#common_aria2_max_waiting").val(options.Common.Aria2.maxWaiting || 100);
+        $("#common_aria2_check_interval").val(options.Common.Aria2.checkInterval || 3);
+        $('#common_aria2_auto_clean').prop("checked", options.Common.Aria2.autoCleanStuck !== false);
+        // 失效URL处理
+        $('#common_skip_deprecated_urls').prop("checked", options.Common.skipDeprecatedUrls !== false);
+        $('#common_try_fix_deprecated_urls').prop("checked", options.Common.tryFixDeprecatedUrls === true);
         $('#common_user_link').prop("checked", options.Common.hasUserLink);
 
 
@@ -1115,13 +1161,21 @@
         QZone_Config.Common.RestSleepUrls = $("#common_rest_sleep_url").val();
         QZone_Config.Common.downloadType = $('#common_download_type').val();
         QZone_Config.Common.disabledShelf = !$('#common_download_status').prop("checked");
-        chrome.downloads.setShelfEnabled && chrome.downloads.setShelfEnabled(!QZone_Config.Common.disabledShelf);
+        // chrome.downloads.setShelfEnabled 在 Manifest V3 中已移除
         QZone_Config.Common.thunderTaskNum = $("#common_thunder_task_count").val() * 1;
         QZone_Config.Common.thunderTaskSleep = $("#common_thunder_task_sleep").val() * 1;
         QZone_Config.Common.downloadThread = $("#common_download_thread").val() * 1;
         QZone_Config.Common.downloadSleep = $("#common_download_sleep").val() * 1;
         QZone_Config.Common.Aria2.rpc = $("#common_aria2_rpc").val();
         QZone_Config.Common.Aria2.token = $("#common_aria2_token").val();
+        // Aria2队列控制配置
+        QZone_Config.Common.Aria2.enableQueueControl = $('#common_aria2_queue_control').prop("checked");
+        QZone_Config.Common.Aria2.maxWaiting = $("#common_aria2_max_waiting").val() * 1;
+        QZone_Config.Common.Aria2.checkInterval = $("#common_aria2_check_interval").val() * 1;
+        QZone_Config.Common.Aria2.autoCleanStuck = $('#common_aria2_auto_clean').prop("checked");
+        // 失效URL处理
+        QZone_Config.Common.skipDeprecatedUrls = $('#common_skip_deprecated_urls').prop("checked");
+        QZone_Config.Common.tryFixDeprecatedUrls = $('#common_try_fix_deprecated_urls').prop("checked");
         QZone_Config.Common.hasUserLink = $('#common_user_link').prop("checked");
 
         // 开发者

@@ -3,33 +3,6 @@ const BrowseDownloads = new Map();
 let QZoneDownloadId = 0;
 
 /**
- * PageAction监听
- */
-chrome.runtime.onInstalled.addListener(function() {
-    chrome.declarativeContent.onPageChanged.removeRules(undefined, function() {
-        chrome.declarativeContent.onPageChanged.addRules([{
-            conditions: [
-                // 打开QQ空间显示pageAction
-                new chrome.declarativeContent.PageStateMatcher({
-                    pageUrl: {
-                        urlMatches: 'https://user.qzone.qq.com/\d*',
-                        schemes: ['https']
-                    }
-                })
-            ],
-            actions: [new chrome.declarativeContent.ShowPageAction()]
-        }]);
-    });
-});
-
-
-let sendMessage = (data, callback) => {
-    chrome.runtime.sendMessage(data, function(res) {
-        callback(res);
-    });
-}
-
-/**
  * 获取当前任务下载数
  */
 const getInProgressTask = () => {
@@ -72,13 +45,17 @@ const downloadByBrowser = function(request) {
             const isMatch = options.Common.refererUrls.filter(item => task.url.includes(item)).length > 0;
 
             if (isMatch) {
-                // 通过XHR下载视频文件
-                await send(task.url, 'blob').then((xhr) => {
+                // 通过fetch下载视频文件
+                try {
+                    const response = await fetch(task.url, {
+                        credentials: 'include'
+                    });
+                    const blob = await response.blob();
                     // 使用BLOB链接下载文件
-                    task.url = URL.createObjectURL(xhr.response);
-                }).catch((e) => {
-                    console.error('通过XHR下载视频错误，将使用浏览器直接下载 bg', task, e);
-                })
+                    task.url = URL.createObjectURL(blob);
+                } catch (e) {
+                    console.error('通过fetch下载视频错误，将使用浏览器直接下载 bg', task, e);
+                }
             }
 
             // 添加下载任务
@@ -144,39 +121,42 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
                 case 'reset':
                     // 重置数据
                     BrowseDownloads.clear();
+                    sendResponse(true);
                     break;
                 case 'download_browser':
                     // 浏览器下载
                     downloadByBrowser(request).then((downloadId) => {
                         sendResponse(downloadId);
                     });
-                    break;
+                    return true; // 保持消息通道打开
                 case 'download_list':
                     // 获取下载列表
                     getDownloadList(request.options).then((data) => {
                         sendResponse(data);
                     });
-                    break;
+                    return true;
                 case 'download_info':
                     // 获取下载信息
                     getDownloadList(request.options).then((data) => {
                         sendResponse(data && data.length > 0 ? data[0] : undefined);
                     });
-                    break;
+                    return true;
                 case 'download_resume':
                     // 恢复下载
                     resumeDownload(request.downloadId).then((data) => {
                         sendResponse(data);
                     });
-                    break;
+                    return true;
                 case 'show_export_zip':
                     // 打开下载的ZIP文件
                     chrome.downloads.show(QZoneDownloadId);
+                    sendResponse(true);
                     break;
                 case 'skipLink':
                     chrome.tabs.create({
                         url: request.url
                     });
+                    sendResponse(true);
                     break;
                 case 'getMimeType':
                     getMimeType(request.url, request.timeout).then((data) => {
@@ -185,24 +165,26 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
                         console.error('文件识别异常，将默认不使用文件后缀！', e);
                         sendResponse('');
                     });
-                    break;
+                    return true;
                 case 'getMapJson':
                     getMapJson(request.url).then((data) => {
                         sendResponse(data);
                     }).catch((e) => {
                         sendResponse(e);
                     });
-                    break;
+                    return true;
                 default:
                     console.warn('Background 接收到消息，但未识别类型！', request);
+                    sendResponse(null);
                     break;
             }
             break;
         default:
             console.warn('Background 接收到消息，但未识别来源！', request);
+            sendResponse(null);
             break;
     }
-    return true;
+    return false;
 });
 
 
@@ -266,7 +248,7 @@ chrome.runtime.onInstalled.addListener((details) => {
                     chrome.storage.sync.clear(function() {
                         console.info('清空配置完成');
                     });
-                    // 重置备份数据S
+                    // 重置备份数据
                     chrome.storage.local.clear(function() {
                         console.info('重置备份数据完成');
                     });
@@ -281,105 +263,60 @@ chrome.runtime.onInstalled.addListener((details) => {
 })
 
 /**
- * 发送请求
- * @param {string} url 
- * @param {string} responseType 
- * @param {integer} timeout 超时秒数 
- */
-const send = function(url, responseType, timeout) {
-    return new Promise(function(resolve, reject) {
-        var request = new XMLHttpRequest();
-        request.open("GET", url);
-        if (responseType) {
-            request.responseType = responseType;
-        }
-        // 允许跨域
-        request.withCredentials = true;
-        // 超时秒数
-        if (timeout) {
-            request.timeout = timeout * 1000;
-        }
-        request.onload = function() {
-            resolve(this);
-        };
-        request.onerror = function(error) {
-            reject(error);
-            this.abort();
-        };
-        request.ontimeout = function(error) {
-            reject(error);
-            this.abort();
-        };
-        request.send();
-    });
-}
-
-/**
- * 获取文件类型
+ * 获取文件类型 (使用fetch替代XMLHttpRequest)
  * @param {string} url 文件地址
  * @param {number} timeout 超时秒数
  * @returns 
  */
 const getMimeType = function(url, timeout) {
-    return new Promise(function(resolve, reject) {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', url, true);
-        // 超时设置
-        xhr.timeout = timeout * 1000;
-        xhr.onreadystatechange = function() {
-            if (2 == xhr.readyState) {
-                const contentType = xhr.getResponseHeader('content-type') || xhr.getResponseHeader('Content-Type') || '';
-                let suffix = '';
-                if (contentType.indexOf('/') > -1) {
-                    suffix = contentType.split('/')[1];
-                }
-                this.abort();
-                resolve(suffix);
+    return new Promise(async function(resolve, reject) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeout * 1000);
+        
+        try {
+            const response = await fetch(url, {
+                method: 'HEAD',
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            
+            const contentType = response.headers.get('content-type') || '';
+            let suffix = '';
+            if (contentType.indexOf('/') > -1) {
+                suffix = contentType.split('/')[1].split(';')[0];
             }
-        }
-        xhr.onerror = function(e) {
+            resolve(suffix);
+        } catch (e) {
+            clearTimeout(timeoutId);
             reject(e);
         }
-        xhr.ontimeout = function(e) {
-            this.abort();
-            reject(e);
-        }
-        xhr.send();
     });
 }
 
 /**
- * 获取GeoJson
+ * 获取GeoJson (使用fetch替代XMLHttpRequest)
  * @param {string} url 文件地址
  * @returns 
  */
 const getMapJson = function(url) {
-    return new Promise(function(resolve, reject) {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', url, true);
-        xhr.onload = function() {
-            var data = {};
-            try {
-                data = JSON.parse(this.responseText);
-            } catch (error) {
-
-            }
+    return new Promise(async function(resolve, reject) {
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
             resolve(data);
-        }
-        xhr.onerror = function(e) {
+        } catch (e) {
             reject(e);
         }
-        xhr.ontimeout = function(e) {
-            this.abort();
-            reject(e);
-        }
-        xhr.send();
     });
 }
 
-// 获取动态规则
-chrome.declarativeNetRequest && chrome.declarativeNetRequest.getDynamicRules(
-    function(res) {
+// 初始化动态规则
+const initDynamicRules = async () => {
+    try {
+        // 获取现有规则
+        const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
+        const removeRuleIds = existingRules.map(rule => rule.id);
+        
         // 添加的规则
         const addRules = [{
             "id": 1,
@@ -393,33 +330,21 @@ chrome.declarativeNetRequest && chrome.declarativeNetRequest.getDynamicRules(
                 "type": "modifyHeaders"
             },
             "condition": {
-                "urlFilter": 'gtimg.com',
-                "resourceTypes": [
-                    "xmlhttprequest"
-                ]
+                "urlFilter": "gtimg.com",
+                "resourceTypes": ["xmlhttprequest"]
             }
-        }]
-
-        // 删除的规则
-        const removeRuleIds = res.map(item => item.id);
-
-        try {
-            // 移除动态规则
-            chrome.declarativeNetRequest.updateDynamicRules({
-                removeRuleIds: removeRuleIds
-            }, function() {
-                // 添加动态规则
-                chrome.declarativeNetRequest.updateDynamicRules({
-                    addRules: addRules
-                })
-            })
-        } catch (error) {
-            try {
-                // 移除动态规则
-                chrome.declarativeNetRequest.updateDynamicRules(removeRuleIds, addRules)
-            } catch (error) {
-
-            }
-        }
+        }];
+        
+        // 更新规则
+        await chrome.declarativeNetRequest.updateDynamicRules({
+            removeRuleIds: removeRuleIds,
+            addRules: addRules
+        });
+        console.info('动态规则初始化完成');
+    } catch (error) {
+        console.error('动态规则初始化失败', error);
     }
-)
+};
+
+// 初始化
+initDynamicRules();

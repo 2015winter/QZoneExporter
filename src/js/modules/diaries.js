@@ -46,38 +46,31 @@ API.Diaries.export = async() => {
 }
 
 /**
- * 获取所有日记的内容
- * @param {Array} items 日记列表
+ * 获取单条日记内容（带重试机制）
+ * @param {Object} item 日记项
+ * @param {number} retryCount 重试次数
  */
-API.Diaries.getAllContents = async(items) => {
-    // 进度更新器
-    const indicator = new StatusIndicator('Diaries_Content');
-    indicator.setTotal(items.length);
-
-    for (let index = 0; index < items.length; index++) {
-        let item = items[index];
-
-        // 更新状态-当前位置
-        indicator.setIndex(index + 1);
-
-        if (!API.Common.isNewItem(item)) {
-            // 已备份数据跳过不处理
-            indicator.addSkip(item);
-            continue;
-        }
-
-        await API.Diaries.getInfo(item.blogid).then(async(data) => {
-            // 添加成功提示
-            indicator.addSuccess(data);
-
+API.Diaries.getItemContent = async(item, retryCount = 3) => {
+    for (let attempt = 1; attempt <= retryCount; attempt++) {
+        try {
+            const data = await API.Diaries.getInfo(item.blogid);
+            
             // 加载日志页面
             const blogPage = jQuery(data);
 
             // 基于DOM获取详细信息
-            item = API.Blogs.readDetailInfo(blogPage) || item;
+            const detailItem = API.Blogs.readDetailInfo(blogPage);
+            if (detailItem) {
+                Object.assign(item, detailItem);
+            }
 
             // 获得网页中的日志正文
             const $detailBlog = blogPage.find("#blogDetailDiv:first");
+
+            // 检查是否成功获取到内容
+            if (!$detailBlog.length || !$detailBlog.html()) {
+                throw new Error('日记内容为空');
+            }
 
             // 添加原始HTML
             item.html = API.Utils.utf8ToBase64($detailBlog.html());
@@ -95,18 +88,82 @@ API.Diaries.getAllContents = async(items) => {
             // 添加点赞Key
             item.uniKey = API.Blogs.getUniKey(item.blogid || item.blogId);
 
-            items[index] = item;
-        }).catch((e) => {
-            console.error("获取日记内容异常", item, e);
-            // 添加失败提示
-            indicator.addFailed(item);
-        })
+            return { success: true, item: item };
+        } catch (e) {
+            console.warn(`获取日记内容失败，第${attempt}次尝试，日记ID: ${item.blogid}`, e);
+            if (attempt < retryCount) {
+                // 重试前等待，逐次增加等待时间
+                await API.Utils.sleep(attempt * 1000);
+            } else {
+                console.error("获取日记内容最终失败", item, e);
+                return { success: false, item: item, error: e };
+            }
+        }
+    }
+};
 
-        // 等待一下再请求
-        let min = QZone_Config.Diaries.Info.randomSeconds.min;
-        let max = QZone_Config.Diaries.Info.randomSeconds.max;
-        let seconds = API.Utils.randomSeconds(min, max);
-        await API.Utils.sleep(seconds * 1000);
+/**
+ * 获取所有日记的内容（并发优化版本）
+ * @param {Array} items 日记列表
+ */
+API.Diaries.getAllContents = async(items) => {
+    // 进度更新器
+    const indicator = new StatusIndicator('Diaries_Content');
+    indicator.setTotal(items.length);
+
+    // 过滤出需要处理的新项目
+    const newItems = [];
+    const itemIndexMap = new Map();
+    
+    for (let index = 0; index < items.length; index++) {
+        const item = items[index];
+        if (!API.Common.isNewItem(item)) {
+            // 已备份数据跳过不处理
+            indicator.addSkip(item);
+        } else {
+            newItems.push(item);
+            itemIndexMap.set(item, index);
+        }
+    }
+
+    // 并发数配置，默认5个并发
+    const concurrentNum = QZone_Config.Diaries.Info.concurrentNum || 5;
+    // 分批处理
+    const chunks = _.chunk(newItems, concurrentNum);
+    
+    let processedCount = 0;
+    
+    for (let i = 0; i < chunks.length; i++) {
+        const chunk = chunks[i];
+        const tasks = [];
+        
+        for (const item of chunk) {
+            tasks.push(API.Diaries.getItemContent(item).then((result) => {
+                processedCount++;
+                indicator.setIndex(processedCount + (items.length - newItems.length));
+                
+                if (result.success) {
+                    indicator.addSuccess(result.item);
+                    // 更新原数组中的项
+                    const originalIndex = itemIndexMap.get(item);
+                    items[originalIndex] = result.item;
+                } else {
+                    indicator.addFailed(result.item);
+                }
+                return result;
+            }));
+        }
+        
+        // 等待当前批次完成
+        await Promise.all(tasks);
+        
+        // 批次间等待，避免请求过于频繁
+        if (i < chunks.length - 1) {
+            const min = QZone_Config.Diaries.Info.randomSeconds.min;
+            const max = QZone_Config.Diaries.Info.randomSeconds.max;
+            const seconds = API.Utils.randomSeconds(min, max);
+            await API.Utils.sleep(seconds * 1000);
+        }
     }
 
     // 完成

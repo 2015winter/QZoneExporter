@@ -1237,9 +1237,33 @@ API.Utils = {
             // 使用默认JSON转换器
             return JSON.parse(json);
         } catch (error) {
-            // 如果异常了再使用eval转换
-            // 不使用JSON.parse，文案中有特殊字符时会异常，比如有反斜杠\
-            return eval("(" + json + ")");
+            // JSON.parse 失败时，尝试修复常见的 JSON 格式问题
+            // MV3 不支持 eval，使用安全的 JSON 预处理
+            try {
+                // 尝试修复未转义的特殊字符
+                let fixedJson = json
+                    // 修复未转义的反斜杠（但保留已转义的）
+                    .replace(/\\(?!["\\/bfnrtu])/g, '\\\\')
+                    // 修复单引号为双引号（如果是用单引号包裹的字符串）
+                    .replace(/:\s*'([^']*)'/g, ':"$1"');
+                return JSON.parse(fixedJson);
+            } catch (e2) {
+                // 如果仍然失败，尝试使用更宽松的解析
+                try {
+                    // 移除可能导致问题的控制字符
+                    let cleanJson = json.replace(/[\x00-\x1F\x7F]/g, (char) => {
+                        if (char === '\n') return '\\n';
+                        if (char === '\r') return '\\r';
+                        if (char === '\t') return '\\t';
+                        return '';
+                    });
+                    return JSON.parse(cleanJson);
+                } catch (e3) {
+                    console.error('JSON解析失败:', error, e2, e3);
+                    console.error('原始JSON:', json.substring(0, 500));
+                    return {};
+                }
+            }
         }
     },
 
@@ -1349,11 +1373,95 @@ API.Utils = {
     },
 
     /**
+     * 已知的失效CDN域名列表
+     * 这些域名的资源可能已经被迁移或删除
+     */
+    DEPRECATED_CDN_DOMAINS: [
+        'imgcache.qzoneapp.com',      // 旧的QQ空间应用图片CDN
+        'qzoneapp.com',               // QQ空间应用域名
+        'imgcache.qq.com',            // 旧的腾讯图片缓存
+        'qzonestyle.gtimg.cn/aoi/',   // 部分旧路径
+    ],
+
+    /**
+     * 检查URL是否为已知的失效CDN域名
+     * @param {string} url 
+     * @returns {boolean}
+     */
+    isDeprecatedCdnUrl(url) {
+        if (!url) return false;
+        url = url.toLowerCase();
+        return this.DEPRECATED_CDN_DOMAINS.some(domain => url.includes(domain));
+    },
+
+    /**
+     * 尝试修复失效的CDN URL
+     * 注意：这只是尝试性修复，不保证成功
+     * @param {string} url 原始URL
+     * @returns {string} 修复后的URL，如果无法修复则返回原URL
+     */
+    tryFixDeprecatedUrl(url) {
+        if (!url) return url;
+        
+        // 1. 尝试将 imgcache.qzoneapp.com 替换为可能的新域名
+        if (url.includes('imgcache.qzoneapp.com')) {
+            // 尝试替换为 qpic.cn（腾讯新的图片CDN）
+            // 注意：这只是猜测性替换，可能不会成功
+            const newUrl = url
+                .replace(/app\d+\.imgcache\.qzoneapp\.com/gi, 'p.qpic.cn')
+                .replace(/imgcache\.qzoneapp\.com/gi, 'p.qpic.cn');
+            console.log('[URL修复尝试]', url, '->', newUrl);
+            return newUrl;
+        }
+        
+        // 2. 其他可能的修复规则可以在这里添加
+        
+        return url;
+    },
+
+    /**
+     * 预检查URL是否可能有效
+     * 快速检查，不发送网络请求
+     * @param {string} url 
+     * @returns {{valid: boolean, reason: string}}
+     */
+    quickCheckUrl(url) {
+        if (!url) {
+            return { valid: false, reason: '空URL' };
+        }
+        
+        // 检查是否为已知失效域名
+        if (this.isDeprecatedCdnUrl(url)) {
+            return { 
+                valid: false, 
+                reason: '已知失效CDN域名: ' + url.match(/https?:\/\/([^\/]+)/)?.[1] 
+            };
+        }
+        
+        // 检查URL格式
+        try {
+            new URL(url);
+        } catch (e) {
+            return { valid: false, reason: 'URL格式无效' };
+        }
+        
+        return { valid: true, reason: '' };
+    },
+
+    /**
      * 迅雷下载
      * @param {ThunderInfo} taskInfo 
      */
     downloadByThunder(taskInfo) {
-        thunderLink.newTask(taskInfo);
+        // Manifest V3 中迅雷SDK不可用，使用thunderx协议唤起
+        if (typeof thunderLink !== 'undefined' && thunderLink.newTask) {
+            thunderLink.newTask(taskInfo);
+        } else {
+            // 使用 thunderx:// 协议唤起迅雷
+            const thunderUrl = 'thunderx://' + JSON.stringify(taskInfo);
+            window.open(thunderUrl, '_blank');
+            console.warn('迅雷SDK不可用，尝试使用thunderx协议唤起');
+        }
     },
 
     /**
@@ -1424,6 +1532,211 @@ API.Utils = {
         };
         // 添加下载任务到Aria2
         return API.Utils.post(Aria2Setting.rpc, JSON.stringify(data));
+    },
+
+    /**
+     * 获取Aria2全局状态
+     * @returns {Promise<{numActive: number, numWaiting: number, numStopped: number}>}
+     */
+    getAria2GlobalStat() {
+        const Aria2Setting = QZone_Config.Common.Aria2;
+        const token = "token:" + Aria2Setting.token;
+        const data = {
+            "jsonrpc": "2.0",
+            "method": "aria2.getGlobalStat",
+            "id": Date.now(),
+            "params": [token]
+        };
+        return API.Utils.post(Aria2Setting.rpc, JSON.stringify(data)).then(result => {
+            if (result.error) {
+                console.error('获取Aria2状态失败', result.error);
+                return { numActive: 0, numWaiting: 0, numStopped: 0 };
+            }
+            const r = result.result || {};
+            return {
+                numActive: parseInt(r.numActive) || 0,
+                numWaiting: parseInt(r.numWaiting) || 0,
+                numStopped: parseInt(r.numStopped) || 0,
+                numStoppedTotal: parseInt(r.numStoppedTotal) || 0
+            };
+        }).catch(error => {
+            console.error('获取Aria2状态异常', error);
+            return { numActive: 0, numWaiting: 0, numStopped: 0 };
+        });
+    },
+
+    /**
+     * 等待Aria2队列有空闲位置
+     * @param {number} maxWaiting 最大等待任务数
+     * @param {number} checkInterval 检查间隔（毫秒）
+     * @returns {Promise<boolean>}
+     */
+    async waitForAria2QueueSlot(maxWaiting, checkInterval = 2000) {
+        const maxWaitTime = 300000; // 最长等待5分钟
+        const startTime = Date.now();
+        let stuckCheckCount = 0;
+        
+        while (true) {
+            const stat = await this.getAria2GlobalStat();
+            const totalPending = stat.numActive + stat.numWaiting;
+            
+            // 如果活跃+等待的任务数小于最大等待数，可以添加新任务
+            if (totalPending < maxWaiting) {
+                return true;
+            }
+            
+            // 超时检查
+            if (Date.now() - startTime > maxWaitTime) {
+                console.warn('等待Aria2队列超时，强制继续添加任务');
+                return true;
+            }
+            
+            // 每检查5次，尝试清理卡住的任务
+            stuckCheckCount++;
+            if (stuckCheckCount >= 5) {
+                stuckCheckCount = 0;
+                const removedCount = await this.removeStuckAria2Tasks();
+                if (removedCount > 0) {
+                    console.log(`已移除 ${removedCount} 个卡住的下载任务`);
+                }
+            }
+            
+            console.log(`Aria2队列繁忙，当前活跃:${stat.numActive}，等待:${stat.numWaiting}，等待队列空闲...`);
+            await API.Utils.sleep(checkInterval);
+        }
+    },
+
+    /**
+     * 获取Aria2活跃任务列表
+     * @returns {Promise<Array>}
+     */
+    async getAria2ActiveTasks() {
+        const Aria2Setting = QZone_Config.Common.Aria2;
+        const token = "token:" + Aria2Setting.token;
+        const data = {
+            "jsonrpc": "2.0",
+            "method": "aria2.tellActive",
+            "id": Date.now(),
+            "params": [token]
+        };
+        try {
+            const result = await API.Utils.post(Aria2Setting.rpc, JSON.stringify(data));
+            if (result.error) {
+                console.error('获取Aria2活跃任务失败', result.error);
+                return [];
+            }
+            return result.result || [];
+        } catch (error) {
+            console.error('获取Aria2活跃任务异常', error);
+            return [];
+        }
+    },
+
+    /**
+     * 移除Aria2任务
+     * @param {string} gid 任务ID
+     * @returns {Promise<boolean>}
+     */
+    async removeAria2Task(gid) {
+        const Aria2Setting = QZone_Config.Common.Aria2;
+        const token = "token:" + Aria2Setting.token;
+        const data = {
+            "jsonrpc": "2.0",
+            "method": "aria2.remove",
+            "id": Date.now(),
+            "params": [token, gid]
+        };
+        try {
+            const result = await API.Utils.post(Aria2Setting.rpc, JSON.stringify(data));
+            return !result.error;
+        } catch (error) {
+            console.error('移除Aria2任务异常', error, gid);
+            return false;
+        }
+    },
+
+    /**
+     * 强制移除Aria2任务（包括已完成/出错的）
+     * @param {string} gid 任务ID
+     * @returns {Promise<boolean>}
+     */
+    async forceRemoveAria2Task(gid) {
+        const Aria2Setting = QZone_Config.Common.Aria2;
+        const token = "token:" + Aria2Setting.token;
+        const data = {
+            "jsonrpc": "2.0",
+            "method": "aria2.forceRemove",
+            "id": Date.now(),
+            "params": [token, gid]
+        };
+        try {
+            const result = await API.Utils.post(Aria2Setting.rpc, JSON.stringify(data));
+            return !result.error;
+        } catch (error) {
+            // 如果forceRemove失败，尝试removeDownloadResult
+            return await this.removeAria2DownloadResult(gid);
+        }
+    },
+
+    /**
+     * 移除Aria2下载结果（已完成/出错的任务）
+     * @param {string} gid 任务ID
+     * @returns {Promise<boolean>}
+     */
+    async removeAria2DownloadResult(gid) {
+        const Aria2Setting = QZone_Config.Common.Aria2;
+        const token = "token:" + Aria2Setting.token;
+        const data = {
+            "jsonrpc": "2.0",
+            "method": "aria2.removeDownloadResult",
+            "id": Date.now(),
+            "params": [token, gid]
+        };
+        try {
+            const result = await API.Utils.post(Aria2Setting.rpc, JSON.stringify(data));
+            return !result.error;
+        } catch (error) {
+            return false;
+        }
+    },
+
+    /**
+     * 检测并移除卡住的Aria2任务（下载速度为0且已超时）
+     * @param {number} stuckTimeout 卡住超时时间（秒），默认60秒
+     * @returns {Promise<number>} 移除的任务数
+     */
+    async removeStuckAria2Tasks(stuckTimeout = 60) {
+        const tasks = await this.getAria2ActiveTasks();
+        let removedCount = 0;
+        
+        for (const task of tasks) {
+            const downloadSpeed = parseInt(task.downloadSpeed) || 0;
+            const connections = parseInt(task.connections) || 0;
+            const completedLength = parseInt(task.completedLength) || 0;
+            const totalLength = parseInt(task.totalLength) || 0;
+            
+            // 判断是否卡住：下载速度为0，且已经运行了一段时间
+            // 或者：没有连接数，且文件大小未知或为0
+            const isStuck = (downloadSpeed === 0 && connections === 0) || 
+                           (totalLength === 0 && downloadSpeed === 0);
+            
+            if (isStuck) {
+                console.warn(`检测到卡住的任务: ${task.gid}，尝试移除...`, {
+                    downloadSpeed,
+                    connections,
+                    completedLength,
+                    totalLength,
+                    files: task.files?.map(f => f.path || f.uris?.[0]?.uri)
+                });
+                
+                const removed = await this.forceRemoveAria2Task(task.gid);
+                if (removed) {
+                    removedCount++;
+                }
+            }
+        }
+        
+        return removedCount;
     },
 
     /**
@@ -2384,11 +2697,10 @@ API.Blogs = {
      * @param {Object} blogPage DOM对象
      */
     readTemplateContent(blogPage) {
-        // 重置前一篇模板日志内容
-        window.g_oBlogContent = undefined;
+        // MV3 不支持 eval，直接从正则捕获组获取内容
         const reg_res = API.Utils.readScriptVar(blogPage, /var g_oBlogContent\s+=\s+'([\s\S]+\/div>)';/);
-        eval((reg_res && reg_res[0] || '').replace('var g_oBlogContent', 'window.g_oBlogContent'))
-        return window.g_oBlogContent;
+        // reg_res[1] 是捕获组中的内容，即实际的日志内容
+        return reg_res && reg_res[1] || undefined;
     }
 };
 
@@ -3792,30 +4104,36 @@ API.Favorites = {
         };
         switch (favorite.type) {
             case 3:
-                // 日志                    
-                user.uin = favorite.blog_info && favorite.blog_info.owner_uin;
-                user.name = favorite.blog_info && favorite.blog_info.owner_name;
+                // 日志
+                if (favorite.blog_info && favorite.blog_info.owner_uin) {
+                    user.uin = favorite.blog_info.owner_uin;
+                    user.name = favorite.blog_info.owner_name || user.name;
+                }
                 break;
             case 4:
                 if (favorite.album_info && favorite.album_info.owner_uin) {
-                    // 相册收藏？暂无数据
+                    // 相册收藏
                     user.uin = favorite.album_info.owner_uin;
-                    user.name = favorite.album_info.owner_name;
-                } else {
+                    user.name = favorite.album_info.owner_name || user.name;
+                } else if (favorite.photo_list && favorite.photo_list[0] && favorite.photo_list[0].owner_uin) {
                     // 照片收藏
-                    user.uin = favorite.photo_list && favorite.photo_list[0].owner_uin;
-                    user.name = favorite.photo_list && favorite.photo_list[0].owner_name;
+                    user.uin = favorite.photo_list[0].owner_uin;
+                    user.name = favorite.photo_list[0].owner_name || user.name;
                 }
                 break;
             case 5:
                 // 说说
-                user.uin = favorite.shuoshuo_info && favorite.shuoshuo_info.owner_uin;
-                user.name = favorite.shuoshuo_info && favorite.shuoshuo_info.owner_name;
+                if (favorite.shuoshuo_info && favorite.shuoshuo_info.owner_uin) {
+                    user.uin = favorite.shuoshuo_info.owner_uin;
+                    user.name = favorite.shuoshuo_info.owner_name || user.name;
+                }
                 break;
             case 7:
                 // 分享
-                user.uin = favorite.share_info && favorite.share_info.owner_uin;
-                user.name = favorite.share_info && favorite.share_info.owner_name;
+                if (favorite.share_info && favorite.share_info.owner_uin) {
+                    user.uin = favorite.share_info.owner_uin;
+                    user.name = favorite.share_info.owner_name || user.name;
+                }
                 break;
             default:
                 break;
@@ -4157,7 +4475,23 @@ API.Shares = {
             $li.find('script').each(function() {
                 const text = $(this).text();
                 if (text.indexOf('shareInfos.push') > -1) {
-                    eval('window.infoJson=' + /[\s\S]+shareInfos.push\((\{[\s\S]+\})\);[\s\S]+/.exec(text)[1]);
+                    // MV3 不支持 eval，使用 JSON.parse 替代
+                    try {
+                        const match = /[\s\S]+shareInfos.push\((\{[\s\S]+\})\);[\s\S]+/.exec(text);
+                        if (match && match[1]) {
+                            // 将 JavaScript 对象字面量转换为有效的 JSON
+                            // 处理没有引号的属性名
+                            let jsonStr = match[1]
+                                .replace(/([{,]\s*)(\w+)\s*:/g, '$1"$2":')  // 属性名加引号
+                                .replace(/:\s*'([^']*)'/g, ':"$1"')         // 单引号值改双引号
+                                .replace(/,\s*}/g, '}')                      // 移除尾随逗号
+                                .replace(/,\s*]/g, ']');                     // 移除数组尾随逗号
+                            window.infoJson = JSON.parse(jsonStr);
+                        }
+                    } catch (e) {
+                        console.warn('解析分享信息失败:', e);
+                        window.infoJson = null;
+                    }
                     return false;
                 }
             })

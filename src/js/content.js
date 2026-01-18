@@ -1141,7 +1141,7 @@ class QZoneOperator {
      * 显示备份进度窗口
      */
     async showProcess() {
-        const html = await API.Utils.get(chrome.extension.getURL('html/indicator.html'));
+        const html = await API.Utils.get(chrome.runtime.getURL('html/indicator.html'));
 
         $('body').append(html);
 
@@ -1533,6 +1533,30 @@ API.Utils.addDownloadTasks = async(module, item, url, module_dir, source, FILE_U
     if (API.Common.isQzoneUrl()) {
         return;
     }
+    
+    // 检查是否为已知失效的CDN域名
+    if (QZone_Config.Common.skipDeprecatedUrls && API.Utils.isDeprecatedCdnUrl(url)) {
+        // 尝试修复URL
+        if (QZone_Config.Common.tryFixDeprecatedUrls) {
+            const fixedUrl = API.Utils.tryFixDeprecatedUrl(url);
+            if (fixedUrl !== url) {
+                console.log('[URL修复] 尝试替换失效URL:', url, '->', fixedUrl);
+                url = fixedUrl;
+                item.custom_url = url;
+            } else {
+                console.warn('[跳过失效URL]', url);
+                item.custom_url_skipped = true;
+                item.custom_url_skip_reason = '已知失效CDN域名';
+                return;
+            }
+        } else {
+            console.warn('[跳过失效URL]', url);
+            item.custom_url_skipped = true;
+            item.custom_url_skip_reason = '已知失效CDN域名';
+            return;
+        }
+    }
+    
     let filename = FILE_URLS.get(url);
     if (!filename) {
         filename = API.Utils.newSimpleUid(8, 16);

@@ -529,38 +529,26 @@
     try {
       new File([], '')
     } catch (e) {
-      try {
-        var klass = new Function('class File extends Blob {' +
-          'constructor(chunks, name, opts) {' +
-            'opts = opts || {};' +
-            'super(chunks, opts || {});' +
-            'this.name = name.replace(/\//g, ":");' +
-            'this.lastModifiedDate = opts.lastModified ? new Date(opts.lastModified) : new Date();' +
-            'this.lastModified = +this.lastModifiedDate;' +
-          '}};' +
-          'return new File([], ""), File'
-        )()
-        global.File = klass
-      } catch (e) {
-        var klass = function (b, d, c) {
-          var blob = new Blob(b, c)
-          var t = c && void 0 !== c.lastModified ? new Date(c.lastModified) : new Date()
+      // MV3 不支持 new Function，直接使用 fallback 方案
+      // 现代浏览器（Chrome 88+）都原生支持 File API，此处仅作为兜底
+      var klass = function (b, d, c) {
+        var blob = new Blob(b, c)
+        var t = c && void 0 !== c.lastModified ? new Date(c.lastModified) : new Date()
 
-          blob.name = d.replace(/\//g, ':')
-          blob.lastModifiedDate = t
-          blob.lastModified = +t
-          blob.toString = function () {
-            return '[object File]'
-          }
-
-          if (strTag) {
-            blob[strTag] = 'File'
-          }
-
-          return blob
+        blob.name = d.replace(/\//g, ':')
+        blob.lastModifiedDate = t
+        blob.lastModified = +t
+        blob.toString = function () {
+          return '[object File]'
         }
-        global.File = klass
+
+        if (strTag) {
+          blob[strTag] = 'File'
+        }
+
+        return blob
       }
+      global.File = klass
     }
   }
 

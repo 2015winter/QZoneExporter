@@ -19,11 +19,25 @@ const Default_Config = {
         // 头像下载地址
         AvatarHost: 1,
         // 文件下载类型
-        downloadType: 'Browser',
+        downloadType: 'Aria2',
         Aria2: {
-            rpc: 'http://localhost:6800/jsonrpc',
-            token: undefined
+            rpc: 'http://localhost:16800/jsonrpc',
+            token: undefined,
+            // 最大等待任务数，当Aria2中活跃+等待任务数超过此值时，暂停添加新任务
+            maxWaiting: 100,
+            // 队列检查间隔（秒）
+            checkInterval: 3,
+            // 是否启用队列控制
+            enableQueueControl: true,
+            // 是否自动清理卡住的任务
+            autoCleanStuck: true,
+            // 卡住任务检查间隔（每添加多少批任务检查一次）
+            stuckCheckInterval: 5
         },
+        // 是否跳过已知失效的CDN域名
+        skipDeprecatedUrls: true,
+        // 是否尝试修复失效URL
+        tryFixDeprecatedUrls: false,
         // 自动识别文件后缀
         isAutoFileSuffix: true,
         // 后缀识别超时秒数
@@ -63,7 +77,7 @@ const Default_Config = {
             max: 2
         },
         isFull: true, //是否获取全文
-        isShowMore: false, //是否展开全文
+        isShowMore: true, //是否展开全文
         Comments: {
             isFull: true, //是否全部评论
             pageSize: 20,
@@ -113,14 +127,14 @@ const Default_Config = {
         refreshWeChatLbs: false, // 刷新朋友圈坐标信息
         GetVoice: false, // 是否获取语音说说
         Like: {
-            isGet: false, //是否获取赞
+            isGet: true, //是否获取赞
             randomSeconds: {
                 min: 1,
                 max: 2
             }
         },
         Visitor: {
-            isGet: false, //是否获取最近访问
+            isGet: true, //是否获取最近访问
             pageSize: 24,
             randomSeconds: {
                 min: 1,
@@ -139,9 +153,11 @@ const Default_Config = {
             max: 2
         },
         Info: {
+            concurrentNum: 5, // 并发获取日志内容数量
+            retryCount: 3, // 重试次数
             randomSeconds: {
-                min: 1,
-                max: 2
+                min: 0.5,
+                max: 1
             }
         },
         Comments: {
@@ -156,14 +172,14 @@ const Default_Config = {
         IncrementTime: Default_IncrementTime, // 增量时间
         IncrementField: "pubTime", // 增量字段
         Like: {
-            isGet: false, //是否获取赞
+            isGet: true, //是否获取赞
             randomSeconds: {
                 min: 1,
                 max: 2
             }
         },
         Visitor: {
-            isGet: false, //是否获取最近访问
+            isGet: true, //是否获取最近访问
             pageSize: 24,
             randomSeconds: {
                 min: 1,
@@ -181,9 +197,11 @@ const Default_Config = {
             max: 2
         },
         Info: {
+            concurrentNum: 5, // 并发获取日记内容数量
+            retryCount: 3, // 重试次数
             randomSeconds: {
-                min: 1,
-                max: 2
+                min: 0.5,
+                max: 1
             }
         },
         Comments: {
@@ -198,14 +216,14 @@ const Default_Config = {
         IncrementTime: Default_IncrementTime, // 增量时间
         IncrementField: "pubtime", // 增量字段
         Like: {
-            isGet: false, //是否获取赞
+            isGet: true, //是否获取赞
             randomSeconds: {
                 min: 1,
                 max: 2
             }
         },
         Visitor: {
-            isGet: false, //是否获取最近访问
+            isGet: true, //是否获取最近访问
             pageSize: 24,
             randomSeconds: {
                 min: 1,
@@ -222,7 +240,7 @@ const Default_Config = {
             max: 2
         },
         Comments: {
-            isGet: false, // 是否获取评论，默认不获取
+            isGet: true, // 是否获取评论，默认获取
             pageSize: 100,
             randomSeconds: {
                 min: 2,
@@ -230,7 +248,7 @@ const Default_Config = {
             }
         },
         SortType: "4", // 相册排序方式
-        RenameType: "Default", // 相册命名规则
+        RenameType: "Sort", // 相册命名规则
         Images: {
             pageSize: 90,
             listType: 'Detail', // 默认为列表详情
@@ -239,7 +257,7 @@ const Default_Config = {
                 max: 4
             },
             Comments: {
-                isGet: false, // 是否获取评论，默认不获取
+                isGet: true, // 是否获取评论，默认获取
                 pageSize: 100,
                 randomSeconds: {
                     min: 2,
@@ -256,22 +274,22 @@ const Default_Config = {
                 }
             },
             isGetVideo: true, // 是否获取相片关联的视频
-            isGetPreview: false, // 是否获取预览图
+            isGetPreview: true, // 是否获取预览图
             fileStructureType: 'File', // 文件夹结构类型
-            RenameType: "Default", // 相片命名规则
+            RenameType: "ShootTime_ShootLbs", // 相片命名规则
         },
         IncrementType: "Full", // 增量备份类型
         IncrementTime: Default_IncrementTime, // 增量时间
         IncrementField: "uploadTime", // 增量字段
         Like: {
-            isGet: false, //是否获取赞
+            isGet: true, //是否获取赞
             randomSeconds: {
                 min: 1,
                 max: 2
             }
         },
         Visitor: {
-            isGet: false, //是否获取最近访问
+            isGet: true, //是否获取最近访问
             pageSize: 24,
             randomSeconds: {
                 min: 1,
@@ -283,14 +301,14 @@ const Default_Config = {
     Videos: {
         exportType: "HTML",
         fileStructureType: 'File', // 文件夹结构类型
-        RenameType: "Default", // 视频命名规则
+        RenameType: "Name", // 视频命名规则
         randomSeconds: {
             min: 1,
             max: 2
         },
         pageSize: 20,
         Comments: {
-            isGet: false, // 是否获取评论，默认不获取
+            isGet: true, // 是否获取评论，默认获取
             pageSize: 20,
             randomSeconds: {
                 min: 1,
@@ -301,7 +319,7 @@ const Default_Config = {
         IncrementTime: Default_IncrementTime, // 增量时间
         IncrementField: "uploadTime", // 增量字段
         Like: {
-            isGet: false, //是否获取赞
+            isGet: true, //是否获取赞
             randomSeconds: {
                 min: 1,
                 max: 2
@@ -375,14 +393,14 @@ const Default_Config = {
         IncrementField: "shareTime", // 增量字段
         hasThatYearToday: true,
         Like: {
-            isGet: false, //是否获取赞
+            isGet: true, //是否获取赞
             randomSeconds: {
                 min: 1,
                 max: 2
             }
         },
         Visitor: {
-            isGet: false, //是否获取最近访问
+            isGet: true, //是否获取最近访问
             pageSize: 24,
             randomSeconds: {
                 min: 1,

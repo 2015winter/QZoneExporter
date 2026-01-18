@@ -1568,6 +1568,72 @@ API.Photos = {
 API.Favorites = {
 
     /**
+     * 获取类型
+     */
+    getType(innerType) {
+        let Fav_Tyep = {
+            0: "全部",
+            1: "网页",
+            2: "照片",
+            3: "日志",
+            4: "照片",
+            5: "说说",
+            6: "文字",
+            7: "分享",
+            8: "未知"
+        }
+        return Fav_Tyep[innerType] || "未知";
+    },
+
+    /**
+     * 获取收藏源用户
+     * @param {Object} favorite 收藏
+     */
+    getFavoriteOwner(favorite) {
+        const user = {
+            uin: favorite.custom_uin,
+            name: favorite.custom_name
+        };
+        switch (favorite.type) {
+            case 3:
+                // 日志
+                if (favorite.blog_info && favorite.blog_info.owner_uin) {
+                    user.uin = favorite.blog_info.owner_uin;
+                    user.name = favorite.blog_info.owner_name || user.name;
+                }
+                break;
+            case 4:
+                if (favorite.album_info && favorite.album_info.owner_uin) {
+                    // 相册收藏
+                    user.uin = favorite.album_info.owner_uin;
+                    user.name = favorite.album_info.owner_name || user.name;
+                } else if (favorite.photo_list && favorite.photo_list[0] && favorite.photo_list[0].owner_uin) {
+                    // 照片收藏
+                    user.uin = favorite.photo_list[0].owner_uin;
+                    user.name = favorite.photo_list[0].owner_name || user.name;
+                }
+                break;
+            case 5:
+                // 说说
+                if (favorite.shuoshuo_info && favorite.shuoshuo_info.owner_uin) {
+                    user.uin = favorite.shuoshuo_info.owner_uin;
+                    user.name = favorite.shuoshuo_info.owner_name || user.name;
+                }
+                break;
+            case 7:
+                // 分享
+                if (favorite.share_info && favorite.share_info.owner_uin) {
+                    user.uin = favorite.share_info.owner_uin;
+                    user.name = favorite.share_info.owner_name || user.name;
+                }
+                break;
+            default:
+                break;
+        }
+        return user;
+    },
+
+    /**
      * 获取收藏分享的URL
      * @param {object} share_info 收藏分享信息
      */
