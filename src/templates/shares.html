@@ -97,17 +97,17 @@
 												<%}%>
 												<!-- 分享内容 -->
 												<!-- 多媒体内容 -->
-												<!-- 分享源图片 -->
-												<%if(share.source.images && share.source.images.length > 0){%>
-													<div id="<%:='share-medias-' + share.id%>" class="medias row pl-3 lightgallery <%:=API.Common.getImgClassType(share,true)%>">
-														<%for (let idx = 0; idx < share.source.images.length; idx++) {%>
-															<%const image = share.source.images[idx];%>
-															<a class="medias-item border message-lightbox" data-idx="<%:=idx%>" data-src="<%:=(image.custom_filepath || image.custom_url)%>" data-sub-html="#<%:='share-source-desc-' + share.id%>">
-																<img class="lazyload loading w-100 h-100" data-idx="<%:=idx%>" data-src="<%:=(image.custom_filepath || image.custom_url)%>">
-															</a>
-														<%}%>
-													</div>
-												<%}%>
+											<!-- 分享源图片 -->
+											<%if(share.source.images && share.source.images.length > 0){%>
+												<div id="<%:='share-medias-' + share.id%>" class="medias row pl-3 lightgallery <%:=API.Common.getImgClassType(share,true)%>">
+													<%for (let idx = 0; idx < share.source.images.length; idx++) {%>
+														<%const image = share.source.images[idx];%>
+														<a class="medias-item border message-lightbox" data-idx="<%:=idx%>" data-src="<%:=image.custom_filepath ? image.custom_filepath : image.custom_url%>" data-sub-html="#<%:='share-source-desc-' + share.id%>">
+															<img class="lazyload loading w-100 h-100" data-idx="<%:=idx%>" src="<%:=image.custom_filepath ? image.custom_filepath : (image.custom_url || '../Common/images/loading.gif')%>" data-src="<%:=image.custom_filepath ? image.custom_filepath : image.custom_url%>">
+														</a>
+													<%}%>
+												</div>
+											<%}%>
 											</blockquote>
 											<!-- 分享评论 -->
 											<%if(share.comments && share.comments.length > 0){%>

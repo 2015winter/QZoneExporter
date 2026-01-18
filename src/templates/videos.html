@@ -78,11 +78,11 @@
 										</div>
 									</div>
 								</div>
-								<a class="lightbox" data-video='{"source": [{"src":"<%:=(video.custom_filepath || video.custom_url || video.url)%>", "type":"video/mp4"}],"attributes": {"preload": false, "controls": true}}' 
-									data-poster="<%:=API.Common.getMediaPath(video.pre || video.custom_pre_url, video.custom_pre_filepath)%>" data-toggle="tooltip" data-html="true" title="<%:=video.desc || video.name%>" data-sub-html="#<%:=video.uid%>">
-									<span class="photo-video"></span>
-									<img class="lazyload loading" src="../Common/images/loading.gif" data-src="<%:=API.Common.getMediaPath(video.pre || video.custom_pre_url, video.custom_pre_filepath)%>" />
-								</a>
+						<a class="lightbox" data-video='{"source": [{"src":"<%:=video.custom_filepath ? video.custom_filepath : (video.custom_url || video.url)%>", "type":"video/mp4"}],"attributes": {"preload": false, "controls": true}}' 
+							data-poster="<%:=API.Common.getMediaPath(video.pre || video.custom_pre_url, video.custom_pre_filepath)%>" data-toggle="tooltip" data-html="true" title="<%:=video.desc || video.name%>" data-sub-html="#<%:=video.uid%>">
+							<span class="photo-video"></span>
+							<img class="lazyload loading" src="<%:=API.Common.getMediaPath(video.pre || video.custom_pre_url, video.custom_pre_filepath) || '../Common/images/loading.gif'%>" data-src="<%:=API.Common.getMediaPath(video.pre || video.custom_pre_url, video.custom_pre_filepath)%>" />
+						</a>
 								<div class="card-body text-truncate" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(video.desc || API.Utils.formatDate(video.uploadTime), 'HTML', false, false, false, false, true) %>">
 									<span class="card-title"><%:=API.Common.formatContent(video.desc || API.Utils.formatDate(video.uploadTime), 'HTML', false, false, false, false, true) %></span>
 								</div>

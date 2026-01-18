@@ -876,15 +876,6 @@ API.Photos.addPhotosDownloadTasks = async(album, photos) => {
 
         const photo = photos[index];
 
-        if (!API.Photos.isNewItem(album.id, photo)) {
-            // 已备份数据跳过不处理
-            indicator.addSkip(photo);
-            continue;
-        }
-
-        // 处理中
-        indicator.addDownload(photo);
-
         // 序号，便于排序
         const orderNumber = API.Utils.prefixNumber(index + 1, photos.length.toString().length);
 
@@ -895,14 +886,35 @@ API.Photos.addPhotosDownloadTasks = async(album, photos) => {
         const categoryPath = API.Photos.getFileStructureFolderPath(photo);
         const downloadFolder = categoryPath ? albumFolder + '/' + categoryPath : albumFolder;
 
-        if (API.Common.isQzoneUrl()) {
-            // QQ空间外链导出时，不需要添加下载任务，但是需要处理
-            // 根据配置的清晰度匹配图片，默认高清
+        // 确保 custom_url 始终有值（用于 HTML 展示的 fallback）
+        if (!photo.custom_url) {
             try {
                 photo.custom_url = API.Photos.getDownloadUrl(photo, QZone_Config.Photos.Images.exifType);
             } catch (error) {
-                console.error('添加下载任务异常：', error, JSON.stringify(photo));
+                // 如果获取失败，使用原始URL作为备选
+                photo.custom_url = photo.url || photo.pre || photo.o_url || photo.hd_url || photo.b_url || photo.s_url || '';
+                console.warn('获取照片下载URL失败，使用备选URL:', photo.custom_url, error);
             }
+        }
+
+        if (!API.Photos.isNewItem(album.id, photo)) {
+            // 已备份数据：确保路径信息完整，但不重新下载
+            // 如果已有 custom_filepath 则保留，否则基于当前结构生成
+            if (!photo.custom_filepath) {
+                const filename = photo.custom_filename || (API.Photos.getImageFileName(photo, orderNumber) + API.Photos.getPhotoSuffix(photo));
+                photo.custom_filename = filename;
+                photo.custom_filepath = downloadFolder + '/' + filename;
+                photo.custom_pre_filepath = photo.custom_pre_filepath || photo.custom_filepath;
+            }
+            indicator.addSkip(photo);
+            continue;
+        }
+
+        // 处理中
+        indicator.addDownload(photo);
+
+        if (API.Common.isQzoneUrl()) {
+            // QQ空间外链导出时，不需要添加下载任务，custom_url 已在上面设置
         } else {
             // 非QQ空间外链导出时，需要添加下载任务
             // 如果相片是视频，需要下载视频

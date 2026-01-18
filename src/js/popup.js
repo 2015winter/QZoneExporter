@@ -225,12 +225,10 @@
         let _albums = [];
         let albumValues = $("#export_albums").val();
         for (const albumId of albumValues) {
-            let index = window.albums.findIndex((obj) => {
-                if (obj.id === albumId) {
-                    return obj;
-                }
-            })
-            _albums.push(window.albums[index])
+            let index = window.albums.findIndex((obj) => obj.id === albumId);
+            if (index > -1) {
+                _albums.push(window.albums[index]);
+            }
         }
 
         let message = {

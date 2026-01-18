@@ -213,14 +213,14 @@ chrome.downloads.onDeterminingFilename.addListener(function(item, __suggest) {
 chrome.runtime.onInstalled.addListener((details) => {
     console.info('QQ空间导出助手安装中...', details);
     switch (details.reason) {
-        // 安装
-        case chrome.runtime.OnInstalledReason.INSTALL:
+        // 安装 - 使用字符串常量以兼容不同Chrome版本
+        case 'install':
             // 打开官网说明文档
             chrome.tabs.create({
                 url: 'https://lvshuncai.com/archives/qzone-export.html'
             });
             break;
-        case chrome.runtime.OnInstalledReason.UPDATE:
+        case 'update':
             switch (details.previousVersion) {
                 case '1.0.0':
                 case '1.0.1':

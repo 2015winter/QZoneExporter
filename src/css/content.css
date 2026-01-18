@@ -22,3 +22,33 @@
 #progressModal details>p {
     margin-left: 14px;
 }
+
+/* 下载管理对话框样式 - 确保在进度对话框之上 */
+#modalTable {
+    z-index: 1060 !important;
+}
+
+/* 当下载管理对话框显示时，确保其backdrop在正确的层级 */
+#modalTable.show ~ .modal-backdrop,
+.modal-backdrop + .modal-backdrop {
+    z-index: 1055 !important;
+}
+
+/* 防止模态框内容被裁剪 */
+#modalTable .modal-body {
+    overflow: auto;
+    max-height: calc(100vh - 200px);
+}
+
+/* 响应式表格高度 */
+@media (max-height: 700px) {
+    #modalTable .modal-body {
+        max-height: 350px;
+    }
+}
+
+@media (min-height: 900px) {
+    #modalTable .modal-body {
+        max-height: 600px;
+    }
+}

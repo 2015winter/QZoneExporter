@@ -617,6 +617,7 @@ const MAX_MSG = {
         '正在添加多媒体文件下载任务到Aria2',
         '已添加 <span style="color: #1ca5fc;">{downloaded}</span> 条',
         '添加超时或失败 <span style="color: red;">{downloadFailed}</span> ',
+        '跳过不支持格式 <span style="color: orange;">{skipUnsupported}</span> 条',
         '总共 <span style="color: #1ca5fc;">{total}</span> 条',
         '请稍候..'
     ],
@@ -668,6 +669,7 @@ class StatusIndicator {
         this.downloading = 0
         this.downloadFailed = 0
         this.skip = 0;
+        this.skipUnsupported = 0; // 跳过不支持格式的数量
     }
 
     /**
@@ -835,6 +837,33 @@ class StatusIndicator {
             count = item.length
         }
         this.skip = count
+        this.print()
+    }
+
+    /**
+     * 添加跳过不支持格式的条目数
+     * @param {Object} item 
+     */
+    addSkipUnsupported(item) {
+        let count = 1
+        if (Array.isArray(item)) {
+            count = item.length
+        }
+        if (typeof item === 'number') {
+            count = item;
+        }
+        this.skipUnsupported = this.skipUnsupported + count
+        this.print()
+    }
+
+    /**
+     * 设置跳过不支持格式的条目数
+     */
+    setSkipUnsupported(count) {
+        if (Array.isArray(count)) {
+            count = count.length
+        }
+        this.skipUnsupported = count
         this.print()
     }
 
@@ -1210,8 +1239,18 @@ class QZoneOperator {
 
         //进度模式窗口隐藏后
         $('#progressModal').on('hidden.bs.modal', function() {
-            $("#progressModal").remove();
-            $("#modalTable").remove();
+            // 确保下载管理对话框已关闭后再移除
+            if ($('#modalTable').hasClass('show')) {
+                $('#modalTable').modal('hide');
+            }
+            // 延迟移除，确保下载管理对话框完全关闭
+            setTimeout(function() {
+                $("#progressModal").remove();
+                $("#modalTable").remove();
+                // 清理可能残留的backdrop
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open').css('padding-right', '');
+            }, 300);
         })
 
         // 链接调整
@@ -1250,20 +1289,31 @@ class QZoneOperator {
                 default:
                     break;
             }
-            $("#table").bootstrapTable('filterBy', {
-                module: module === 'all' ? undefined : module,
-                downloadState: status === 'all' ? undefined : status,
-            }, {
-                filterAlgorithm: function(row, filters) {
-                    let hanRow = true;
-                    for (const key in filters) {
-                        if (filters[key] && row[key] !== filters[key]) {
-                            hanRow = false;
-                        }
-                    }
-                    return hanRow;
+            
+            // 获取所有数据
+            const allData = API.Utils.getDownloadTasks();
+            
+            // 如果两个条件都是"all"，显示所有数据
+            if (module === 'all' && status === 'all') {
+                $("#table").bootstrapTable('load', allData);
+                $("#table").bootstrapTable('resetView');
+                return;
+            }
+            
+            // 手动筛选数据
+            const filteredData = allData.filter(row => {
+                let match = true;
+                if (module !== 'all' && row.module !== module) {
+                    match = false;
                 }
-            })
+                if (status !== 'all' && row.downloadState !== status) {
+                    match = false;
+                }
+                return match;
+            });
+            
+            $("#table").bootstrapTable('load', filteredData);
+            $("#table").bootstrapTable('resetView');
         }
 
         // 查看指定状态的数据
@@ -1353,11 +1403,40 @@ class QZoneOperator {
             API.Common.downloadsByBrowser(newBrowserTasks);
         })
 
+        // 下载管理对话框显示前，调整z-index确保正确层级
+        $('#modalTable').on('show.bs.modal', function() {
+            // 确保下载管理对话框及其backdrop在进度对话框之上
+            setTimeout(function() {
+                // 调整最新创建的backdrop的z-index
+                const backdrops = $('.modal-backdrop');
+                if (backdrops.length > 0) {
+                    backdrops.last().css('z-index', 1055);
+                }
+            }, 10);
+        })
+
+        // 下载管理对话框隐藏时，恢复进度对话框的backdrop
+        $('#modalTable').on('hidden.bs.modal', function() {
+            // 确保body的modal-open状态正确（因为进度对话框仍然打开）
+            if ($('#progressModal').hasClass('show')) {
+                $('body').addClass('modal-open');
+            }
+            // 清理可能多余的backdrop，只保留一个
+            const backdrops = $('.modal-backdrop');
+            if (backdrops.length > 1) {
+                backdrops.not(':first').remove();
+            }
+        })
+
         //显示下载任务列表
         $('#modalTable').on('shown.bs.modal', function() {
 
             // 重置筛选条件
             $('#statusFilter').val('interrupted');
+            
+            // 计算自适应的表格高度
+            const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+            const tableHeight = Math.min(Math.max(viewportHeight - 300, 300), 550);
 
             $("#table").bootstrapTable('destroy').bootstrapTable({
                 undefinedText: '-',
@@ -1365,7 +1444,7 @@ class QZoneOperator {
                 locale: 'zh-CN',
                 search: true,
                 searchAlign: 'right',
-                height: "450",
+                height: tableHeight,
                 pagination: true,
                 pageList: "[10, 20, 50, 100, 200, 500, 1000, 2000, 5000, All]",
                 paginationHAlign: 'left',
@@ -1565,6 +1644,11 @@ API.Utils.addDownloadTasks = async(module, item, url, module_dir, source, FILE_U
             item.custom_mimeType = suffix;
         } else {
             let autoSuffix = await API.Utils.autoFileSuffix(url);
+            // 如果后缀识别失败，使用默认后缀 .jpg（QQ空间图片大多为JPEG格式）
+            if (!autoSuffix) {
+                autoSuffix = '.jpg';
+                console.warn('[后缀识别失败] 使用默认后缀 .jpg:', url);
+            }
             filename = filename + autoSuffix;
             item.custom_mimeType = autoSuffix;
         }

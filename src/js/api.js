@@ -1449,8 +1449,74 @@ API.Utils = {
     },
 
     /**
+     * 检查URL是否被Aria2/Motrix支持下载
+     * @param {string} url 下载URL
+     * @returns {{supported: boolean, reason: string}}
+     */
+    isUrlSupportedByAria2(url) {
+        if (!url || typeof url !== 'string') {
+            return { supported: false, reason: '空URL或非字符串' };
+        }
+
+        url = url.trim();
+
+        // 检查是否为空
+        if (url.length === 0) {
+            return { supported: false, reason: '空URL' };
+        }
+
+        // 检查协议 - Aria2支持HTTP/HTTPS/FTP
+        const supportedProtocols = ['http:', 'https:', 'ftp:'];
+        const unsupportedProtocols = [
+            'thunder:', 'ed2k:', 'magnet:', 'mqqapi:', 
+            'javascript:', 'data:', 'blob:', 'file:',
+            'qqdl:', 'flashget:', 'qqdownload:'
+        ];
+
+        // 检查是否为不支持的协议
+        const lowerUrl = url.toLowerCase();
+        for (const protocol of unsupportedProtocols) {
+            if (lowerUrl.startsWith(protocol)) {
+                return { 
+                    supported: false, 
+                    reason: '不支持的协议: ' + protocol.replace(':', '')
+                };
+            }
+        }
+
+        // 检查URL格式是否有效
+        try {
+            const urlObj = new URL(url);
+            // 确保是支持的协议
+            if (!supportedProtocols.includes(urlObj.protocol)) {
+                return { 
+                    supported: false, 
+                    reason: '不支持的协议: ' + urlObj.protocol.replace(':', '')
+                };
+            }
+        } catch (e) {
+            // URL格式无效，但可能是相对路径
+            // 检查是否以 // 开头（协议相对URL）
+            if (url.startsWith('//')) {
+                return { supported: true, reason: '' };
+            }
+            return { supported: false, reason: 'URL格式无效' };
+        }
+
+        // 检查是否为已知失效CDN
+        if (this.isDeprecatedCdnUrl(url)) {
+            return { 
+                supported: false, 
+                reason: '已知失效CDN域名'
+            };
+        }
+
+        return { supported: true, reason: '' };
+    },
+
+    /**
      * 迅雷下载
-     * @param {ThunderInfo} taskInfo 
+     * @param {ThunderInfo} taskInfo
      */
     downloadByThunder(taskInfo) {
         // Manifest V3 中迅雷SDK不可用，使用thunderx协议唤起
@@ -2260,7 +2326,8 @@ API.Common = {
     getUserLogoLocalUrl(uin, isAppendPrePath, count) {
         let filePath;
         if (!this.isQzoneUrl()) {
-            filePath = 'Common/images/' + uin;
+            // 头像文件名添加.jpg后缀
+            filePath = 'Common/images/' + uin + '.jpg';
         }
         return API.Common.getMediaPath(this.getUserLogoUrl(uin), filePath, isAppendPrePath, count);
     },

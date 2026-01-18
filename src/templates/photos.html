@@ -91,43 +91,49 @@
 											</div>
 										</div>
 									<%}%>
-									<%if(photo.is_video && photo.video_info){%>
-										<a class="lightbox" data-video='{"source": [{"src":"<%:=API.Common.getMediaPath(photo.video_info.video_url, photo.custom_filepath, true)%>", "type":"video/mp4"}],"attributes": {"preload": false, "controls": true}}' 
-											data-poster="<%:=API.Common.getMediaPath(photo.custom_url, photo.custom_pre_filepath, true)%>" data-sub-html="#<%:=photo.uid%>">
-											<span class="photo-video"></span>
-											<%if(photo.isLocal){%>
-												<img class="lazyload loading" />
-											<%}else{%>
-												<img class="lazyload loading" src="../Common/images/loading.gif" data-src="<%:=API.Common.getMediaPath(photo.custom_url, photo.custom_pre_filepath,true)%>" />
-											<%}%>
-										</a>
-										<div class="card-body text-truncate" data-toggle="tooltip" data-html="true" title="<%:=API.Photos.getPhotoBasicInfoTooltip(photo)%>">
-											<span class="card-title"><%:=(API.Common.formatContent(photo.name, 'HTML', false, false, false, false, true) || API.Utils.formatDate(photo.uploadtime || photo.uploadTime))%></span>
+								<%if(photo.is_video && photo.video_info){%>
+									<%/* 获取视频路径，确保有fallback */%>
+									<%const videoSrc = API.Common.getMediaPath(photo.video_info.video_url, photo.custom_filepath, true) || '../Common/images/loading.gif'%>
+									<%const videoPoster = API.Common.getMediaPath(photo.custom_url, photo.custom_pre_filepath, true) || '../Common/images/loading.gif'%>
+									<a class="lightbox" data-video='{"source": [{"src":"<%:=videoSrc%>", "type":"video/mp4"}],"attributes": {"preload": false, "controls": true}}' 
+										data-poster="<%:=videoPoster%>" data-sub-html="#<%:=photo.uid%>">
+										<span class="photo-video"></span>
+										<%if(photo.isLocal){%>
+											<img class="lazyload loading" />
+										<%}else{%>
+											<img class="lazyload loading" src="<%:=videoPoster%>" data-src="<%:=videoPoster%>" />
+										<%}%>
+									</a>
+									<div class="card-body text-truncate" data-toggle="tooltip" data-html="true" title="<%:=API.Photos.getPhotoBasicInfoTooltip(photo)%>">
+										<span class="card-title"><%:=(API.Common.formatContent(photo.name, 'HTML', false, false, false, false, true) || API.Utils.formatDate(photo.uploadtime || photo.uploadTime))%></span>
+									</div>
+									<div class="pic-num-wrap d-flex justify-content-around">
+										<div class="align-self-end">
+											<span class="text-light fa fa-thumbs-o-up cursor viewlikes" title="查看点赞" data-field="uniKey" data-target="<%:=photo.uniKey%>"><%:=photo.likes ? photo.likes.length : 0%></span>
 										</div>
-										<div class="pic-num-wrap d-flex justify-content-around">
-											<div class="align-self-end">
-												<span class="text-light fa fa-thumbs-o-up cursor viewlikes" title="查看点赞" data-field="uniKey" data-target="<%:=photo.uniKey%>"><%:=photo.likes ? photo.likes.length : 0%></span>
-											</div>
-											<div class="align-self-end">
-												<span class="text-light fa fa-comments-o cursor viewcomments" title="查看评论" data-field="uniKey" data-target="<%:=photo.uniKey%>"><%:=photo.comments ? photo.comments.length : 0%></span>
-											</div>
+										<div class="align-self-end">
+											<span class="text-light fa fa-comments-o cursor viewcomments" title="查看评论" data-field="uniKey" data-target="<%:=photo.uniKey%>"><%:=photo.comments ? photo.comments.length : 0%></span>
 										</div>
-									<%}else{%>
-										<a class="lightbox" href="<%:=API.Common.getMediaPath(photo.custom_url, photo.custom_filepath, true)%>" data-sub-html="#<%:=photo.uid%>">
-											<img class="lazyload loading card-img" height="225px" src="../Common/images/loading.gif" data-src="<%:=API.Common.getMediaPath(photo.custom_url, photo.custom_pre_filepath || photo.custom_filepath, true)%>">
-										</a>
-										<div class="card-body  text-truncate" data-toggle="tooltip" data-html="true" title="<%:=API.Photos.getPhotoBasicInfoTooltip(photo)%>">
-											<span class="card-title"><%:=(API.Common.formatContent(photo.name, 'HTML', false, false, false, false, true) || API.Utils.formatDate(photo.uploadtime || photo.uploadTime))%></span>
+									</div>
+								<%}else{%>
+									<%/* 获取图片路径，确保有fallback */%>
+									<%const photoHref = API.Common.getMediaPath(photo.custom_url, photo.custom_filepath, true) || '../Common/images/loading.gif'%>
+									<%const photoSrc = API.Common.getMediaPath(photo.custom_url, photo.custom_pre_filepath || photo.custom_filepath, true) || '../Common/images/loading.gif'%>
+									<a class="lightbox" href="<%:=photoHref%>" data-sub-html="#<%:=photo.uid%>">
+										<img class="lazyload loading card-img" height="225px" src="<%:=photoSrc%>" data-src="<%:=photoSrc%>">
+									</a>
+									<div class="card-body  text-truncate" data-toggle="tooltip" data-html="true" title="<%:=API.Photos.getPhotoBasicInfoTooltip(photo)%>">
+										<span class="card-title"><%:=(API.Common.formatContent(photo.name, 'HTML', false, false, false, false, true) || API.Utils.formatDate(photo.uploadtime || photo.uploadTime))%></span>
+									</div>
+									<div class="pic-num-wrap d-flex justify-content-around">
+										<div class="align-self-end">
+											<span class="text-light fa fa-thumbs-o-up cursor viewlikes" title="查看点赞" data-field="uniKey" data-target="<%:=photo.uniKey%>"><%:=photo.likes ? photo.likes.length : 0%></span>
 										</div>
-										<div class="pic-num-wrap d-flex justify-content-around">
-											<div class="align-self-end">
-												<span class="text-light fa fa-thumbs-o-up cursor viewlikes" title="查看点赞" data-field="uniKey" data-target="<%:=photo.uniKey%>"><%:=photo.likes ? photo.likes.length : 0%></span>
-											</div>
-											<div class="align-self-end">
-												<span class="text-light fa fa-comments-o cursor viewcomments" title="查看评论" data-field="uniKey" data-target="<%:=photo.uniKey%>"><%:=photo.comments ? photo.comments.length : 0%></span>
-											</div>
+										<div class="align-self-end">
+											<span class="text-light fa fa-comments-o cursor viewcomments" title="查看评论" data-field="uniKey" data-target="<%:=photo.uniKey%>"><%:=photo.comments ? photo.comments.length : 0%></span>
 										</div>
-									<%}%>
+									</div>
+								<%}%>
 								</div>
 							</div>
 						<%}%>

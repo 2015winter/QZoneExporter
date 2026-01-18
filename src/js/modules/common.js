@@ -1029,8 +1029,33 @@ API.Common.downloadByAria2 = async(tasks) => {
     const autoCleanStuck = aria2Config.autoCleanStuck !== false; // 默认启用
     const stuckCheckInterval = aria2Config.stuckCheckInterval || 5;
 
-    // 开始下载
-    const _tasks = _.chunk(tasks, QZone_Config.Common.downloadThread);
+    // 预先过滤不支持的URL格式
+    const supportedTasks = [];
+    const unsupportedTasks = [];
+    
+    for (const task of tasks) {
+        const checkResult = API.Utils.isUrlSupportedByAria2(task.url);
+        if (checkResult.supported) {
+            supportedTasks.push(task);
+        } else {
+            unsupportedTasks.push({
+                task: task,
+                reason: checkResult.reason
+            });
+            task.setState('skipped');
+            task.skipReason = checkResult.reason;
+            console.warn(`[Aria2] 跳过不支持的URL格式: ${task.url}, 原因: ${checkResult.reason}`);
+        }
+    }
+    
+    // 更新跳过的不支持格式数量
+    if (unsupportedTasks.length > 0) {
+        indicator.setSkipUnsupported(unsupportedTasks.length);
+        console.log(`[Aria2] 跳过 ${unsupportedTasks.length} 个不支持格式的下载任务`);
+    }
+
+    // 开始下载支持的任务
+    const _tasks = _.chunk(supportedTasks, QZone_Config.Common.downloadThread);
     let batchCount = 0;
     
     for (let i = 0; i < _tasks.length; i++) {
@@ -1937,7 +1962,9 @@ API.Common.downloadUserAvatar = (user) => {
         return;
     }
 
-    API.Utils.newDownloadTask('Friends', avatarUrl, 'Common/images', user.uin + '', user, true);
+    // 头像默认使用jpg后缀（QQ头像通常是jpg格式）
+    const avatarFileName = user.uin + '.jpg';
+    API.Utils.newDownloadTask('Friends', avatarUrl, 'Common/images', avatarFileName, user, true);
     user.avatar = API.Common.getUserLogoUrl(user.uin);
     user.custom_avatar = API.Common.getUserLogoLocalUrl(user.uin);
 

@@ -167,55 +167,55 @@
 								</div>
 								<%/* 多媒体内容 */%>
 								<div class="medias row p-3 lightgallery <%:=API.Common.getImgClassType(favorite)%>">
-									<%/* 视频内容 */%>
-									<%if(favorite.custom_videos){%>
-										<%let imgIdex = 0%>
-										<%for(let video of favorite.custom_videos){%>
-											<% video.vid = 'QZ-' + API.Utils.newSimpleUid(16); %>
-											<%if(video.play_url){%>
-												<a class="medias-item border message-lightbox-external" target="_blank" href="<%:=video.play_url%>">
-													<span class="message-video"></span>
-													<img class="lazyload loading w-100 h-100" data-src="<%:=video.custom_pre_filepath || video.preview_img%>">
-												</a>
-											<%}else{%>
-												<a class="medias-item border message-lightbox"  data-video='{"source": [{"src":"<%:=video.custom_filepath || video.url%>", "type":"video/mp4"}],"attributes": {"preload": false, "controls": true}}' 
-													data-poster="<%:=video.custom_pre_filepath || video.preview_img%>" data-sub-html="#<%:=favorite.uid%>">
-													<span class="message-video"></span>
-													<img class="lazyload loading w-100 h-100" data-idx="<%:=imgIdex%>" data-src="<%:=video.custom_pre_filepath || video.preview_img%>" />
-												</a>
-												<%imgIdex++%>
-											<%}%>
-										<%}%>
+								<%/* 视频内容 */%>
+								<%if(favorite.custom_videos){%>
+									<%let imgIdex = 0%>
+									<%for(let video of favorite.custom_videos){%>
+										<% video.vid = 'QZ-' + API.Utils.newSimpleUid(16); %>
+									<%if(video.play_url){%>
+										<a class="medias-item border message-lightbox-external" target="_blank" href="<%:=video.play_url%>">
+											<span class="message-video"></span>
+											<img class="lazyload loading w-100 h-100" src="<%:=video.custom_pre_filepath ? video.custom_pre_filepath : (video.preview_img || '../Common/images/loading.gif')%>" data-src="<%:=video.custom_pre_filepath ? video.custom_pre_filepath : video.preview_img%>">
+										</a>
+									<%}else{%>
+										<a class="medias-item border message-lightbox"  data-video='{"source": [{"src":"<%:=video.custom_filepath ? video.custom_filepath : video.url%>", "type":"video/mp4"}],"attributes": {"preload": false, "controls": true}}' 
+											data-poster="<%:=video.custom_pre_filepath ? video.custom_pre_filepath : video.preview_img%>" data-sub-html="#<%:=favorite.uid%>">
+											<span class="message-video"></span>
+											<img class="lazyload loading w-100 h-100" data-idx="<%:=imgIdex%>" src="<%:=video.custom_pre_filepath ? video.custom_pre_filepath : (video.preview_img || '../Common/images/loading.gif')%>" data-src="<%:=video.custom_pre_filepath ? video.custom_pre_filepath : video.preview_img%>" />
+										</a>
+										<%imgIdex++%>
 									<%}%>
-									<%/* 图片内容 */%>
-									<%if(favorite.custom_origin_images || favorite.custom_images){%>
-										<%let imgIdex = 0%>
-										<%let favImages = favorite.custom_origin_images || favorite.custom_images%>
-										<%for(let image of favImages){%>
-											<a class="medias-item border message-lightbox" target="_blank" href="<%:=image.custom_filepath || image.custom_url%>" data-sub-html="#<%:=favorite.uid%>">
-												<img class="lazyload loading w-100 h-100" data-idx="<%:=imgIdex%>" data-src="<%:=image.custom_filepath || image.custom_url%>">
-											</a>
-											<%imgIdex++%>
-										<%}%>
 									<%}%>
-								</div>
-								<%/* 音乐内容（目前PC端已无法正常播放，直接显示专辑图片与歌曲信息） */%>
-								<%if(favorite.custom_audios && favorite.custom_audios.length > 0){%>
-									<div class="medias row p-3 ml-5 border">
-										<ul class="list-unstyled">
-											<%let imgIdex = 0%>
-											<%for(let music of favorite.custom_audios){%>
-												<li>
-													<a class="medias-item text-center message-lightbox" href="<%:=music.playurl || music.play_url%>" data-sub-html="#<%:=favorite.uid%>">
-														<img class="lazyload loading w-100 h-100" data-idx="<%:=imgIdex%>" data-src="<%:=music.custom_filepath || music.custom_url%>">
-														<span><%:=music.song_name%></span>
-													</a>
-												</li>
-												<%imgIdex++%>
-											<%}%>
-										</ul>
-									</div>
 								<%}%>
+							<%/* 图片内容 */%>
+							<%if(favorite.custom_origin_images || favorite.custom_images){%>
+								<%let imgIdex = 0%>
+								<%let favImages = favorite.custom_origin_images || favorite.custom_images%>
+								<%for(let image of favImages){%>
+									<a class="medias-item border message-lightbox" target="_blank" href="<%:=image.custom_filepath ? image.custom_filepath : image.custom_url%>" data-src="<%:=image.custom_filepath ? image.custom_filepath : image.custom_url%>" data-sub-html="#<%:=favorite.uid%>">
+										<img class="lazyload loading w-100 h-100" data-idx="<%:=imgIdex%>" src="<%:=image.custom_filepath ? image.custom_filepath : (image.custom_url || '../Common/images/loading.gif')%>" data-src="<%:=image.custom_filepath ? image.custom_filepath : image.custom_url%>">
+									</a>
+									<%imgIdex++%>
+								<%}%>
+							<%}%>
+								</div>
+						<%/* 音乐内容（目前PC端已无法正常播放，直接显示专辑图片与歌曲信息） */%>
+						<%if(favorite.custom_audios && favorite.custom_audios.length > 0){%>
+							<div class="medias row p-3 ml-5 border">
+								<ul class="list-unstyled">
+									<%let imgIdex = 0%>
+									<%for(let music of favorite.custom_audios){%>
+										<li>
+											<a class="medias-item text-center message-lightbox" href="<%:=music.playurl || music.play_url%>" data-src="<%:=music.custom_filepath ? music.custom_filepath : music.custom_url%>" data-sub-html="#<%:=favorite.uid%>">
+												<img class="lazyload loading w-100 h-100" data-idx="<%:=imgIdex%>" src="<%:=music.custom_filepath ? music.custom_filepath : (music.custom_url || '../Common/images/loading.gif')%>" data-src="<%:=music.custom_filepath ? music.custom_filepath : music.custom_url%>">
+												<span><%:=music.song_name%></span>
+											</a>
+										</li>
+										<%imgIdex++%>
+									<%}%>
+								</ul>
+							</div>
+						<%}%>
 							</div>
 							<div class="card-footer text-muted">
 								<span class="border-primary border rounded text-primary small p-1 float-right" title="当前楼层">#<%:=total + 1 %></span>

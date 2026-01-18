@@ -25,10 +25,16 @@ $(function() {
 
         // 画廊相册DOM
         const $galleryDom = $(this).parent().get(0);
-        // 点击的图片的索引位置
-        const imgIdx = $(this).attr('data-idx');
+        const $clickedItem = $(this);
+        
+        // 获取当前容器下所有的 .message-lightbox 元素
+        const $allItems = $(this).parent().find('.message-lightbox');
+        
+        // 计算被点击元素在同级元素中的实际索引位置（基于DOM顺序）
+        const actualIdx = $allItems.index($clickedItem);
+        
         if ($galleryDom.galleryIns) {
-            $galleryDom.galleryIns.openGallery(imgIdx * 1);
+            $galleryDom.galleryIns.openGallery(actualIdx >= 0 ? actualIdx : 0);
             return;
         }
 
@@ -60,8 +66,8 @@ $(function() {
 
         $galleryDom.galleryIns = galleryIns;
 
-        // 打开画廊
-        galleryIns.openGallery(imgIdx * 1);
+        // 打开画廊，使用实际的DOM索引
+        galleryIns.openGallery(actualIdx >= 0 ? actualIdx : 0);
     })
 
     // 查看评论中的图片

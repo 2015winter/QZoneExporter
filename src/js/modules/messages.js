@@ -627,8 +627,8 @@ API.Messages.addMediaToTasks = async(dataList) => {
                 // 添加视频下载任务
                 API.Videos.addDownloadTasks('Messages', [video], module_dir, item);
             } else {
-                // 普通图片
-                let url = image.url2 || image.url1;
+                // 普通图片 - 兼容多种URL字段格式
+                let url = image.url2 || image.url1 || image.url3 || image.pic_id || image.url;
                 await API.Utils.addDownloadTasks('Messages', image, url, module_dir, item, QZone.Messages.FILE_URLS);
             }
             indicator.addSuccess(image);

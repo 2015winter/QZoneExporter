@@ -136,60 +136,61 @@
 										<%if(message.custom_videos){%>
 											<%let imgIdx = 0%>
 											<%for(let video of message.custom_videos){%>
-												<%if (API.Videos.isExternalVideo(video)) {%>
-													<!-- 外部视频 -->
-													<a class="medias-item border message-lightbox-external" href="<%:=API.Videos.getVideoUrl(video)%>" target="_blank">
-														<span class="message-video"></span>
-														<img class="lazyload loading w-100 h-100" src="../Common/images/loading.gif" data-src="<%:=video.custom_pre_filepath || video.custom_pre_url || video.url1%>">
-													</a>
-												<%}else{%>
-													<!-- 空间视频 -->
-													<a class="medias-item border message-lightbox" data-idx="<%:=imgIdx%>" data-video='{"source": [{"src":"<%:=(video.custom_filepath || video.custom_url || video.url3)%>", "type":"video/mp4"}],"attributes": {"preload": false, "controls": true}}'
-														data-poster="<%:=video.custom_pre_filepath || video.custom_pre_url || video.url1%>" data-sub-html="#<%:= 'QZIMG-'+ message.tid%>">
-														<span class="message-video"></span>
-														<img class="lazyload loading w-100 h-100" data-id="<%:=video.video_id%>" src="../Common/images/loading.gif"  data-src="<%:=video.custom_pre_filepath || video.custom_pre_url || video.url1%>" />
-													</a>
-													<%imgIdx++%>
-												<%}%>
+											<%if (API.Videos.isExternalVideo(video)) {%>
+												<!-- 外部视频 -->
+												<a class="medias-item border message-lightbox-external" href="<%:=API.Videos.getVideoUrl(video)%>" target="_blank">
+													<span class="message-video"></span>
+													<img class="lazyload loading w-100 h-100" src="<%:=video.custom_pre_filepath ? video.custom_pre_filepath : (video.custom_pre_url || video.url1 || '../Common/images/loading.gif')%>" data-src="<%:=video.custom_pre_filepath ? video.custom_pre_filepath : (video.custom_pre_url || video.url1)%>">
+												</a>
+											<%}else{%>
+												<!-- 空间视频 -->
+												<a class="medias-item border message-lightbox" data-idx="<%:=imgIdx%>" data-video='{"source": [{"src":"<%:=video.custom_filepath ? video.custom_filepath : (video.custom_url || video.url3)%>", "type":"video/mp4"}],"attributes": {"preload": false, "controls": true}}'
+													data-poster="<%:=video.custom_pre_filepath ? video.custom_pre_filepath : (video.custom_pre_url || video.url1)%>" data-sub-html="#<%:= 'QZIMG-'+ message.tid%>">
+													<span class="message-video"></span>
+													<img class="lazyload loading w-100 h-100" data-id="<%:=video.video_id%>" src="<%:=video.custom_pre_filepath ? video.custom_pre_filepath : (video.custom_pre_url || video.url1 || '../Common/images/loading.gif')%>" data-src="<%:=video.custom_pre_filepath ? video.custom_pre_filepath : (video.custom_pre_url || video.url1)%>" />
+												</a>
+												<%imgIdx++%>
+											<%}%>
 											<%}%>
 										<%}%>
 										<!-- 图片内容(含视频，即同时存在图片与视频) -->
 										<%if(message.custom_images){%>
 											<%let imgIdx = 0%>
 											<%for(let image of message.custom_images){%>
-												<%if(image.is_video && image.video_info){%>
-													<%if (API.Videos.isExternalVideo(image.video_info)) {%>
-														<!-- 外部视频 -->
-														<a class="medias-item border message-lightbox-external" href="<%:=API.Videos.getVideoUrl(image.video_info)%>" target="_blank">
-															<span class="message-video"></span>
-															<img class="lazyload loading w-100 h-100" src="../Common/images/loading.gif" data-src="<%:=image.video_info.custom_pre_filepath || image.video_info.custom_pre_url || image.video_info.url1%>">
-														</a>
-													<%}else{%>
-														<!-- 空间视频 -->
-														<a class="medias-item border message-lightbox" data-idx="<%:=imgIdx%>" data-video='{"source": [{"src":"<%:=(image.video_info.custom_filepath || image.video_info.custom_url || image.video_info.url3)%>", "type":"video/mp4"}],"attributes": {"preload": false, "controls": true}}'
-															data-poster="<%:=image.video_info.custom_pre_filepath || image.video_info.custom_pre_url || image.video_info.url1%>" data-sub-html="#<%:= 'QZIMG-'+ message.tid%>">
-															<span class="message-video"></span>
-															<img class="lazyload loading w-100 h-100" data-id="<%:=image.video_info.video_id%>" src="../Common/images/loading.gif" data-src="<%:=image.video_info.custom_pre_filepath || image.video_info.custom_pre_url || image.video_info.url1%>" />
-														</a>
-														<%imgIdx++%>
-													<%}%>
+											<%if(image.is_video && image.video_info){%>
+												<%if (API.Videos.isExternalVideo(image.video_info)) {%>
+													<!-- 外部视频 -->
+													<a class="medias-item border message-lightbox-external" href="<%:=API.Videos.getVideoUrl(image.video_info)%>" target="_blank">
+														<span class="message-video"></span>
+														<img class="lazyload loading w-100 h-100" src="<%:=image.video_info.custom_pre_filepath ? image.video_info.custom_pre_filepath : (image.video_info.custom_pre_url || image.video_info.url1 || '../Common/images/loading.gif')%>" data-src="<%:=image.video_info.custom_pre_filepath ? image.video_info.custom_pre_filepath : (image.video_info.custom_pre_url || image.video_info.url1)%>">
+													</a>
 												<%}else{%>
-													<a class="medias-item border message-lightbox" data-idx="<%:=imgIdx%>" data-src="<%:=(image.custom_filepath || image.custom_url)%>" data-sub-html="#<%:= 'QZIMG-'+ message.tid%>">
-														<img class="lazyload loading w-100 h-100" data-id="<%:=image.pic_id%>" src="../Common/images/loading.gif" src="../Common/images/loading.gif" data-src="<%:=(image.custom_filepath || image.custom_url)%>">
+													<!-- 空间视频 -->
+													<a class="medias-item border message-lightbox" data-idx="<%:=imgIdx%>" data-video='{"source": [{"src":"<%:=image.video_info.custom_filepath ? image.video_info.custom_filepath : (image.video_info.custom_url || image.video_info.url3)%>", "type":"video/mp4"}],"attributes": {"preload": false, "controls": true}}'
+														data-poster="<%:=image.video_info.custom_pre_filepath ? image.video_info.custom_pre_filepath : (image.video_info.custom_pre_url || image.video_info.url1)%>" data-sub-html="#<%:= 'QZIMG-'+ message.tid%>">
+														<span class="message-video"></span>
+														<img class="lazyload loading w-100 h-100" data-id="<%:=image.video_info.video_id%>" src="<%:=image.video_info.custom_pre_filepath ? image.video_info.custom_pre_filepath : (image.video_info.custom_pre_url || image.video_info.url1 || '../Common/images/loading.gif')%>" data-src="<%:=image.video_info.custom_pre_filepath ? image.video_info.custom_pre_filepath : (image.video_info.custom_pre_url || image.video_info.url1)%>" />
 													</a>
 													<%imgIdx++%>
 												<%}%>
+						<%}else{%>
+							<%const imgSrc = image.custom_filepath || image.custom_url || image.url2 || image.url1 || image.url3 || image.pic_id || image.url || '../Common/images/loading.gif'%>
+							<a class="medias-item border message-lightbox" data-idx="<%:=imgIdx%>" data-src="<%:=imgSrc%>" data-sub-html="#<%:= 'QZIMG-'+ message.tid%>">
+								<img class="lazyload loading w-100 h-100" data-id="<%:=image.pic_id%>" src="<%:=imgSrc%>" data-src="<%:=imgSrc%>">
+							</a>
+							<%imgIdx++%>
+						<%}%>
 											<%}%>
 										<%}%>
-										<!-- 动画表情内容（目前只支持一个） -->
-										<%if(message.custom_magics){%>
-											<%for(let image of message.custom_magics){%>
-												<a class="medias-item border" data-src="<%:=(image.custom_filepath || image.custom_url)%>">
-													<img class="lazyload loading w-100 h-100" data-src='<%:=(image.custom_filepath || image.custom_url)%>'>
-												</a>
-												<hr>
-											<%}%>
+									<!-- 动画表情内容（目前只支持一个） -->
+									<%if(message.custom_magics){%>
+										<%for(let image of message.custom_magics){%>
+											<a class="medias-item border" data-src="<%:=image.custom_filepath ? image.custom_filepath : image.custom_url%>">
+												<img class="lazyload loading w-100 h-100" src="<%:=image.custom_filepath ? image.custom_filepath : (image.custom_url || '../Common/images/loading.gif')%>" data-src='<%:=image.custom_filepath ? image.custom_filepath : image.custom_url%>'>
+											</a>
+											<hr>
 										<%}%>
+									<%}%>
 									</div>
 									<!-- 音乐内容（目前已无法正常播放，直接显示专辑图片与歌曲信息） -->
 									<%if(message.custom_audios && message.audiototal > 0){%>
@@ -197,8 +198,8 @@
 											<ul class="list-unstyled w-100">
 												<%for(let music of message.custom_audios){%>
 													<li class="border">
-														<a class="medias-item text-center" data-src="<%:=(music.custom_filepath || music.image)%>" href="<%:=music.playurl%>">
-															<img class="lazyload loading border" data-src="<%:=(music.custom_filepath || music.image)%>">
+														<a class="medias-item text-center" data-src="<%:=music.custom_filepath ? music.custom_filepath : music.image%>" href="<%:=music.playurl%>">
+															<img class="lazyload loading border" src="<%:=music.custom_filepath ? music.custom_filepath : (music.image || '../Common/images/loading.gif')%>" data-src="<%:=music.custom_filepath ? music.custom_filepath : music.image%>">
 															<span><%:=music.name%></span>
 														</a>
 													</li>
