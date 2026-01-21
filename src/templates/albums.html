@@ -52,7 +52,7 @@
 								<div class="card thumbnail mb-3 shadow-sm">
 									<span class="sidebar-h2" data-tag="h2" data-sidebar='<%:=album.name%>'></span>
 									<span class="badge badge-success badge-pill album-photo-total cursor" title="相片数量"><%:=album.total%></span>
-									<a href="photos.html?albumId=<%:=album.id%>" onclick="return <%:=album.allowAccess >0 && album.photoList.length >0 %>;">
+									<a href="<%:=API.Utils.filenameValidate(album.name)%>.html" onclick="return <%:=album.allowAccess >0 && album.photoList.length >0 %>;">
 										<img class="card-img" src="<%:=(album.custom_filepath || album.custom_url || album.url || album.pre)%>">
 									</a>
 									<div class="card-body text-truncate" data-toggle="tooltip" data-html="true" title="<%:=API.Photos.getAlbumBasicInfoTooltip(album)%>">

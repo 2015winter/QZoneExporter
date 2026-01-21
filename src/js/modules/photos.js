@@ -1207,9 +1207,6 @@ API.Photos.exportPhotosToHtml = async(albums) => {
         // 基于JSON生成JS
         await API.Common.writeJsonToJs('albums', albums, moduleFolder + '/json/albums.js');
 
-        // 生成相片列表HTML
-        await API.Common.writeHtmlofTpl('photos', null, moduleFolder + "/photos.html");
-
         for (const album of albums) {
             // 生成静态相册文件
             const name = API.Utils.filenameValidate(album.name);
