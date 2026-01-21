@@ -58,18 +58,20 @@
 				<div id="lightgallery" class="row photos">
 					<script id="photos_tpl" type="text/html">
 						<%/* 遍历相片 */%>
+						<%if(album && album.photoList && album.photoList.length > 0){%>
 						<%for (const photo of album.photoList) {%>
 							<%photo.uid = 'QZ-' + API.Utils.newSimpleUid(16)%>
 							<%photo.custom_lbs = API.Photos.getPhotoLbs(photo)%>
 							<div class="col-md-2 mb-2">
 								<div class="card thumbnail mb-2 shadow-sm">
+									<%/* 详情面板 - 非本地照片显示 */%>
 									<%if(!photo.isLocal){%>
 										<div id="<%:=photo.uid%>" class='photo-detail' style="display:none">
 											<div class="d-flex justify-content-between">
 												<div class="col text-white-50 text-left">
 													<p>
-														<i title="相片尺寸（非原图尺寸，仅供参考）"><%:=(photo.video_info && photo.video_info.cover_width || photo.width)+ " * " + (photo.video_info && photo.video_info.cover_height || photo.height)%></i>
-														<i title="相片大小（非原图尺寸，仅供参考）" class="ml-2"><%:=API.Utils.formatFileSize(photo.video_info && photo.video_info.size || photo.photocubage || 0)%></i>
+														<i title="相片尺寸（非原图尺寸，仅供参考）"><%:=(photo.is_video && photo.video_info ? (photo.video_info.cover_width || 0) : (photo.width || 0)) + " * " + (photo.is_video && photo.video_info ? (photo.video_info.cover_height || 0) : (photo.height || 0))%></i>
+														<i title="相片大小（非原图尺寸，仅供参考）" class="ml-2"><%:=API.Utils.formatFileSize(photo.is_video && photo.video_info ? (photo.video_info.size || 0) : (photo.photocubage || 0))%></i>
 														<i title="相片类型" class="ml-2"><%:=photo.is_video ? 'MP4' : API.Photos.getPhotoType(photo)%></i>
 													</p>
 													<p>
@@ -91,18 +93,15 @@
 											</div>
 										</div>
 									<%}%>
+								<%/* 视频类型处理 */%>
 								<%if(photo.is_video && photo.video_info){%>
-									<%/* 获取视频路径，确保有fallback */%>
+									<%/* 获取视频路径：custom_filepath是视频文件路径，custom_pre_filepath是封面图路径 */%>
 									<%const videoSrc = API.Common.getMediaPath(photo.video_info.video_url, photo.custom_filepath, true) || '../Common/images/loading.gif'%>
-									<%const videoPoster = API.Common.getMediaPath(photo.custom_url, photo.custom_pre_filepath, true) || '../Common/images/loading.gif'%>
+									<%const videoPoster = API.Common.getMediaPath(photo.custom_url || photo.pre, photo.custom_pre_filepath, true) || '../Common/images/loading.gif'%>
 									<a class="lightbox" data-video='{"source": [{"src":"<%:=videoSrc%>", "type":"video/mp4"}],"attributes": {"preload": false, "controls": true}}' 
 										data-poster="<%:=videoPoster%>" data-sub-html="#<%:=photo.uid%>">
 										<span class="photo-video"></span>
-										<%if(photo.isLocal){%>
-											<img class="lazyload loading" />
-										<%}else{%>
-											<img class="lazyload loading" src="<%:=videoPoster%>" data-src="<%:=videoPoster%>" />
-										<%}%>
+										<img class="lazyload loading" src="<%:=videoPoster%>" data-src="<%:=videoPoster%>" />
 									</a>
 									<div class="card-body text-truncate" data-toggle="tooltip" data-html="true" title="<%:=API.Photos.getPhotoBasicInfoTooltip(photo)%>">
 										<span class="card-title"><%:=(API.Common.formatContent(photo.name, 'HTML', false, false, false, false, true) || API.Utils.formatDate(photo.uploadtime || photo.uploadTime))%></span>
@@ -116,13 +115,13 @@
 										</div>
 									</div>
 								<%}else{%>
-									<%/* 获取图片路径，确保有fallback */%>
+									<%/* 图片类型处理 */%>
 									<%const photoHref = API.Common.getMediaPath(photo.custom_url, photo.custom_filepath, true) || '../Common/images/loading.gif'%>
-									<%const photoSrc = API.Common.getMediaPath(photo.custom_url, photo.custom_pre_filepath || photo.custom_filepath, true) || '../Common/images/loading.gif'%>
+									<%const photoSrc = API.Common.getMediaPath(photo.custom_url || photo.pre, photo.custom_pre_filepath || photo.custom_filepath, true) || '../Common/images/loading.gif'%>
 									<a class="lightbox" href="<%:=photoHref%>" data-sub-html="#<%:=photo.uid%>">
 										<img class="lazyload loading card-img" height="225px" src="<%:=photoSrc%>" data-src="<%:=photoSrc%>">
 									</a>
-									<div class="card-body  text-truncate" data-toggle="tooltip" data-html="true" title="<%:=API.Photos.getPhotoBasicInfoTooltip(photo)%>">
+									<div class="card-body text-truncate" data-toggle="tooltip" data-html="true" title="<%:=API.Photos.getPhotoBasicInfoTooltip(photo)%>">
 										<span class="card-title"><%:=(API.Common.formatContent(photo.name, 'HTML', false, false, false, false, true) || API.Utils.formatDate(photo.uploadtime || photo.uploadTime))%></span>
 									</div>
 									<div class="pic-num-wrap d-flex justify-content-around">
@@ -135,6 +134,12 @@
 									</div>
 								<%}%>
 								</div>
+							</div>
+						<%}%>
+						<%}else{%>
+							<div class="col-12 text-center text-muted py-5">
+								<i class="fa fa-image fa-3x mb-3"></i>
+								<p>暂无相片</p>
 							</div>
 						<%}%>
 					</script>
