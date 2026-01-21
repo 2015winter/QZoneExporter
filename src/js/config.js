@@ -669,6 +669,91 @@ const ExportFiles = [{
     original: 'export/js/common.js',
     target: 'Common/js/common.js'
 }, {
+    // vendor CSS files
+    original: 'export/vendor/css/font-awesome.min.css',
+    target: 'Common/vendor/css/font-awesome.min.css'
+}, {
+    original: 'export/vendor/css/bootstrap.min.css',
+    target: 'Common/vendor/css/bootstrap.min.css'
+}, {
+    original: 'export/vendor/css/bootstrap-table.min.css',
+    target: 'Common/vendor/css/bootstrap-table.min.css'
+}, {
+    original: 'export/vendor/css/lightgallery.min.css',
+    target: 'Common/vendor/css/lightgallery.min.css'
+}, {
+    original: 'export/vendor/css/lightgallery-bundle.min.css',
+    target: 'Common/vendor/css/lightgallery-bundle.min.css'
+}, {
+    // vendor fonts
+    original: 'export/vendor/fonts/fontawesome-webfont.woff2',
+    target: 'Common/vendor/fonts/fontawesome-webfont.woff2'
+}, {
+    // vendor JS files
+    original: 'export/vendor/js/jquery.min.js',
+    target: 'Common/vendor/js/jquery.min.js'
+}, {
+    original: 'export/vendor/js/bootstrap.bundle.min.js',
+    target: 'Common/vendor/js/bootstrap.bundle.min.js'
+}, {
+    original: 'export/vendor/js/bootstrap-table.min.js',
+    target: 'Common/vendor/js/bootstrap-table.min.js'
+}, {
+    original: 'export/vendor/js/bootstrap-table-zh-CN.min.js',
+    target: 'Common/vendor/js/bootstrap-table-zh-CN.min.js'
+}, {
+    original: 'export/vendor/js/lodash.min.js',
+    target: 'Common/vendor/js/lodash.min.js'
+}, {
+    original: 'export/vendor/js/moment.min.js',
+    target: 'Common/vendor/js/moment.min.js'
+}, {
+    original: 'export/vendor/js/zh-cn.min.js',
+    target: 'Common/vendor/js/zh-cn.min.js'
+}, {
+    original: 'export/vendor/js/index.aio.min.js',
+    target: 'Common/vendor/js/index.aio.min.js'
+}, {
+    original: 'export/vendor/js/jquery.mousewheel.min.js',
+    target: 'Common/vendor/js/jquery.mousewheel.min.js'
+}, {
+    original: 'export/vendor/js/lazyload.min.js',
+    target: 'Common/vendor/js/lazyload.min.js'
+}, {
+    original: 'export/vendor/js/clicklove.min.js',
+    target: 'Common/vendor/js/clicklove.min.js'
+}, {
+    original: 'export/vendor/js/echarts.min.js',
+    target: 'Common/vendor/js/echarts.min.js'
+}, {
+    // lightgallery JS files
+    original: 'export/vendor/js/lightgallery.min.js',
+    target: 'Common/vendor/js/lightgallery.min.js'
+}, {
+    original: 'export/vendor/js/lg-zoom.min.js',
+    target: 'Common/vendor/js/lg-zoom.min.js'
+}, {
+    original: 'export/vendor/js/lg-video.min.js',
+    target: 'Common/vendor/js/lg-video.min.js'
+}, {
+    original: 'export/vendor/js/lg-thumbnail.min.js',
+    target: 'Common/vendor/js/lg-thumbnail.min.js'
+}, {
+    original: 'export/vendor/js/lg-rotate.min.js',
+    target: 'Common/vendor/js/lg-rotate.min.js'
+}, {
+    original: 'export/vendor/js/lg-hash.min.js',
+    target: 'Common/vendor/js/lg-hash.min.js'
+}, {
+    original: 'export/vendor/js/lg-fullscreen.min.js',
+    target: 'Common/vendor/js/lg-fullscreen.min.js'
+}, {
+    original: 'export/vendor/js/lg-comment.min.js',
+    target: 'Common/vendor/js/lg-comment.min.js'
+}, {
+    original: 'export/vendor/js/lg-autoplay.min.js',
+    target: 'Common/vendor/js/lg-autoplay.min.js'
+}, {
     original: 'export/js/messages.js',
     target: 'Messages/js/messages.js'
 }, {
