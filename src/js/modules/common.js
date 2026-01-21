@@ -439,6 +439,52 @@ API.Common.safeTemplateRender = (tpl, data) => {
     const evaluateExpr = (expr, ctx) => {
         if (!expr) return undefined;
         expr = expr.trim();
+
+        // 去掉最外层包裹括号，例如：(a || b) -> a || b
+        // 这在模板里常见：<%:=(a || b)%>；如果不处理，会因为操作符查找跳过括号导致被当成“路径”取值。
+        const stripOuterParens = (s) => {
+            s = (s || '').trim();
+            if (!s.startsWith('(') || !s.endsWith(')')) return s;
+
+            let depth = 0;
+            let inString = false;
+            let stringChar = '';
+
+            for (let i = 0; i < s.length; i++) {
+                const ch = s[i];
+                if (inString) {
+                    if (ch === stringChar && (i === 0 || s[i - 1] !== '\\')) inString = false;
+                    continue;
+                }
+
+                if (ch === '"' || ch === "'") {
+                    inString = true;
+                    stringChar = ch;
+                    continue;
+                }
+
+                if (ch === '(') {
+                    depth++;
+                    continue;
+                }
+
+                if (ch === ')') {
+                    depth--;
+                    // 最外层括号在末尾之前就闭合，说明不是完整包裹
+                    if (depth === 0 && i < s.length - 1) return s;
+                }
+            }
+
+            if (depth !== 0) return s;
+            return s.slice(1, -1).trim();
+        };
+
+        // 可能有多层括号包裹
+        for (let i = 0; i < 5; i++) {
+            const next = stripOuterParens(expr);
+            if (next === expr) break;
+            expr = next;
+        }
         
         // 字符串字面量
         if ((expr.startsWith('"') && expr.endsWith('"')) || (expr.startsWith("'") && expr.endsWith("'"))) {

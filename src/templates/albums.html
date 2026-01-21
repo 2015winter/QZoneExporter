@@ -43,7 +43,7 @@
 			<div id="albums_html" class="container tz-gallery">
 				<%/* 遍历分类 */%>
 				<%for (const [className, items] of albumsMapping) {%>
-					<h1 class='text-primary' data-sidebar='<%:=className%><span class="badge badge-primary badge-pill itemSize"><%:=items.length%><span>'><%:=className%></h1>
+					<h1 class='text-primary' data-sidebar='<%:=className%><span class="badge badge-primary badge-pill itemSize"><%:=items.length%></span>'><%:=className%></h1>
 					<hr>
 					<div class="row">
 						<%/* 遍历相册 */%>

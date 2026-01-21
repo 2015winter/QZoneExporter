@@ -167,8 +167,8 @@ API.Boards.handerData = async(boardInfo) => {
                 console.warn('board img url is null', board, $img);
                 continue;
             }
-            // 处理表情表情相对协议
-            url = url.replace(/^\/qzone\/em/g, 'http://qzonestyle.gtimg.cn/qzone/em');
+            // 处理表情相对协议（支持/qzone/em、/qzone/rc等多种路径）
+            url = url.replace(/^\/qzone\//g, 'http://qzonestyle.gtimg.cn/qzone/');
             url = API.Utils.toHttp(url);
 
             // 添加下载任务

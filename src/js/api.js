@@ -927,8 +927,8 @@ API.Utils = {
             return content;
         }
 
-        // 替换无协议的链接
-        content = content.replace(/src=\"\/qzone\/em/g, 'src=\"http://qzonestyle.gtimg.cn/qzone/em');
+        // 替换无协议的链接（支持/qzone/下的所有路径，如em、rc等）
+        content = content.replace(/src=\"\/qzone\//g, 'src=\"http://qzonestyle.gtimg.cn/qzone/');
 
         // 转换emoji表情链接
         content = content.replace(/\[em\]e(\d+)\[\/em\]/gi, function(emoji, eid) {
@@ -1363,6 +1363,8 @@ API.Utils = {
         url = url.replace(/^\/\//g, 'http://');
         // 替换HTTPS协议
         url = url.replace(/https:\//, "http:/");
+        // 替换qzone相对路径（如/qzone/rc/、/qzone/em/等）
+        url = url.replace(/^\/qzone\//g, 'http://qzonestyle.gtimg.cn/qzone/');
         try {
             // 解码
             url = decodeURIComponent(url);
@@ -2499,6 +2501,20 @@ API.Common = {
             QZone.Common.FILE_URLS.set(imageUrl, custom_filename);
         }
 
+        // 匹配qzonestyle其他路径图片（如/qzone/rc/等）
+        const qzoneStyleUrls = content.match(/(https|http):\/\/qzonestyle\.gtimg\.cn\/qzone\/(?!em\/)[^\s"'<>]+\.(gif|png|jpg|jpeg)/gi) || [];
+        for (const imageUrl of qzoneStyleUrls) {
+            if (QZone.Common.FILE_URLS.get(imageUrl)) {
+                continue;
+            }
+            // 从URL中提取文件名
+            const urlPath = imageUrl.replace(/(https|http):\/\/qzonestyle\.gtimg\.cn\/qzone\//i, '');
+            const custom_filename = 'qzone_' + urlPath.replace(/\//g, '_');
+            // 添加下载任务
+            API.Utils.newDownloadTask('Common', imageUrl, 'Common/images', custom_filename);
+            QZone.Common.FILE_URLS.set(imageUrl, custom_filename);
+        }
+
         return content;
     },
 
@@ -2520,6 +2536,12 @@ API.Common = {
         // 替换微信表情地址
         content = content.replace(/https:\/\/cdn.jsdelivr.net\/gh\/ShunCai\/QZoneExport@dev\/src\/img\/emoji\/(.{1,15}).png/g, function(emoji, eid) {
             return API.Common.getMediaPath(emoji, 'Common/images/{0}.png'.format(eid), true);
+        });
+
+        // 替换qzonestyle其他路径图片（如/qzone/rc/等）
+        content = content.replace(/(https|http):\/\/qzonestyle\.gtimg\.cn\/qzone\/(?!em\/e\d+\.gif)([^\s"'<>]+\.(gif|png|jpg|jpeg))/gi, function(match, protocol, path) {
+            const custom_filename = 'qzone_' + path.replace(/\//g, '_');
+            return API.Common.getMediaPath(match, 'Common/images/' + custom_filename, true);
         });
 
         return content;
