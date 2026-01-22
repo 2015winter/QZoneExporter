@@ -248,7 +248,7 @@ const Default_Config = {
             }
         },
         SortType: "4", // 相册排序方式
-        RenameType: "Sort", // 相册命名规则
+        RenameType: "Default", // 相册命名规则
         Images: {
             pageSize: 90,
             listType: 'Detail', // 默认为列表详情

@@ -276,12 +276,13 @@ API.Videos.addDownloadTasks = (module, videos, module_dir, source) => {
 
         // 添加下载任务
         const categoryPath = API.Videos.getFileStructureFolderPath(video);
-        const downloadFolder = categoryPath ? 'Videos/' + categoryPath : 'Videos';
+        const downloadFolder = categoryPath ? 'Videos/' + categoryPath : 'Videos/videos';
 
         // 文件路径
         video.custom_filepath = 'images/' + video.custom_filename;
         if (isVideo) {
-            video.custom_filepath = categoryPath ? categoryPath + '/' + video.custom_filename : video.custom_filename;
+            // 视频文件路径：有分类时为 分类/文件名，无分类时为 videos/文件名
+            video.custom_filepath = categoryPath ? categoryPath + '/' + video.custom_filename : 'videos/' + video.custom_filename;
         }
 
         API.Utils.newDownloadTask(module, video.custom_url, isVideo ? downloadFolder : module_dir, video.custom_filename, source || video);

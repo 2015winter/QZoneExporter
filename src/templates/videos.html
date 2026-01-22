@@ -55,8 +55,12 @@
 			<div class="container-fluid tz-gallery">
 				<div id="lightgallery" class="row videos">
 					<%/* 遍历视频 */%>
+					<%if(videos && videos.length > 0){%>
 					<%for (const video of videos) {%>
 						<%video.uid = 'QZ-' + API.Utils.newSimpleUid(16)%>
+						<%/* 获取视频和封面路径 */%>
+						<%const videoSrc = video.custom_filepath || video.custom_url || video.url || ''%>
+						<%const posterSrc = API.Common.getMediaPath(video.pre || video.custom_pre_url, video.custom_pre_filepath) || '../Common/images/loading.gif'%>
 						<div class="col-md-2 mb-2">
 							<div class="card thumbnail mb-2 shadow-sm">
 								<div id="<%:=video.uid%>" class='photo-detail' style="display:none">
@@ -64,8 +68,8 @@
 										<div class="row">
 											<div class="col text-white-50 text-left">
 												<p>
-													<i title="拍摄/上传时间" class="fa fa-camera text-primary"><%:=video.shootTime ? API.Utils.formatDate(video.shootTime) : API.Utils.formatDate(video.uploadTime)%></i>
-													<i title="相片类型" class="ml-2">MP4</i>
+													<i title="拍摄/上传时间" class="fa fa-camera text-primary"><%:=API.Utils.formatDate(video.shootTime || video.uploadTime)%></i>
+													<i title="视频类型" class="ml-2">MP4</i>
 												</p>
 											</div>
 											<div class="col text-center text-truncate">
@@ -78,23 +82,29 @@
 										</div>
 									</div>
 								</div>
-						<a class="lightbox" data-video='{"source": [{"src":"<%:=video.custom_filepath ? video.custom_filepath : (video.custom_url || video.url)%>", "type":"video/mp4"}],"attributes": {"preload": false, "controls": true}}' 
-							data-poster="<%:=API.Common.getMediaPath(video.pre || video.custom_pre_url, video.custom_pre_filepath)%>" data-toggle="tooltip" data-html="true" title="<%:=video.desc || video.name%>" data-sub-html="#<%:=video.uid%>">
-							<span class="photo-video"></span>
-							<img class="lazyload loading" src="<%:=API.Common.getMediaPath(video.pre || video.custom_pre_url, video.custom_pre_filepath) || '../Common/images/loading.gif'%>" data-src="<%:=API.Common.getMediaPath(video.pre || video.custom_pre_url, video.custom_pre_filepath)%>" />
-						</a>
-								<div class="card-body text-truncate" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(video.desc || API.Utils.formatDate(video.uploadTime), 'HTML', false, false, false, false, true) %>">
-									<span class="card-title"><%:=API.Common.formatContent(video.desc || API.Utils.formatDate(video.uploadTime), 'HTML', false, false, false, false, true) %></span>
+								<a class="lightbox" href="<%:=videoSrc%>" data-video='{"source": [{"src":"<%:=videoSrc%>", "type":"video/mp4"}],"attributes": {"preload": false, "controls": true}}' 
+									data-poster="<%:=posterSrc%>" data-sub-html="#<%:=video.uid%>">
+									<span class="photo-video"></span>
+									<img class="lazyload loading" src="<%:=posterSrc%>" data-src="<%:=posterSrc%>" />
+								</a>
+								<div class="card-body text-truncate" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(video.name || video.desc || API.Utils.formatDate(video.uploadTime), 'HTML', false, false, false, false, true)%>">
+									<span class="card-title"><%:=API.Common.formatContent(video.name || video.desc || API.Utils.formatDate(video.uploadTime), 'HTML', false, false, false, false, true)%></span>
 								</div>
 								<div class="pic-num-wrap d-flex justify-content-around">
 									<div class="align-self-end">
-										<span class="text-light fa fa-thumbs-o-up cursor viewlikes" title="查看点赞" data-field="uniKey" data-target="<%:=video.uniKey%>" ><%:=video.likes ? video.likes.length : 0%></span>
+										<span class="text-light fa fa-thumbs-o-up cursor viewlikes" title="查看点赞" data-field="uniKey" data-target="<%:=video.uniKey%>"><%:=video.likes ? video.likes.length : 0%></span>
 									</div>
 									<div class="align-self-end">
 										<span class="text-light fa fa-comments-o cursor viewcomments" title="查看评论" data-field="uniKey" data-target="<%:=video.uniKey%>"><%:=video.comments ? video.comments.length : 0%></span>
 									</div>
 								</div>
 							</div>
+						</div>
+					<%}%>
+					<%}else{%>
+						<div class="col-12 text-center text-muted py-5">
+							<i class="fa fa-video-camera fa-3x mb-3"></i>
+							<p>暂无视频</p>
 						</div>
 					<%}%>
 				</div>
