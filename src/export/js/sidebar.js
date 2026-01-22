@@ -21,6 +21,7 @@ const initSidebar = function() {
 
     $("body").prepend('<div id="BlogAnchor" class="BlogAnchor">' +
         '<div id="AnchorContent" class="AnchorContent"> </div>' +
+        '<div class="resize-handle"></div>' +
         '</div>');
 
 
@@ -50,6 +51,63 @@ const initSidebar = function() {
         }
     }
 
+    // 初始化侧边栏拖拽
+    initSidebarResize();
+}
+
+// 侧边栏拖拽功能
+const initSidebarResize = function() {
+    const $sidebar = $('#BlogAnchor');
+    const $handle = $sidebar.find('.resize-handle');
+    const $content = $('#messages_html, #albums_html, #boards_html, #favorites_html, #shares_html, #visitors_html, #videos_html, #blogs-type-list, #friends-type-list');
+    
+    let isResizing = false;
+    let startX, startWidth;
+
+    $handle.on('mousedown', function(e) {
+        isResizing = true;
+        startX = e.clientX;
+        startWidth = $sidebar.width();
+        $handle.addClass('dragging');
+        $('body').css('cursor', 'ew-resize');
+        $('body').css('user-select', 'none');
+        e.preventDefault();
+    });
+
+    $(document).on('mousemove', function(e) {
+        if (!isResizing) return;
+        
+        const diff = e.clientX - startX;
+        let newWidth = startWidth + diff;
+        
+        // 限制宽度范围
+        newWidth = Math.max(150, Math.min(400, newWidth));
+        
+        $sidebar.css('width', newWidth + 'px');
+        $content.css('margin-left', (newWidth + 10) + 'px');
+    });
+
+    $(document).on('mouseup', function() {
+        if (isResizing) {
+            isResizing = false;
+            $handle.removeClass('dragging');
+            $('body').css('cursor', '');
+            $('body').css('user-select', '');
+            
+            // 保存宽度到 localStorage
+            localStorage.setItem('sidebarWidth', $sidebar.width());
+        }
+    });
+
+    // 恢复保存的宽度
+    const savedWidth = localStorage.getItem('sidebarWidth');
+    if (savedWidth) {
+        const width = parseInt(savedWidth);
+        if (width >= 150 && width <= 400) {
+            $sidebar.css('width', width + 'px');
+            $content.css('margin-left', (width + 10) + 'px');
+        }
+    }
 }
 
 $(document).ready(initSidebar);

@@ -335,14 +335,29 @@ API.Videos.exportToHtml = async(videos) => {
         // 基于JSON生成JS
         await API.Common.writeJsonToJs('videos', videos, moduleFolder + '/json/videos.js');
 
-        // 生成视频汇总列表HTML
-        await API.Common.writeHtmlofTpl('videos', { videos: videos, targetYear: 'ALL' }, moduleFolder + "/index.html");
+        // 根据年月分组
+        const videoMaps = API.Utils.groupedByTime(videos, 'uploadTime', 'all');
 
-        // 根据年份分组
+        // 生成视频汇总列表HTML（包含侧边栏导航）
+        await API.Common.writeHtmlofTpl('videos', { 
+            videoMaps: videoMaps, 
+            total: videos.length,
+            targetYear: 'ALL' 
+        }, moduleFolder + "/index.html");
+
+        // 根据年份分组生成年份HTML
         const year_maps = API.Utils.groupedByTime(videos, 'uploadTime', 'year');
         for (const [year, year_items] of year_maps) {
+            // 该年份的年月分组
+            let _videoMaps = new Map();
+            const monthMaps = API.Utils.groupedByTime(year_items, 'uploadTime', 'month');
+            _videoMaps.set(year, monthMaps);
             // 生成视频年份列表HTML
-            await API.Common.writeHtmlofTpl('videos', { videos: year_items, targetYear: year }, moduleFolder + "/" + year + ".html");
+            await API.Common.writeHtmlofTpl('videos', { 
+                videoMaps: _videoMaps, 
+                total: year_items.length,
+                targetYear: year 
+            }, moduleFolder + "/" + year + ".html");
         }
 
     } catch (error) {

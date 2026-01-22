@@ -31,6 +31,8 @@
 	
 	<script type="text/javascript" src="../Common/json/config.js"></script>
 	<script type="text/javascript" src="json/videos.js"></script>
+	<script type="text/javascript" src="../Common/js/common.js"></script>
+	<script type="text/javascript" src="../Common/js/sidebar.js"></script>
 </head>
 
 <body>
@@ -50,72 +52,74 @@
 			</div>
 		</nav>
 	</header>
-	<main role="main">
-		<div class="albums py-5 bg-light" style="padding-top: 4rem!important;">
-			<div class="container-fluid tz-gallery">
-				<div id="lightgallery" class="row videos">
-					<%/* 遍历视频 */%>
-					<%if(videos && videos.length > 0){%>
-					<%for (const video of videos) {%>
-						<%video.uid = 'QZ-' + API.Utils.newSimpleUid(16)%>
-						<%/* 获取视频和封面路径 */%>
-						<%const videoSrc = video.custom_filepath || video.custom_url || video.url || ''%>
-						<%const posterSrc = API.Common.getMediaPath(video.pre || video.custom_pre_url, video.custom_pre_filepath) || '../Common/images/loading.gif'%>
-						<div class="col-md-2 mb-2">
-							<div class="card thumbnail mb-2 shadow-sm">
-								<div id="<%:=video.uid%>" class='photo-detail' style="display:none">
-									<div class="container">
-										<div class="row">
-											<div class="col text-white-50 text-left">
-												<p>
-													<i title="拍摄/上传时间" class="fa fa-camera text-primary"><%:=API.Utils.formatDate(video.shootTime || video.uploadTime)%></i>
-													<i title="视频类型" class="ml-2">MP4</i>
-												</p>
+	<main role="main" class="flex-shrink-0">
+		<div id="videos_html" class="container-fluid videos-container">
+			<%/* 遍历年份 */%>
+			<%for (const [year, yearMap] of videoMaps) {%>
+				<span class="sidebar-h1" data-tag="h1" data-sidebar='<%:=year%>年<span class="badge badge-primary badge-pill itemSize"><%:=API.Utils.sumYearItemSize(yearMap)%></span>'></span>
+				<div class="year-title"><i class="fa fa-calendar-o mr-2"></i><%:=year%>年<span class="badge badge-primary"><%:=API.Utils.sumYearItemSize(yearMap)%>个视频</span></div>
+				<%/* 遍历月份 */%>
+				<%for (const [month, monthVideos] of yearMap) {%>
+					<span class="sidebar-h2" data-tag="h2" data-sidebar='<%:=month%>月<span class="badge badge-secondary badge-pill itemSize"><%:=monthVideos.length%></span>'></span>
+					<div class="month-title"><i class="fa fa-folder-open-o mr-1"></i><%:=month%>月 <small class="text-muted">(<%:=monthVideos.length%>个)</small></div>
+					<div id="lightgallery-<%:=year%>-<%:=month%>" class="row videos">
+						<%/* 遍历视频 */%>
+						<%for (const video of monthVideos) {%>
+							<%video.uid = 'QZ-' + API.Utils.newSimpleUid(16)%>
+							<%/* 获取视频和封面路径 */%>
+							<%const videoSrc = video.custom_filepath || video.custom_url || video.url || ''%>
+							<%const posterSrc = API.Common.getMediaPath(video.pre || video.custom_pre_url, video.custom_pre_filepath) || '../Common/images/loading.gif'%>
+							<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-6 mb-3">
+								<div class="card thumbnail shadow-sm">
+									<div id="<%:=video.uid%>" class='photo-detail' style="display:none">
+										<div class="container">
+											<div class="row">
+												<div class="col text-white-50 text-left">
+													<p>
+														<i title="拍摄/上传时间" class="fa fa-camera text-primary"><%:=API.Utils.formatDate(video.shootTime || video.uploadTime)%></i>
+														<i title="视频类型" class="ml-2">MP4</i>
+													</p>
+												</div>
+												<div class="col text-center text-truncate">
+													<span class="video-title" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(video.name || API.Utils.formatDate(video.uploadTime), 'HTML', false, false, false, false, true)%>"><%:=API.Common.formatContent(video.name || API.Utils.formatDate(video.uploadTime), 'HTML', false, false, false, false, true)%></span>
+													<%if(video.desc){%>
+														<span class="text-white-50" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(video.desc, 'HTML', false, false, false, false, true)%>"><%:=API.Common.formatContent(video.desc, "HTML", false, false, false, false, true)%></span>
+													<%}%>
+												</div>
+												<div class="col"></div>
 											</div>
-											<div class="col text-center text-truncate">
-												<h6 data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(video.name || API.Utils.formatDate(video.uploadTime), 'HTML', false, false, false, false, true)%>"><%:=API.Common.formatContent(video.name || API.Utils.formatDate(video.uploadTime), 'HTML', false, false, false, false, true)%></h6>
-												<%if(video.desc){%>
-													<span class="text-white-50" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(video.desc, 'HTML', false, false, false, false, true)%>"><%:=API.Common.formatContent(video.desc, "HTML", false, false, false, false, true)%></span>
-												<%}%>
-											</div>
-											<div class="col"></div>
 										</div>
 									</div>
-								</div>
-								<a class="lightbox" href="<%:=videoSrc%>" data-video='{"source": [{"src":"<%:=videoSrc%>", "type":"video/mp4"}],"attributes": {"preload": false, "controls": true}}' 
-									data-poster="<%:=posterSrc%>" data-sub-html="#<%:=video.uid%>">
-									<span class="photo-video"></span>
-									<img class="lazyload loading" src="<%:=posterSrc%>" data-src="<%:=posterSrc%>" />
-								</a>
-								<div class="card-body text-truncate" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(video.name || video.desc || API.Utils.formatDate(video.uploadTime), 'HTML', false, false, false, false, true)%>">
-									<span class="card-title"><%:=API.Common.formatContent(video.name || video.desc || API.Utils.formatDate(video.uploadTime), 'HTML', false, false, false, false, true)%></span>
-								</div>
-								<div class="pic-num-wrap d-flex justify-content-around">
-									<div class="align-self-end">
-										<span class="text-light fa fa-thumbs-o-up cursor viewlikes" title="查看点赞" data-field="uniKey" data-target="<%:=video.uniKey%>"><%:=video.likes ? video.likes.length : 0%></span>
+									<a class="lightbox" href="<%:=videoSrc%>" data-video='{"source": [{"src":"<%:=videoSrc%>", "type":"video/mp4"}],"attributes": {"preload": false, "controls": true}}' 
+										data-poster="<%:=posterSrc%>" data-sub-html="#<%:=video.uid%>">
+										<span class="photo-video"></span>
+										<img class="lazyload loading card-img-top" src="<%:=posterSrc%>" data-src="<%:=posterSrc%>" />
+									</a>
+									<div class="card-body p-2 text-truncate" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(video.name || video.desc || API.Utils.formatDate(video.uploadTime), 'HTML', false, false, false, false, true)%>">
+										<small class="card-title"><%:=API.Common.formatContent(video.name || video.desc || API.Utils.formatDate(video.uploadTime), 'HTML', false, false, false, false, true)%></small>
 									</div>
-									<div class="align-self-end">
-										<span class="text-light fa fa-comments-o cursor viewcomments" title="查看评论" data-field="uniKey" data-target="<%:=video.uniKey%>"><%:=video.comments ? video.comments.length : 0%></span>
+									<div class="card-footer p-1 d-flex justify-content-around bg-dark">
+										<span class="text-light fa fa-thumbs-o-up cursor viewlikes small" title="查看点赞" data-field="uniKey" data-target="<%:=video.uniKey%>"><%:=video.likes ? video.likes.length : 0%></span>
+										<span class="text-light fa fa-comments-o cursor viewcomments small" title="查看评论" data-field="uniKey" data-target="<%:=video.uniKey%>"><%:=video.comments ? video.comments.length : 0%></span>
 									</div>
 								</div>
 							</div>
-						</div>
-					<%}%>
-					<%}else{%>
-						<div class="col-12 text-center text-muted py-5">
-							<i class="fa fa-video-camera fa-3x mb-3"></i>
-							<p>暂无视频</p>
-						</div>
-					<%}%>
+						<%}%>
+					</div>
+				<%}%>
+			<%}%>
+			<%if(!videoMaps || videoMaps.size === 0){%>
+				<div class="col-12 text-center text-muted py-5">
+					<i class="fa fa-video-camera fa-3x mb-3"></i>
+					<p>暂无视频</p>
 				</div>
-			</div>
+			<%}%>
 		</div>
 	</main>
 	<script type="text/javascript">
 		// 当前年份
 		window.targetYear = "<%:=targetYear || 'ALL'%>";
 	</script>
-	<script type="text/javascript" src="../Common/js/common.js"></script>
 	<script type="text/javascript" src="js/videos.js"></script>
 </body>
 

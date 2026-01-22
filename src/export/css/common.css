@@ -332,9 +332,29 @@ body {
     position: fixed;
     height: 100%;
     width: 210px;
+    min-width: 150px;
+    max-width: 400px;
     left: 0;
     top: 56px;
     border-right: 1px solid #E6ECF1;
+    z-index: 100;
+}
+
+/* 侧边栏拖拽手柄 */
+.BlogAnchor .resize-handle {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 5px;
+    height: 100%;
+    cursor: ew-resize;
+    background: transparent;
+    transition: background 0.2s;
+}
+
+.BlogAnchor .resize-handle:hover,
+.BlogAnchor .resize-handle.dragging {
+    background: #007bff;
 }
 
 .BlogAnchor p {
@@ -1040,6 +1060,107 @@ pre {
     position: relative;
 }
 
+/* 视频容器样式 */
+.videos-container {
+    top: 57px;
+    position: relative;
+    padding: 20px;
+}
+
+/* 年份标题 */
+#videos_html .year-title {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+    padding: 15px 0 10px 0;
+    margin-top: 25px;
+    border-top: 2px solid #dee2e6;
+}
+
+#videos_html .year-title:first-of-type {
+    margin-top: 0;
+    border-top: none;
+}
+
+#videos_html .year-title .badge {
+    font-size: 0.8rem;
+    vertical-align: middle;
+    margin-left: 8px;
+}
+
+/* 月份标题 */
+#videos_html .month-title {
+    display: block;
+    font-size: 1.1rem;
+    color: #666;
+    padding: 8px 0;
+    margin-top: 10px;
+}
+
+/* 年份分隔标题(侧边栏用) */
+#videos_html .sidebar-h1 {
+    display: none;
+}
+
+/* 月份分隔(侧边栏用) */
+#videos_html .sidebar-h2 {
+    display: none;
+}
+
+#videos_html .videos {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -8px;
+}
+
+#videos_html .videos > div {
+    padding: 0 8px;
+}
+
+#videos_html .thumbnail {
+    width: 100%;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+#videos_html .thumbnail .lightbox {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    height: 150px;
+    overflow: hidden;
+    background-color: #000;
+}
+
+#videos_html .thumbnail .lightbox .photo-video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.6);
+    z-index: 10;
+    opacity: 0.6;
+}
+
+#videos_html .thumbnail .lightbox:hover .photo-video {
+    opacity: 0.9;
+}
+
+#videos_html .thumbnail .lightbox img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#videos_html .thumbnail .card-body {
+    background: #f8f9fa;
+}
+
+#videos_html .thumbnail .card-footer {
+    border-radius: 0 0 0.5rem 0.5rem;
+}
+
 
 /* 相册样式 */
 
@@ -1438,8 +1559,10 @@ blockquote.source {
     #boards_html,
     #favorites_html,
     #shares_html,
-    #visitors_html {
+    #visitors_html,
+    #videos_html {
         max-width: 60vw;
+        margin-left: 220px;
     }
     /* 日志分类 */
     #blogs-types {
