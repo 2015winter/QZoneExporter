@@ -8,38 +8,106 @@ $(function() {
     // 图片懒加载
     lazyload();
 
-    // 初始化所有 lightgallery 实例
-    const galleries = document.querySelectorAll('[id^="lightgallery"]');
-    galleries.forEach($gallery => {
-        $gallery.moduleName = 'Videos';
-
-        // 注册监听
-        API.Common.registerEvents($gallery);
-
-        // 实例化画廊相册
-        const galleryIns = lightGallery($gallery, {
-            plugins: [
-                lgZoom,
-                lgAutoplay,
-                lgComment,
-                lgFullscreen,
-                lgHash,
-                lgRotate,
-                lgThumbnail,
-                lgVideo
-            ],
-            mode: 'lg-fade',
-            selector: '.lightbox',
-            download: false,
-            mousewheel: true,
-            thumbnail: true,
-            commentBox: true,
-            loop: false,
-            autoplayVideoOnSlide: false,
-            commentsMarkup: '<div id="lg-comment-box" class="lg-comment-box lg-fb-comment-box"><div class="lg-comment-header"><h3 class="lg-comment-title">评论</h3><span class="lg-comment-close lg-icon"></span></div><div class="lg-comment-body"></div></div>'
+    // 视频播放功能
+    function initVideoPlayer() {
+        // 点击播放按钮 - 在卡片内播放
+        $('.play-btn').on('click', function(e) {
+            e.stopPropagation();
+            const wrapper = $(this).closest('.video-wrapper');
+            playVideoInCard(wrapper, false);
         });
-        $gallery.galleryIns = galleryIns;
-    });
+
+        // 点击全屏按钮 - 全屏播放
+        $('.btn-fullscreen').on('click', function(e) {
+            e.stopPropagation();
+            const wrapper = $(this).closest('.video-wrapper');
+            playVideoInCard(wrapper, true);
+        });
+
+        // 点击封面图片 - 在卡片内播放
+        $('.video-poster').on('click', function(e) {
+            e.stopPropagation();
+            const wrapper = $(this).closest('.video-wrapper');
+            playVideoInCard(wrapper, false);
+        });
+    }
+
+    // 在卡片内播放视频
+    function playVideoInCard(wrapper, fullscreen) {
+        const videoSrc = wrapper.data('video-src');
+        const posterSrc = wrapper.data('poster');
+        
+        if (!videoSrc) {
+            console.warn('视频源不存在');
+            return;
+        }
+
+        // 检查是否已有视频元素
+        let video = wrapper.find('video');
+        if (video.length === 0) {
+            // 创建视频元素
+            video = $('<video></video>', {
+                'class': 'card-video',
+                'controls': true,
+                'preload': 'metadata',
+                'poster': posterSrc
+            });
+            video.append($('<source>', {
+                'src': videoSrc,
+                'type': 'video/mp4'
+            }));
+            wrapper.append(video);
+        }
+
+        // 隐藏封面和播放按钮
+        wrapper.find('.video-poster, .play-btn').hide();
+        wrapper.find('.btn-fullscreen').hide();
+        video.show();
+
+        // 播放视频
+        const videoEl = video[0];
+        videoEl.play().then(() => {
+            if (fullscreen) {
+                requestFullscreen(videoEl);
+            }
+        }).catch(err => {
+            console.warn('视频播放失败:', err);
+        });
+
+        // 视频结束后显示封面
+        video.off('ended').on('ended', function() {
+            resetVideoCard(wrapper);
+        });
+
+        // 暂停后双击可以重置
+        video.off('dblclick').on('dblclick', function() {
+            if (videoEl.paused) {
+                resetVideoCard(wrapper);
+            }
+        });
+    }
+
+    // 重置视频卡片
+    function resetVideoCard(wrapper) {
+        wrapper.find('video').hide();
+        wrapper.find('.video-poster, .play-btn, .btn-fullscreen').show();
+    }
+
+    // 请求全屏
+    function requestFullscreen(el) {
+        if (el.requestFullscreen) {
+            el.requestFullscreen();
+        } else if (el.webkitRequestFullscreen) {
+            el.webkitRequestFullscreen();
+        } else if (el.mozRequestFullScreen) {
+            el.mozRequestFullScreen();
+        } else if (el.msRequestFullscreen) {
+            el.msRequestFullscreen();
+        }
+    }
+
+    // 初始化视频播放器
+    initVideoPlayer();
 
     // 查看赞
     $('.viewlikes').on('click', function() {

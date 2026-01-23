@@ -1132,7 +1132,7 @@ pre {
     overflow: hidden;
 }
 
-#videos_html .thumbnail .lightbox {
+#videos_html .thumbnail .video-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -1140,25 +1140,65 @@ pre {
     height: 150px;
     overflow: hidden;
     background-color: #000;
+    border-top-left-radius: calc(0.5rem - 1px);
+    border-top-right-radius: calc(0.5rem - 1px);
 }
 
-#videos_html .thumbnail .lightbox .photo-video {
+#videos_html .thumbnail .video-wrapper .photo-video {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) scale(0.6);
     z-index: 10;
     opacity: 0.6;
+    cursor: pointer;
 }
 
-#videos_html .thumbnail .lightbox:hover .photo-video {
+#videos_html .thumbnail .video-wrapper:hover .photo-video {
     opacity: 0.9;
+    transform: translate(-50%, -50%) scale(0.7);
+    transition: all 0.2s ease;
 }
 
-#videos_html .thumbnail .lightbox img {
+#videos_html .thumbnail .video-wrapper .btn-fullscreen {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    z-index: 15;
+    background: rgba(0, 0, 0, 0.6);
+    border: none;
+    color: #fff;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#videos_html .thumbnail .video-wrapper:hover .btn-fullscreen {
+    opacity: 1;
+}
+
+#videos_html .thumbnail .video-wrapper .btn-fullscreen:hover {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+#videos_html .thumbnail .video-wrapper .video-poster {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    cursor: pointer;
+}
+
+#videos_html .thumbnail .video-wrapper video.card-video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #000;
 }
 
 #videos_html .thumbnail .card-body {

@@ -7,25 +7,12 @@
 	<title>QQ空间备份-视频</title>
 	<link rel="stylesheet" href="../Common/vendor/css/font-awesome.min.css">
 	<link rel="stylesheet" href="../Common/vendor/css/bootstrap.min.css">
-	<link rel="stylesheet" href="../Common/vendor/css/lightgallery.min.css">
-	<link rel="stylesheet" href="../Common/vendor/css/lightgallery-bundle.min.css">
 	<link rel="stylesheet" type="text/css" href="../Common/css/common.css">
 	<script src="../Common/vendor/js/jquery.min.js"></script>
 	<script src="../Common/vendor/js/jquery.mousewheel.min.js"></script>
 	<script src="../Common/vendor/js/bootstrap.bundle.min.js"></script>
 	<script src="../Common/vendor/js/lodash.min.js"></script>
-	
-	<script src="../Common/vendor/js/lightgallery.min.js"></script>
-	<script src="../Common/vendor/js/lg-zoom.min.js"></script>
-	<script src="../Common/vendor/js/lg-video.min.js"></script>
-	<script src="../Common/vendor/js/lg-thumbnail.min.js"></script>
-	<script src="../Common/vendor/js/lg-rotate.min.js"></script>
-	<script src="../Common/vendor/js/lg-hash.min.js"></script>
-	<script src="../Common/vendor/js/lg-fullscreen.min.js"></script>
-	<script src="../Common/vendor/js/lg-comment.min.js"></script>
-	<script src="../Common/vendor/js/lg-autoplay.min.js"></script>
 	<script src="../Common/vendor/js/clicklove.min.js"></script>
-
 	<script src="../Common/vendor/js/lazyload.min.js"></script>
 	<script src="../Common/vendor/js/index.aio.min.js"></script>
 	
@@ -90,11 +77,11 @@
 											</div>
 										</div>
 									</div>
-									<a class="lightbox" href="<%:=videoSrc%>" data-video='{"source": [{"src":"<%:=videoSrc%>", "type":"video/mp4"}],"attributes": {"preload": false, "controls": true}}' 
-										data-poster="<%:=posterSrc%>" data-sub-html="#<%:=video.uid%>">
-										<span class="photo-video"></span>
-										<img class="lazyload loading card-img-top" src="<%:=posterSrc%>" data-src="<%:=posterSrc%>" />
-									</a>
+									<div class="video-wrapper" data-video-src="<%:=videoSrc%>" data-poster="<%:=posterSrc%>">
+										<img class="lazyload loading card-img-top video-poster" src="<%:=posterSrc%>" data-src="<%:=posterSrc%>" />
+										<span class="photo-video play-btn" title="播放视频"></span>
+										<button class="btn-fullscreen" title="全屏播放"><i class="fa fa-expand"></i></button>
+									</div>
 									<div class="card-body p-2 text-truncate" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(video.name || video.desc || API.Utils.formatDate(video.uploadTime), 'HTML', false, false, false, false, true)%>">
 										<small class="card-title"><%:=API.Common.formatContent(video.name || video.desc || API.Utils.formatDate(video.uploadTime), 'HTML', false, false, false, false, true)%></small>
 									</div>
