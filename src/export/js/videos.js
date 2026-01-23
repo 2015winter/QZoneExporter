@@ -8,89 +8,68 @@ $(function() {
     // 图片懒加载
     lazyload();
 
-    // 视频播放功能
-    function initVideoPlayer() {
-        // 点击播放按钮 - 在卡片内播放
-        $('.play-btn').on('click', function(e) {
-            e.stopPropagation();
-            const wrapper = $(this).closest('.video-wrapper');
-            playVideoInCard(wrapper, false);
-        });
-
-        // 点击全屏按钮 - 全屏播放
-        $('.btn-fullscreen').on('click', function(e) {
-            e.stopPropagation();
-            const wrapper = $(this).closest('.video-wrapper');
-            playVideoInCard(wrapper, true);
-        });
-
-        // 点击封面图片 - 在卡片内播放
-        $('.video-poster').on('click', function(e) {
-            e.stopPropagation();
-            const wrapper = $(this).closest('.video-wrapper');
-            playVideoInCard(wrapper, false);
-        });
-    }
-
-    // 在卡片内播放视频
-    function playVideoInCard(wrapper, fullscreen) {
-        const videoSrc = wrapper.data('video-src');
-        const posterSrc = wrapper.data('poster');
+    // 创建视频弹窗
+    function createVideoModal() {
+        if ($('#videoModal').length > 0) return;
         
-        if (!videoSrc) {
-            console.warn('视频源不存在');
-            return;
-        }
+        const modalHtml = `
+            <div id="videoModal" class="video-modal">
+                <div class="video-modal-content">
+                    <button class="video-modal-close" title="关闭">&times;</button>
+                    <video id="modalVideo" controls preload="metadata"></video>
+                </div>
+            </div>
+        `;
+        $('body').append(modalHtml);
 
-        // 检查是否已有视频元素
-        let video = wrapper.find('video');
-        if (video.length === 0) {
-            // 创建视频元素
-            video = $('<video></video>', {
-                'class': 'card-video',
-                'controls': true,
-                'preload': 'metadata',
-                'poster': posterSrc
-            });
-            video.append($('<source>', {
-                'src': videoSrc,
-                'type': 'video/mp4'
-            }));
-            wrapper.append(video);
-        }
-
-        // 隐藏封面和播放按钮
-        wrapper.find('.video-poster, .play-btn').hide();
-        wrapper.find('.btn-fullscreen').hide();
-        video.show();
-
-        // 播放视频
-        const videoEl = video[0];
-        videoEl.play().then(() => {
-            if (fullscreen) {
-                requestFullscreen(videoEl);
+        // 点击遮罩关闭
+        $('#videoModal').on('click', function(e) {
+            if (e.target === this) {
+                closeVideoModal();
             }
-        }).catch(err => {
-            console.warn('视频播放失败:', err);
         });
 
-        // 视频结束后显示封面
-        video.off('ended').on('ended', function() {
-            resetVideoCard(wrapper);
-        });
+        // 关闭按钮
+        $('.video-modal-close').on('click', closeVideoModal);
 
-        // 暂停后双击可以重置
-        video.off('dblclick').on('dblclick', function() {
-            if (videoEl.paused) {
-                resetVideoCard(wrapper);
+        // ESC 键关闭
+        $(document).on('keydown', function(e) {
+            if (e.key === 'Escape' && $('#videoModal').is(':visible')) {
+                closeVideoModal();
             }
         });
     }
 
-    // 重置视频卡片
-    function resetVideoCard(wrapper) {
-        wrapper.find('video').hide();
-        wrapper.find('.video-poster, .play-btn, .btn-fullscreen').show();
+    // 关闭弹窗
+    function closeVideoModal() {
+        const video = $('#modalVideo')[0];
+        if (video) {
+            video.pause();
+            video.src = '';
+        }
+        $('#videoModal').fadeOut(200);
+    }
+
+    // 弹窗播放视频
+    function playVideoInModal(videoSrc, posterSrc) {
+        createVideoModal();
+        const video = $('#modalVideo')[0];
+        video.poster = posterSrc || '';
+        video.src = videoSrc;
+        $('#videoModal').fadeIn(200);
+        video.play().catch(err => console.warn('视频播放失败:', err));
+    }
+
+    // 全屏播放视频
+    function playVideoFullscreen(videoSrc, posterSrc) {
+        createVideoModal();
+        const video = $('#modalVideo')[0];
+        video.poster = posterSrc || '';
+        video.src = videoSrc;
+        $('#videoModal').fadeIn(200);
+        video.play().then(() => {
+            requestFullscreen(video);
+        }).catch(err => console.warn('视频播放失败:', err));
     }
 
     // 请求全屏
@@ -104,6 +83,42 @@ $(function() {
         } else if (el.msRequestFullscreen) {
             el.msRequestFullscreen();
         }
+    }
+
+    // 视频播放功能
+    function initVideoPlayer() {
+        // 点击播放按钮 - 弹窗播放
+        $('.play-btn').on('click', function(e) {
+            e.stopPropagation();
+            const wrapper = $(this).closest('.video-wrapper');
+            const videoSrc = wrapper.data('video-src');
+            const posterSrc = wrapper.data('poster');
+            if (videoSrc) {
+                playVideoInModal(videoSrc, posterSrc);
+            }
+        });
+
+        // 点击全屏按钮 - 全屏播放
+        $('.btn-fullscreen').on('click', function(e) {
+            e.stopPropagation();
+            const wrapper = $(this).closest('.video-wrapper');
+            const videoSrc = wrapper.data('video-src');
+            const posterSrc = wrapper.data('poster');
+            if (videoSrc) {
+                playVideoFullscreen(videoSrc, posterSrc);
+            }
+        });
+
+        // 点击封面图片 - 弹窗播放
+        $('.video-poster').on('click', function(e) {
+            e.stopPropagation();
+            const wrapper = $(this).closest('.video-wrapper');
+            const videoSrc = wrapper.data('video-src');
+            const posterSrc = wrapper.data('poster');
+            if (videoSrc) {
+                playVideoInModal(videoSrc, posterSrc);
+            }
+        });
     }
 
     // 初始化视频播放器

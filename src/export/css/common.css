@@ -1194,19 +1194,67 @@ pre {
     cursor: pointer;
 }
 
-#videos_html .thumbnail .video-wrapper video.card-video {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    background: #000;
-}
-
 #videos_html .thumbnail .card-body {
     background: #f8f9fa;
 }
 
 #videos_html .thumbnail .card-footer {
     border-radius: 0 0 0.5rem 0.5rem;
+}
+
+/* 视频弹窗样式 */
+.video-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 9999;
+}
+
+.video-modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 90%;
+    max-height: 90%;
+    background: #000;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+.video-modal-close {
+    position: absolute;
+    top: -12px;
+    right: -12px;
+    width: 32px;
+    height: 32px;
+    background: #ff4757;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 20px;
+    line-height: 26px;
+    text-align: center;
+    cursor: pointer;
+    z-index: 10001;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.video-modal-close:hover {
+    background: #ff6b81;
+    transform: scale(1.1);
+}
+
+#modalVideo {
+    display: block;
+    max-width: 80vw;
+    max-height: 80vh;
+    border-radius: 8px;
 }
 
 
