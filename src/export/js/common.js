@@ -657,7 +657,8 @@ API.Common = {
     getUserLogoLocalUrl(uin, isAppendPrePath, count) {
         let filePath;
         if (!this.isQzoneUrl()) {
-            filePath = 'Common/images/' + uin;
+            // 头像文件名添加.jpg后缀
+            filePath = 'Common/images/' + uin + '.jpg';
         }
         return API.Common.getMediaPath(this.getUserLogoUrl(uin), filePath, isAppendPrePath, count);
     },
