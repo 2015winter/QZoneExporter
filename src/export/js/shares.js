@@ -1,5 +1,12 @@
 $(function() {
 
+    // 清理空的medias容器（无有效图片的分享）
+    $('.medias').each(function() {
+        if ($(this).find('.medias-item').length === 0) {
+            $(this).hide();
+        }
+    });
+
     // 是否需要生成那年今日
     if (QZone_Config.Shares.hasThatYearToday) {
 

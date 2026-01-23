@@ -4621,18 +4621,26 @@ API.Shares = {
             const $normal_images = $($contentDiv.find('div.mod_details.lbor > div.layout_s img')) || [];
             if ($normal_images) {
                 $normal_images.each(function() {
-                    images.push({
-                        url: $(this).attr('src') || $(this).attr('data-src')
-                    });
+                    const imgUrl = $(this).attr('src') || $(this).attr('data-src');
+                    // 过滤无效URL（空值、loading图等）
+                    if (imgUrl && !imgUrl.includes('loading.gif') && !imgUrl.endsWith('loading.gif')) {
+                        images.push({
+                            url: imgUrl
+                        });
+                    }
                 });
             }
             // 相册、相片的图
             const $album_images = $($contentDiv.find('div.mod_details.lbor > div.mod_brief > div.mod_list > ul > li img')) || [];
             if ($album_images) {
                 $album_images.each(function() {
-                    images.push({
-                        url: $(this).attr('src') || $(this).attr('data-src')
-                    });
+                    const imgUrl = $(this).attr('src') || $(this).attr('data-src');
+                    // 过滤无效URL（空值、loading图等）
+                    if (imgUrl && !imgUrl.includes('loading.gif') && !imgUrl.endsWith('loading.gif')) {
+                        images.push({
+                            url: imgUrl
+                        });
+                    }
                 });
             }
             const shareSource = new ShareSource(title, desc, url, fromUrl, fromName, count * 1, images);

@@ -212,6 +212,12 @@ body {
     flex-wrap: wrap;
 }
 
+/* 隐藏没有有效图片的空medias容器 */
+.medias:empty,
+.medias:not(:has(.medias-item)) {
+    display: none;
+}
+
 .medias-item {
     cursor: pointer;
     box-sizing: border-box;

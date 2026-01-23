@@ -2550,25 +2550,26 @@ TPL.SHARES_ITEM = `
                     <%}%>
                     <blockquote class="source">
                         <!-- 分享源标题 -->
-                        <%if(share.source && Object.keys(share.source).length > 0 ){%>
-                            <%if(share.source.title){%>
-                                <p><a target="_blank" href="<%:=share.source.url%>"><%:=share.source.title%></a></p>
-                            <%}%>
-                            <!-- 分享源描述 -->
-                            <%if(share.source.desc){%>
-                                <p id="<%:='share-source-desc-' + share.id%>"><%:=API.Common.formatContent(share.source.desc, "HTML", false, false, false, false, true)%></p>
-                            <%}%>
+                        <%if(share.source && share.source.title){%>
+                            <p><a target="_blank" href="<%:=share.source.url%>"><%:=share.source.title%></a></p>
+                        <%}%>
+                        <!-- 分享源描述 -->
+                        <%if(share.source && share.source.desc){%>
+                            <p id="<%:='share-source-desc-' + share.id%>"><%:=API.Common.formatContent(share.source.desc, "HTML", false, false, false, false, true)%></p>
                         <%}%>
                         <!-- 分享内容 -->
                         <!-- 多媒体内容 -->
                         <!-- 分享源图片 -->
-                        <%if(share.source.images && share.source.images.length > 0){%>
+                        <%if(share.source && share.source.images && share.source.images.length > 0){%>
                             <div id="<%:='share-medias-' + share.id%>" class="medias row pl-3 lightgallery <%:=API.Common.getImgClassType(share,true)%>">
                                 <%for (let idx = 0; idx < share.source.images.length; idx++) {%>
                                     <%const image = share.source.images[idx];%>
-                                    <a class="medias-item border message-lightbox" data-idx="<%:=idx%>" data-src="<%:=image.custom_filepath ? image.custom_filepath : image.custom_url%>" data-sub-html="#<%:='share-source-desc-' + share.id%>">
-                                        <img class="lazyload loading w-100 h-100" data-idx="<%:=idx%>" src="<%:=image.custom_filepath ? image.custom_filepath : (image.custom_url || '../Common/images/loading.gif')%>" data-src="<%:=image.custom_filepath ? image.custom_filepath : image.custom_url%>">
+                                    <%const imgUrl = image.custom_filepath || image.custom_url || image.url || '';%>
+                                    <%if(imgUrl){%>
+                                    <a class="medias-item border message-lightbox" data-idx="<%:=idx%>" data-src="<%:=imgUrl%>" data-sub-html="#<%:='share-source-desc-' + share.id%>">
+                                        <img class="lazyload loading w-100 h-100" data-idx="<%:=idx%>" src="<%:=imgUrl%>" data-src="<%:=imgUrl%>">
                                     </a>
+                                    <%}%>
                                 <%}%>
                             </div>
                         <%}%>
