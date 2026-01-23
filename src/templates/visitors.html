@@ -65,22 +65,12 @@
 										</div>
 									</div>
 								</div>
-								<%/* 天数分组 */%>
-								<%const dayMaps = API.Utils.groupedByTime(monthItems, "time", "day");%>
-								<%for (const [day, dayItems] of dayMaps) {%>
-									<div class="timeline2-entry">
-										<div class="timeline2-entry-day">
-											<div class="timeline2-icon">
-												<span class="sidebar-h3" data-tag="h3" data-sidebar="<%:=day%>日"><%:=day%>日</span>
-											</div>
-										</div>
-									</div>
-									<%/* 遍历 */%>
-									<%for (const item of dayItems) {%>
+								<%/* 遍历同一月份的所有访客 */%>
+								<%for (const item of monthItems) {%>
 										<div class="timeline2-entry">
 											<div class="timeline2-entry-inner">
 												<div class="timeline2-time">
-													<span><%:=API.Utils.formatDate(item.time,'hh:mm')%></span>
+													<span><%:=API.Utils.formatDate(item.time,'dd日 hh:mm')%></span>
 												</div>
 												<div class="timeline2-icon">
 													<a class="avatar" href="<%:=API.Common.getUserUrl(item.uin)%>" target="_blank">
@@ -192,8 +182,7 @@
 											</div>
 										</div>
 									<%}%>
-									<hr>
-								<%}%>
+								<hr>
 							<%}%>
 						<%}%>
 					<%}%>
