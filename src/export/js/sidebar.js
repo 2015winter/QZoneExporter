@@ -37,9 +37,33 @@ const initSidebar = function() {
         $("#AnchorContent").append(`<li><a class="nav_item {0} anchor-link text-truncate" data-toggle="tooltip" data-html="true" title='{1}' href="#wow{2}">{3}</a></li>`.format(className, html, id, html));
     });
 
-    $(".anchor-link").click(function() {
+    $(".anchor-link").click(function(e) {
+        e.preventDefault();
         $(".BlogAnchor li .nav_item.current").removeClass('current');
         $(this).addClass('current');
+        
+        // 获取目标锚点
+        const targetId = $(this).attr('href');
+        const $target = $(targetId);
+        
+        if ($target.length) {
+            // 如果目标元素是隐藏的侧边栏标记，则查找其下一个可见兄弟元素
+            let $scrollTarget = $target;
+            if ($target.hasClass('sidebar-h1') || $target.hasClass('sidebar-h2') || 
+                $target.hasClass('sidebar-h3') || $target.hasClass('sidebar-h4') ||
+                $target.hasClass('sidebar-h5') || $target.hasClass('sidebar-h6')) {
+                const $nextVisible = $target.next(':visible');
+                if ($nextVisible.length) {
+                    $scrollTarget = $nextVisible;
+                }
+            }
+            
+            // 滚动到目标位置，减去头部高度
+            const offset = $scrollTarget.offset();
+            if (offset) {
+                $("html,body").animate({ scrollTop: offset.top - 70 }, 300);
+            }
+        }
     });
 
     // hash发生变化

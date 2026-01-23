@@ -1100,12 +1100,20 @@ pre {
 
 /* 年份分隔标题(侧边栏用) */
 #videos_html .sidebar-h1 {
-    display: none;
+    position: absolute;
+    visibility: hidden;
+    height: 0;
+    margin: 0;
+    padding: 0;
 }
 
 /* 月份分隔(侧边栏用) */
 #videos_html .sidebar-h2 {
-    display: none;
+    position: absolute;
+    visibility: hidden;
+    height: 0;
+    margin: 0;
+    padding: 0;
 }
 
 #videos_html .videos {
