@@ -55,15 +55,49 @@
 	<main role="main">
 		<div class="albums py-5 bg-light" style="padding-top: 4rem!important;">
 			<div class="container-fluid tz-gallery">
-				<div id="lightgallery" class="row photos">
+				<!-- 相册工具栏 -->
+				<div class="photos-toolbar mb-4">
+					<div class="d-flex justify-content-between align-items-center flex-wrap">
+						<div class="album-stats">
+							<span class="badge badge-info"><i class="fa fa-image mr-1"></i> <span id="photoCount">0 张相片</span></span>
+							<span class="badge badge-secondary"><i class="fa fa-video-camera mr-1"></i> <span id="videoCount">0 个视频</span></span>
+						</div>
+						<div class="layout-controls">
+							<div class="btn-group btn-group-sm" role="group">
+								<button type="button" class="btn btn-outline-secondary" data-layout="grid" title="网格视图">
+									<i class="fa fa-th"></i> 网格
+								</button>
+								<button type="button" class="btn btn-outline-secondary active" data-layout="timeline" title="时间线视图">
+									<i class="fa fa-calendar"></i> 时间
+								</button>
+								<button type="button" class="btn btn-outline-secondary" data-layout="masonry" title="瀑布流视图">
+									<i class="fa fa-columns"></i> 瀑布
+								</button>
+							</div>
+							<div class="btn-group btn-group-sm ml-2" role="group">
+								<button type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" title="排序">
+									<i class="fa fa-sort-amount-desc"></i> 排序
+								</button>
+								<div class="dropdown-menu dropdown-menu-right">
+									<a class="dropdown-item active" href="#" data-sort="time-desc"><i class="fa fa-sort-numeric-desc"></i> 最新优先</a>
+									<a class="dropdown-item" href="#" data-sort="time-asc"><i class="fa fa-sort-numeric-asc"></i> 最早优先</a>
+									<a class="dropdown-item" href="#" data-sort="name"><i class="fa fa-sort-alpha-asc"></i> 按名称</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<div id="lightgallery" class="photos layout-timeline">
 					<script id="photos_tpl" type="text/html">
 						<%/* 遍历相片 */%>
 						<%if(album && album.photoList && album.photoList.length > 0){%>
 						<%for (const photo of album.photoList) {%>
 							<%photo.uid = 'QZ-' + API.Utils.newSimpleUid(16)%>
 							<%photo.custom_lbs = API.Photos.getPhotoLbs(photo)%>
-							<div class="col-md-2 mb-2">
-								<div class="card thumbnail mb-2 shadow-sm">
+							<%const photoTime = (photo.rawshoottime || photo.shootTime) || (photo.uploadtime || photo.uploadTime)%>
+							<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-6 mb-3 photo-item" data-time="<%:=photoTime%>">
+								<div class="card thumbnail shadow-sm">
 									<%/* 详情面板 - 非本地照片显示 */%>
 									<%if(!photo.isLocal){%>
 										<div id="<%:=photo.uid%>" class='photo-detail' style="display:none">
@@ -75,7 +109,7 @@
 														<i title="相片类型" class="ml-2"><%:=photo.is_video ? 'MP4' : API.Photos.getPhotoType(photo)%></i>
 													</p>
 													<p>
-														<i title="拍摄/上传时间" class="fa fa-clock-o text-primary"><%:=API.Utils.formatDate((photo.rawshoottime || photo.shootTime) || (photo.uploadtime || photo.uploadTime))%></i>
+														<i title="拍摄/上传时间" class="fa fa-clock-o text-primary"><%:=API.Utils.formatDate(photoTime)%></i>
 														<%if(photo.custom_lbs && (photo.custom_lbs.idname || photo.custom_lbs.name)){%>
 															<a title="拍摄/上传地点" class="ml-2 text-primary" href="<%:=API.Messages.getMapUrl(photo.custom_lbs)%>" target="_blank"><i class="fa fa-map-marker"></i><%:=photo.custom_lbs.idname || photo.custom_lbs.name%></a>
 														<%}%>
@@ -101,7 +135,7 @@
 									<a class="lightbox" data-video='{"source": [{"src":"<%:=videoSrc%>", "type":"video/mp4"}],"attributes": {"preload": false, "controls": true}}' 
 										data-poster="<%:=videoPoster%>" data-sub-html="#<%:=photo.uid%>">
 										<span class="photo-video"></span>
-										<img class="lazyload loading" src="<%:=videoPoster%>" data-src="<%:=videoPoster%>" />
+										<img class="lazyload loading card-img photo-thumb" src="<%:=videoPoster%>" data-src="<%:=videoPoster%>" />
 									</a>
 									<div class="card-body text-truncate" data-toggle="tooltip" data-html="true" title="<%:=API.Photos.getPhotoBasicInfoTooltip(photo)%>">
 										<span class="card-title"><%:=(API.Common.formatContent(photo.name, 'HTML', false, false, false, false, true) || API.Utils.formatDate(photo.uploadtime || photo.uploadTime))%></span>
@@ -119,7 +153,7 @@
 									<%const photoHref = API.Common.getMediaPath(photo.custom_url, photo.custom_filepath, true) || '../Common/images/loading.gif'%>
 									<%const photoSrc = API.Common.getMediaPath(photo.custom_url || photo.pre, photo.custom_pre_filepath || photo.custom_filepath, true) || '../Common/images/loading.gif'%>
 									<a class="lightbox" href="<%:=photoHref%>" data-sub-html="#<%:=photo.uid%>">
-										<img class="lazyload loading card-img" height="225px" src="<%:=photoSrc%>" data-src="<%:=photoSrc%>">
+										<img class="lazyload loading card-img photo-thumb" src="<%:=photoSrc%>" data-src="<%:=photoSrc%>">
 									</a>
 									<div class="card-body text-truncate" data-toggle="tooltip" data-html="true" title="<%:=API.Photos.getPhotoBasicInfoTooltip(photo)%>">
 										<span class="card-title"><%:=(API.Common.formatContent(photo.name, 'HTML', false, false, false, false, true) || API.Utils.formatDate(photo.uploadtime || photo.uploadTime))%></span>
