@@ -32,29 +32,289 @@
 	<script type="text/javascript" src="../Common/json/config.js"></script>
 
 	<script type="text/javascript" src="../Albums/json/albums.js"></script>
+	<style>
+		/* 相册详情页样式 - 与Albums/index.html统一 */
+		body {
+			background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+			min-height: 100vh;
+		}
+		
+		/* 主容器 - 与albums-container完全一致，增加左边距避免被遮挡 */
+		.photos-container {
+			padding: 80px 30px 40px 30px;
+			margin-left: 220px;
+			max-width: none !important;
+		}
+		
+		/* 移除tz-gallery所有默认边距 */
+		.photos-container .tz-gallery,
+		.photos-container .photos-toolbar,
+		.photos-container .photos-grid {
+			padding-left: 0;
+			padding-right: 0;
+			margin-left: 0;
+			margin-right: 0;
+		}
+		
+		@media (max-width: 1000px) {
+			.photos-container {
+				margin-left: 0;
+				padding: 70px 15px 30px 15px;
+			}
+		}
+		
+		/* 相册标题样式 - h2用于侧边栏 */
+		h2.photos-title {
+			margin: 0 0 24px 0;
+			font-size: inherit;
+			font-weight: normal;
+		}
+		
+		.photos-header {
+			display: flex;
+			align-items: center;
+			padding: 16px 24px;
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			border-radius: 16px;
+			box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+		}
+		
+		.photos-icon {
+			width: 48px;
+			height: 48px;
+			background: rgba(255, 255, 255, 0.2);
+			border-radius: 12px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			margin-right: 16px;
+			flex-shrink: 0;
+		}
+		
+		.photos-icon i {
+			font-size: 24px;
+			color: #fff;
+		}
+		
+		.photos-title-text {
+			color: #fff;
+			font-size: 22px;
+			font-weight: 700;
+			text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+			flex: 1;
+		}
+		
+		.photos-count {
+			background: rgba(255, 255, 255, 0.25);
+			color: #fff;
+			font-size: 14px;
+			font-weight: 600;
+			padding: 6px 16px;
+			border-radius: 20px;
+			white-space: nowrap;
+			flex-shrink: 0;
+		}
+		
+		/* 照片网格 */
+		.photos-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+			gap: 20px;
+		}
+		
+		/* 工具栏样式美化 */
+		.photos-toolbar {
+			background: #fff;
+			padding: 16px 24px;
+			border-radius: 16px;
+			box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+			margin-bottom: 24px;
+			border: 1px solid rgba(102, 126, 234, 0.1);
+		}
+		
+		.photos-toolbar .album-stats {
+			display: flex;
+			gap: 12px;
+			align-items: center;
+		}
+		
+		.photos-toolbar .album-stats .badge {
+			font-size: 13px;
+			font-weight: 500;
+			padding: 8px 16px;
+			border-radius: 20px;
+			display: inline-flex;
+			align-items: center;
+			gap: 6px;
+		}
+		
+		.photos-toolbar .album-stats .badge-info {
+			background: linear-gradient(135deg, #11998e, #38ef7d);
+			border: none;
+		}
+		
+		.photos-toolbar .album-stats .badge-secondary {
+			background: linear-gradient(135deg, #f093fb, #f5576c);
+			border: none;
+		}
+		
+		.photos-toolbar .layout-controls {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
+		
+		.photos-toolbar .btn-group .btn {
+			border-radius: 8px !important;
+			padding: 6px 14px;
+			font-size: 13px;
+			border-color: #e0e0e0;
+			color: #666;
+			transition: all 0.2s ease;
+		}
+		
+		.photos-toolbar .btn-group .btn:hover {
+			background: linear-gradient(135deg, #667eea, #764ba2);
+			border-color: transparent;
+			color: #fff;
+		}
+		
+		.photos-toolbar .btn-group .btn.active {
+			background: linear-gradient(135deg, #667eea, #764ba2);
+			border-color: transparent;
+			color: #fff;
+		}
+		
+		.photos-toolbar .btn-group .btn i {
+			margin-right: 4px;
+		}
+		
+		/* 下拉按钮样式 - 高优先级覆盖 */
+		.photos-toolbar .btn-group .btn.dropdown-toggle,
+		.photos-toolbar .dropdown-toggle {
+			background: #fff !important;
+			border: 1px solid #e0e0e0 !important;
+			color: #666 !important;
+		}
+		
+		.photos-toolbar .btn-group .btn.dropdown-toggle:hover,
+		.photos-toolbar .btn-group .btn.dropdown-toggle:focus,
+		.photos-toolbar .dropdown-toggle:hover,
+		.photos-toolbar .dropdown-toggle:focus {
+			background: linear-gradient(135deg, #667eea, #764ba2) !important;
+			border-color: transparent !important;
+			color: #fff !important;
+		}
+		
+		.photos-toolbar .dropdown-menu {
+			border-radius: 12px;
+			border: none;
+			box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+			padding: 8px 0;
+			min-width: 140px;
+		}
+		
+		.photos-toolbar .dropdown-item {
+			padding: 10px 16px;
+			font-size: 13px;
+			color: #555;
+			transition: all 0.2s ease;
+		}
+		
+		.photos-toolbar .dropdown-item:hover {
+			background: linear-gradient(135deg, #667eea, #764ba2);
+			color: #fff;
+		}
+		
+		.photos-toolbar .dropdown-item.active {
+			background: linear-gradient(135deg, #667eea, #764ba2);
+			color: #fff;
+		}
+		
+		.photos-toolbar .dropdown-item i {
+			margin-right: 8px;
+			width: 16px;
+		}
+		
+		/* 响应式 */
+		@media (max-width: 768px) {
+			.photos-toolbar {
+				padding: 12px 16px;
+			}
+			
+			.photos-toolbar .d-flex {
+				flex-direction: column;
+				gap: 12px;
+			}
+			
+			.photos-toolbar .album-stats {
+				justify-content: center;
+			}
+			
+			.photos-toolbar .layout-controls {
+				justify-content: center;
+				flex-wrap: wrap;
+			}
+			
+			.photos-header {
+				padding: 12px 16px;
+				border-radius: 12px;
+			}
+			
+			.photos-icon {
+				width: 40px;
+				height: 40px;
+			}
+			
+			.photos-title-text {
+				font-size: 18px;
+			}
+			
+			.photos-grid {
+				grid-template-columns: repeat(2, 1fr);
+				gap: 12px;
+			}
+		}
+	</style>
 </head>
 
 <body>
 	<header>
-		<nav class="navbar navbar-expand-lg navbar-dark fixed-top bg-dark">
-			<a class="navbar-brand" target="_blank" href="https://github.com/ShunCai/QZoneExport">QQ空间导出助手</a>
+		<nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.95)); backdrop-filter: blur(10px);">
+			<a class="navbar-brand" target="_blank" href="https://github.com/ShunCai/QZoneExport">
+				<i class="fa fa-cloud-download mr-2"></i>QQ空间导出助手
+			</a>
 			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
 			</button>
 			<div class="collapse navbar-collapse" id="navbarSupportedContent">
 				<nav aria-label="breadcrumb">
-					<ol class="breadcrumb bg-dark">
-						<li class="breadcrumb-item"><a href="../index.html">个人中心</a></li>
-						<li class="breadcrumb-item"><a href="index.html">相册</a></li>
-						<li class="breadcrumb-item active" aria-current="page">相册名称</li>
+					<ol class="breadcrumb" style="background: transparent; margin-bottom: 0;">
+						<li class="breadcrumb-item"><a href="../index.html" style="color: rgba(255,255,255,0.85);"><i class="fa fa-home mr-1"></i>个人中心</a></li>
+						<li class="breadcrumb-item"><a href="index.html" style="color: rgba(255,255,255,0.85);">相册</a></li>
+						<li class="breadcrumb-item active" aria-current="page" style="color: rgba(255,255,255,0.95);">相册名称</li>
 					</ol>
 				</nav>
 			</div>
 		</nav>
 	</header>
 	<main role="main">
-		<div class="albums py-5 bg-light" style="padding-top: 4rem!important;">
-			<div class="container-fluid tz-gallery">
+		<div class="photos-container" id="photos_html">
+			<!-- 分类标题 - h1用于侧边栏一级 -->
+			<h1 class="sidebar-h1" data-sidebar='<%:=album.className || "相册"%><span class="badge badge-primary badge-pill itemSize">1</span>' style="display:none;"></h1>
+			
+			<!-- 相册标题 - h2用于侧边栏二级（不带数量，与index.html一致） -->
+			<h2 class="photos-title sidebar-h2" data-sidebar='<%:=album.name%>'>
+				<div class="photos-header">
+					<div class="photos-icon">
+						<i class="fa fa-folder-open"></i>
+					</div>
+					<span class="photos-title-text"><%:=album.name%></span>
+					<span class="photos-count"><%:=album.photoList ? album.photoList.length : 0%> 张相片</span>
+				</div>
+			</h2>
+			
+			<div class="tz-gallery">
 				<!-- 相册工具栏 -->
 				<div class="photos-toolbar mb-4">
 					<div class="d-flex justify-content-between align-items-center flex-wrap">
@@ -88,7 +348,7 @@
 					</div>
 				</div>
 				
-				<div id="lightgallery" class="photos layout-timeline">
+				<div id="lightgallery" class="photos layout-timeline photos-grid">
 					<script id="photos_tpl" type="text/html">
 						<%/* 遍历相片 */%>
 						<%if(album && album.photoList && album.photoList.length > 0){%>
@@ -216,6 +476,7 @@
 		window.albumId ='<%:=(albumId)%>';
 	</script>
 	<script type="text/javascript" src="../Common/js/common.js"></script>
+	<script type="text/javascript" src="../Common/js/sidebar.js"></script>
 	<script type="text/javascript" src="js/photos.js"></script>
 </body>
 
