@@ -86,8 +86,8 @@
 										<small class="card-title"><%:=API.Common.formatContent(video.name || video.desc || API.Utils.formatDate(video.uploadTime), 'HTML', false, false, false, false, true)%></small>
 									</div>
 									<div class="card-footer p-1 d-flex justify-content-around bg-dark">
-										<span class="text-light fa fa-thumbs-o-up cursor viewlikes small" title="查看点赞" data-field="uniKey" data-target="<%:=video.uniKey%>"><%:=video.likes ? video.likes.length : 0%></span>
-										<span class="text-light fa fa-comments-o cursor viewcomments small" title="查看评论" data-field="uniKey" data-target="<%:=video.uniKey%>"><%:=video.comments ? video.comments.length : 0%></span>
+										<span class="text-light fa fa-heart cursor viewlikes small" title="查看点赞" data-field="uniKey" data-target="<%:=video.uniKey%>"><%:=video.likes ? video.likes.length : 0%></span>
+										<span class="text-light fa fa-comment cursor viewcomments small" title="查看评论" data-field="uniKey" data-target="<%:=video.uniKey%>"><%:=video.comments ? video.comments.length : 0%></span>
 									</div>
 								</div>
 							</div>

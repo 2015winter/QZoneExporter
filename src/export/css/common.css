@@ -509,6 +509,19 @@ body {
     background-image: linear-gradient(rgba(255, 255, 255, 0), rgba(26, 26, 26, .4));
 }
 
+/* 统计图标颜色美化 - 点赞红色、评论青色、浏览黄色 */
+.pic-num-wrap .fa-heart::before {
+    color: #ff6b6b !important;
+}
+
+.pic-num-wrap .fa-comment::before {
+    color: #4ecdc4 !important;
+}
+
+.pic-num-wrap .fa-eye::before {
+    color: #feca57 !important;
+}
+
 .pic-num {
     display: inline-block;
     margin: 20px 5px 0 0;

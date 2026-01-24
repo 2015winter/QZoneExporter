@@ -274,6 +274,14 @@
 				grid-template-columns: repeat(2, 1fr);
 				gap: 12px;
 			}
+			
+			.photos-grid .photo-item .pic-num-wrap {
+				padding: 16px 8px 8px !important;
+			}
+			
+			.photos-grid .photo-item .pic-num-wrap span.cursor {
+				font-size: 12px;
+			}
 		}
 	</style>
 </head>
@@ -401,14 +409,14 @@
 										<span class="card-title"><%:=(API.Common.formatContent(photo.name, 'HTML', false, false, false, false, true) || API.Utils.formatDate(photo.uploadtime || photo.uploadTime))%></span>
 									</div>
 									<div class="pic-num-wrap d-flex justify-content-around">
-										<div class="align-self-end">
-											<span class="text-light fa fa-thumbs-o-up cursor viewlikes" title="查看点赞" data-field="uniKey" data-target="<%:=photo.uniKey%>"><%:=photo.likes ? photo.likes.length : 0%></span>
-										</div>
-										<div class="align-self-end">
-											<span class="text-light fa fa-comments-o cursor viewcomments" title="查看评论" data-field="uniKey" data-target="<%:=photo.uniKey%>"><%:=photo.comments ? photo.comments.length : 0%></span>
-										</div>
+									<div class="align-self-end">
+										<span class="text-light fa fa-heart cursor viewlikes" title="查看点赞" data-field="uniKey" data-target="<%:=photo.uniKey%>"><%:=photo.likes ? photo.likes.length : 0%></span>
 									</div>
-								<%}else{%>
+									<div class="align-self-end">
+										<span class="text-light fa fa-comment cursor viewcomments" title="查看评论" data-field="uniKey" data-target="<%:=photo.uniKey%>"><%:=photo.comments ? photo.comments.length : 0%></span>
+									</div>
+								</div>
+							<%}else{%>
 									<%/* 图片类型处理 */%>
 									<%const photoHref = API.Common.getMediaPath(photo.custom_url, photo.custom_filepath, true) || '../Common/images/loading.gif'%>
 									<%const photoSrc = API.Common.getMediaPath(photo.custom_url || photo.pre, photo.custom_pre_filepath || photo.custom_filepath, true) || '../Common/images/loading.gif'%>
@@ -419,15 +427,15 @@
 										<span class="card-title"><%:=(API.Common.formatContent(photo.name, 'HTML', false, false, false, false, true) || API.Utils.formatDate(photo.uploadtime || photo.uploadTime))%></span>
 									</div>
 									<div class="pic-num-wrap d-flex justify-content-around">
-										<div class="align-self-end">
-											<span class="text-light fa fa-thumbs-o-up cursor viewlikes" title="查看点赞" data-field="uniKey" data-target="<%:=photo.uniKey%>"><%:=photo.likes ? photo.likes.length : 0%></span>
-										</div>
-										<div class="align-self-end">
-											<span class="text-light fa fa-comments-o cursor viewcomments" title="查看评论" data-field="uniKey" data-target="<%:=photo.uniKey%>"><%:=photo.comments ? photo.comments.length : 0%></span>
-										</div>
+									<div class="align-self-end">
+										<span class="text-light fa fa-heart cursor viewlikes" title="查看点赞" data-field="uniKey" data-target="<%:=photo.uniKey%>"><%:=photo.likes ? photo.likes.length : 0%></span>
 									</div>
-								<%}%>
+									<div class="align-self-end">
+										<span class="text-light fa fa-comment cursor viewcomments" title="查看评论" data-field="uniKey" data-target="<%:=photo.uniKey%>"><%:=photo.comments ? photo.comments.length : 0%></span>
+									</div>
 								</div>
+							<%}%>
+							</div>
 							</div>
 						<%}%>
 						<%}else{%>
