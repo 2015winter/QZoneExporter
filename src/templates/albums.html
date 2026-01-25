@@ -35,13 +35,19 @@
 		/* 主容器 - 用fluid撑满，考虑左侧栏 */
 		.albums-container {
 			padding: 80px 30px 40px 30px;
-			margin-left: 210px; /* 左侧栏宽度 */
 			max-width: none !important;
+			transition: margin-left 0.1s ease;
+		}
+		
+		@media (min-width: 1001px) {
+			.albums-container {
+				margin-left: 220px; /* 左侧栏宽度，会被JS动态调整 */
+			}
 		}
 		
 		@media (max-width: 1000px) {
 			.albums-container {
-				margin-left: 0;
+				margin-left: 0 !important;
 				padding: 70px 15px 30px 15px;
 			}
 		}

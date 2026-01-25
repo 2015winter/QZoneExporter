@@ -42,8 +42,14 @@
 		/* 主容器 - 与albums-container完全一致，增加左边距避免被遮挡 */
 		.photos-container {
 			padding: 80px 30px 40px 30px;
-			margin-left: 220px;
 			max-width: none !important;
+			transition: margin-left 0.1s ease;
+		}
+		
+		@media (min-width: 1001px) {
+			.photos-container {
+				margin-left: 220px; /* 会被JS动态调整 */
+			}
 		}
 		
 		/* 移除tz-gallery所有默认边距 */
@@ -58,7 +64,7 @@
 		
 		@media (max-width: 1000px) {
 			.photos-container {
-				margin-left: 0;
+				margin-left: 0 !important;
 				padding: 70px 15px 30px 15px;
 			}
 		}

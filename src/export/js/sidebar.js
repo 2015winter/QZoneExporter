@@ -83,7 +83,8 @@ const initSidebar = function() {
 const initSidebarResize = function() {
     const $sidebar = $('#BlogAnchor');
     const $handle = $sidebar.find('.resize-handle');
-    const $content = $('#messages_html, #albums_html, #boards_html, #favorites_html, #shares_html, #visitors_html, #videos_html, #blogs-type-list, #friends-type-list');
+    // 增加容器类选择器，确保能匹配到各种页面的主内容区
+    const $content = $('#messages_html, #albums_html, #boards_html, #favorites_html, #shares_html, #visitors_html, #videos_html, #blogs-type-list, #friends-type-list, .albums-container, .photos-container, .videos-container');
     
     let isResizing = false;
     let startX, startWidth;
