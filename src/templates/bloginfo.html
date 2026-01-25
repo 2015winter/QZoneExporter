@@ -4,7 +4,7 @@
 <head>
 	<link rel="icon" href="../Common/images/favicon.ico">
 	<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-	<title>QQ空间备份-日志标题</title>
+	<title>QQ空间备份-日志详情</title>
 	<link rel="stylesheet" href="../Common/vendor/css/font-awesome.min.css">
 	<link rel="stylesheet" href="../Common/vendor/css/bootstrap.min.css">
 	<link rel="stylesheet" href="../Common/vendor/css/lightgallery.min.css">
@@ -23,139 +23,626 @@
 	<script src="../Common/vendor/js/lg-comment.min.js"></script>
 	<script src="../Common/vendor/js/lg-autoplay.min.js"></script>
 	<script src="../Common/vendor/js/clicklove.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/template_js@2.2.1/dist/index.aio.min.js" integrity="sha256-gnK+GsIXEBgu/mJouMDtUxXvXM3M0jzxNYmjnlsifgY=" crossorigin="anonymous"></script>
+	<script src="../Common/vendor/js/index.aio.min.js"></script>
 	
 	<script type="text/javascript" src="../Common/json/config.js"></script>
 	<script type="text/javascript" src="json/blogs.js"></script>
 	<script type="text/javascript" src="../Common/js/common.js"></script>
 	<script type="text/javascript" src="js/bloginfo.js"></script>
+	
+	<style>
+		/* 日志详情页专属样式 - 与首页风格一致 */
+		body.bloginfo-page {
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+			min-height: 100vh;
+			padding-top: 70px;
+			padding-bottom: 80px;
+		}
+		
+		/* 导航栏样式 */
+		.bloginfo-navbar {
+			background: linear-gradient(135deg, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.95)) !important;
+			backdrop-filter: blur(10px);
+		}
+		
+		.bloginfo-breadcrumb {
+			background: transparent !important;
+		}
+		
+		.bloginfo-breadcrumb .breadcrumb-item a {
+			color: rgba(255, 255, 255, 0.85);
+			transition: color 0.3s ease;
+		}
+		
+		.bloginfo-breadcrumb .breadcrumb-item a:hover {
+			color: #fff;
+			text-decoration: none;
+		}
+		
+		.bloginfo-breadcrumb .breadcrumb-item.active {
+			color: rgba(255, 255, 255, 0.9);
+		}
+		
+		.bloginfo-breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+			color: rgba(255, 255, 255, 0.5);
+		}
+		
+		/* 主卡片容器 */
+		.bloginfo-main-card {
+			background: rgba(255, 255, 255, 0.95);
+			backdrop-filter: blur(20px);
+			border-radius: 24px;
+			box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+			padding: 48px;
+			margin-top: 20px;
+			animation: fadeInUp 0.6s ease-out;
+			max-width: 920px;
+			margin-left: auto;
+			margin-right: auto;
+		}
+		
+		@keyframes fadeInUp {
+			from {
+				opacity: 0;
+				transform: translateY(30px);
+			}
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+		
+		/* 日志头部区域 */
+		.blog-header {
+			text-align: center;
+			margin-bottom: 40px;
+			padding-bottom: 30px;
+			border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+		}
+		
+		.blog-title-main {
+			font-size: 28px;
+			font-weight: 700;
+			background: linear-gradient(135deg, #667eea, #764ba2);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			margin-bottom: 20px;
+			line-height: 1.4;
+		}
+		
+		.blog-meta-info {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			flex-wrap: wrap;
+			gap: 20px;
+			color: #718096;
+			font-size: 14px;
+		}
+		
+		.blog-meta-item {
+			display: flex;
+			align-items: center;
+			gap: 6px;
+		}
+		
+		.blog-meta-item i {
+			color: #667eea;
+		}
+		
+		.blog-label-badge {
+			display: inline-block;
+			padding: 4px 12px;
+			border-radius: 20px;
+			font-size: 12px;
+			font-weight: 600;
+			color: #fff;
+		}
+		
+		.blog-label-badge.original {
+			background: linear-gradient(135deg, #11998e, #38ef7d);
+		}
+		
+		.blog-label-badge.repost {
+			background: linear-gradient(135deg, #f093fb, #f5576c);
+		}
+		
+		/* 日志内容区域 */
+		.blog-content-wrapper {
+			padding: 20px 0;
+			line-height: 1.8;
+			font-size: 16px;
+			color: #2d3748;
+		}
+		
+		.blog-content-wrapper img {
+			max-width: 100%;
+			height: auto;
+			border-radius: 12px;
+			margin: 16px 0;
+			box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+		}
+		
+		.blog-content-wrapper p {
+			margin-bottom: 16px;
+		}
+		
+		.blog-content-wrapper a {
+			color: #667eea;
+			text-decoration: none;
+			transition: color 0.3s ease;
+		}
+		
+		.blog-content-wrapper a:hover {
+			color: #764ba2;
+			text-decoration: underline;
+		}
+		
+		/* 评论区域 */
+		.comments-section {
+			margin-top: 40px;
+			padding-top: 30px;
+			border-top: 1px solid rgba(0, 0, 0, 0.08);
+		}
+		
+		.comments-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 24px;
+		}
+		
+		.comments-title {
+			font-size: 20px;
+			font-weight: 600;
+			color: #2d3748;
+			display: flex;
+			align-items: center;
+			gap: 10px;
+		}
+		
+		.comments-count {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			min-width: 28px;
+			height: 28px;
+			padding: 0 10px;
+			background: linear-gradient(135deg, #667eea, #764ba2);
+			border-radius: 14px;
+			font-size: 14px;
+			font-weight: 600;
+			color: #fff;
+		}
+		
+		.blog-stats-bar {
+			display: flex;
+			gap: 20px;
+		}
+		
+		.stat-item {
+			display: flex;
+			align-items: center;
+			gap: 6px;
+			padding: 6px 14px;
+			background: linear-gradient(145deg, #f8fafc, #fff);
+			border-radius: 20px;
+			border: 1px solid rgba(102, 126, 234, 0.15);
+			font-size: 13px;
+			color: #4a5568;
+			cursor: pointer;
+			transition: all 0.3s ease;
+		}
+		
+		.stat-item:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+		}
+		
+		.stat-item i.fa-eye {
+			color: #feca57;
+		}
+		
+		.stat-item i.fa-thumbs-up {
+			color: #ff6b6b;
+		}
+		
+		/* 单条评论 */
+		.comment-card {
+			background: linear-gradient(145deg, #f8fafc, #fff);
+			border-radius: 16px;
+			padding: 20px;
+			margin-bottom: 16px;
+			border: 1px solid rgba(0, 0, 0, 0.05);
+			transition: all 0.3s ease;
+		}
+		
+		.comment-card:hover {
+			box-shadow: 0 6px 20px rgba(102, 126, 234, 0.1);
+		}
+		
+		.comment-header {
+			display: flex;
+			align-items: flex-start;
+			margin-bottom: 12px;
+		}
+		
+		.comment-avatar {
+			width: 48px;
+			height: 48px;
+			flex-shrink: 0;
+		}
+		
+		.comment-avatar img {
+			width: 100%;
+			height: 100%;
+			border-radius: 50%;
+			object-fit: cover;
+			border: 2px solid rgba(102, 126, 234, 0.2);
+		}
+		
+		.comment-info {
+			margin-left: 14px;
+			flex: 1;
+		}
+		
+		.comment-author {
+			font-weight: 600;
+			color: #2d3748;
+			text-decoration: none;
+			transition: color 0.3s ease;
+		}
+		
+		.comment-author:hover {
+			color: #667eea;
+		}
+		
+		.comment-floor {
+			display: inline-block;
+			padding: 2px 8px;
+			background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+			border-radius: 10px;
+			font-size: 11px;
+			font-weight: 600;
+			color: #667eea;
+			margin-left: 8px;
+		}
+		
+		.comment-private {
+			display: inline-block;
+			padding: 2px 8px;
+			background: linear-gradient(135deg, #feca57, #f093fb);
+			border-radius: 10px;
+			font-size: 11px;
+			font-weight: 600;
+			color: #fff;
+			margin-left: 8px;
+		}
+		
+		.comment-time {
+			font-size: 12px;
+			color: #a0aec0;
+			margin-top: 4px;
+		}
+		
+		.comment-body {
+			color: #4a5568;
+			line-height: 1.7;
+			padding-left: 62px;
+		}
+		
+		.comment-body p {
+			margin-bottom: 8px;
+		}
+		
+		/* 评论图片 */
+		.comment-lightgallery {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 10px;
+			margin-top: 12px;
+		}
+		
+		.comment-img-lightbox {
+			display: block;
+		}
+		
+		.comment-img {
+			max-width: 150px;
+			max-height: 150px;
+			border-radius: 8px;
+			cursor: pointer;
+			transition: all 0.3s ease;
+		}
+		
+		.comment-img:hover {
+			transform: scale(1.05);
+			box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+		}
+		
+		/* 回复列表 */
+		.reply-list {
+			margin-top: 16px;
+			padding-left: 62px;
+		}
+		
+		.reply-card {
+			background: rgba(102, 126, 234, 0.05);
+			border-radius: 12px;
+			padding: 16px;
+			margin-bottom: 10px;
+			border-left: 3px solid rgba(102, 126, 234, 0.3);
+		}
+		
+		.reply-header {
+			display: flex;
+			align-items: center;
+			margin-bottom: 10px;
+		}
+		
+		.reply-avatar {
+			width: 36px;
+			height: 36px;
+			flex-shrink: 0;
+		}
+		
+		.reply-avatar img {
+			width: 100%;
+			height: 100%;
+			border-radius: 50%;
+			object-fit: cover;
+		}
+		
+		.reply-info {
+			margin-left: 10px;
+		}
+		
+		.reply-body {
+			padding-left: 46px;
+			color: #4a5568;
+			font-size: 14px;
+		}
+		
+		/* 底部 */
+		.bloginfo-footer {
+			background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.9));
+			backdrop-filter: blur(10px);
+			position: fixed;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			z-index: 1000;
+		}
+		
+		.footer-text {
+			font-size: 14px;
+			letter-spacing: 1px;
+		}
+		
+		/* 空评论状态 */
+		.no-comments {
+			text-align: center;
+			padding: 40px 20px;
+			color: #a0aec0;
+		}
+		
+		.no-comments i {
+			font-size: 48px;
+			margin-bottom: 16px;
+			opacity: 0.5;
+		}
+		
+		/* 响应式 */
+		@media (max-width: 768px) {
+			.bloginfo-main-card {
+				padding: 24px 16px;
+				margin: 10px;
+				border-radius: 20px;
+			}
+			
+			.blog-title-main {
+				font-size: 22px;
+			}
+			
+			.blog-meta-info {
+				flex-direction: column;
+				gap: 12px;
+			}
+			
+			.comments-header {
+				flex-direction: column;
+				gap: 16px;
+				align-items: flex-start;
+			}
+			
+			.blog-stats-bar {
+				width: 100%;
+				justify-content: space-around;
+			}
+			
+			.comment-body,
+			.reply-list {
+				padding-left: 0;
+				margin-top: 12px;
+			}
+			
+			.reply-body {
+				padding-left: 0;
+			}
+		}
+	</style>
 </head>
 
-<body>
+<body class="bloginfo-page">
 	<header>
-		<nav class="navbar navbar-expand-lg navbar-dark fixed-top bg-dark">
-			<a class="navbar-brand" target="_blank" href="https://github.com/ShunCai/QZoneExport">QQ空间导出助手</a>
+		<nav class="navbar navbar-expand-lg navbar-dark fixed-top bloginfo-navbar">
+			<a class="navbar-brand" target="_blank" href="https://github.com/ShunCai/QZoneExport">
+				<i class="fa fa-cloud-download mr-2"></i>QQ空间导出助手
+			</a>
 			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
 			</button>
 			<div class="collapse navbar-collapse" id="navbarSupportedContent">
 				<nav aria-label="breadcrumb">
-					<ol class="breadcrumb bg-dark">
-						<li class="breadcrumb-item"><a href="../index.html">个人中心</a></li>
-						<li class="breadcrumb-item"><a href="index.html">日志</a></li>
+					<ol class="breadcrumb bloginfo-breadcrumb">
+						<li class="breadcrumb-item"><a href="../index.html"><i class="fa fa-home mr-1"></i>个人中心</a></li>
+						<li class="breadcrumb-item"><a href="index.html"><i class="fa fa-book mr-1"></i>日志</a></li>
 						<li class="breadcrumb-item active" aria-current="page">日志详情</li>
 					</ol>
 				</nav>
 			</div>
 		</nav>
 	</header>
-	<main role="main">
-		<div class="container py-5 mt-3" style="max-width: 920px;">
-			<div id="blog_info" class="text-center">
-				<h2 id="blog_title" class="text-warning">日志标题</h2>
-				<div>
-					<span id="blog_time" class="text-muted">发布时间</span>
+	
+	<main role="main" class="flex-shrink-0">
+		<div class="container">
+			<div class="bloginfo-main-card">
+				<!-- 日志头部 -->
+				<div class="blog-header">
+					<h1 id="blog_title" class="blog-title-main">日志标题</h1>
+					<div class="blog-meta-info">
+						<span class="blog-meta-item">
+							<i class="fa fa-clock-o"></i>
+							<span id="blog_time">发布时间</span>
+						</span>
+						<span class="blog-meta-item">
+							<i class="fa fa-folder-o"></i>
+							<span id="blog_category">分类</span>
+						</span>
+						<span id="blog_label" class="blog-label-badge original">原创</span>
+					</div>
 				</div>
-			</div>
-			<article id="blog_content" class="mt-3 p-2">
-				日志内容
-			</article>
-			<div id="comments_html">
-				<script id="comments_tpl" type="text/html">
-					<h5 class="mt-3">评论
-						<span class="badge badge-primary badge-pill"><%:=blog.comments && blog.comments.length || 0%></span>
-						<span class="text-primary p-1 float-right fa fa-thumbs-up mr-2 cursor viewlikes" title="查看点赞" data-field="blogid" data-target="<%:=blog.blogid%>"><%:=blog.likeTotal || 0 %></span>
-						<span class="text-primary p-1 float-right fa fa-eye mr-2 cursor viewVisitors" title="最近访问" data-field="blogid" data-target="<%:=blog.blogid%>"><%:=blog.custom_visitor && blog.custom_visitor.viewCount || 0 %></span>
-					</h5>
-					<!-- 日志评论 -->
-					<%if(blog.comments){%>
-						<%for (let index = 0; index < blog.comments.length; index++) {%>
-							<%const comment = blog.comments[index];%>
-							<hr>
-							<div class="comments mt-2">
-								<div class="comment">
-									<div class="d-flex justify-content-start ">
+				
+				<!-- 日志内容 -->
+				<article id="blog_content" class="blog-content-wrapper">
+					日志内容加载中...
+				</article>
+				
+				<!-- 评论区域 -->
+				<div id="comments_html" class="comments-section">
+					<script id="comments_tpl" type="text/html">
+						<div class="comments-header">
+							<div class="comments-title">
+								<i class="fa fa-comments"></i>
+								评论
+								<span class="comments-count"><%:=blog.comments && blog.comments.length || 0%></span>
+							</div>
+							<div class="blog-stats-bar">
+								<span class="stat-item viewVisitors" title="最近访问" data-field="blogid" data-target="<%:=blog.blogid%>">
+									<i class="fa fa-eye"></i>
+									<span><%:=blog.custom_visitor && blog.custom_visitor.viewCount || 0 %></span>
+								</span>
+								<span class="stat-item viewlikes" title="查看点赞" data-field="blogid" data-target="<%:=blog.blogid%>">
+									<i class="fa fa-thumbs-up"></i>
+									<span><%:=blog.likeTotal || 0 %></span>
+								</span>
+							</div>
+						</div>
+						
+						<%if(blog.comments && blog.comments.length > 0){%>
+							<%for (let index = 0; index < blog.comments.length; index++) {%>
+								<%const comment = blog.comments[index];%>
+								<div class="comment-card">
+									<div class="comment-header">
 										<div class="comment-avatar">
-											<a class="avatar p-0 m-0" target="_blank" href="<%:=API.Common.getUserUrl(API.Common.getCommentUser(comment).uin)%>">
-												<img class="lazyload loading w-100 h-100 border rounded-circle" src="<%:=API.Common.getUserLogoLocalUrl(API.Common.getCommentUser(comment).uin, true)%>" >
+											<a target="_blank" href="<%:=API.Common.getUserUrl(API.Common.getCommentUser(comment).uin)%>">
+												<img src="<%:=API.Common.getUserLogoLocalUrl(API.Common.getCommentUser(comment).uin, true)%>" alt="avatar">
 											</a>
 										</div>
-										<div class="comment-infos ml-2">
-											<a target="_blank" href="<%:=API.Common.getUserUrl(API.Common.getCommentUser(comment).uin)%>">
-												<span><%:=API.Common.formatContent(API.Common.getCommentUser(comment).name, 'HTML', false, false, false, false, true)%></span>
-											</a>
-											<%if(comment.private){%>
-												<span class="text-warning"> 私密评论 </span>
-											<%}%>
-											<span class="border-warning border rounded text-warning small p-1" title="当前楼层">#<%:=index + 1 %></span>
-											<div class="text-muted small"><%:=API.Utils.formatDate(comment.postTime || comment.create_time)%></div>
+										<div class="comment-info">
+											<div>
+												<a class="comment-author" target="_blank" href="<%:=API.Common.getUserUrl(API.Common.getCommentUser(comment).uin)%>">
+													<%:=API.Common.formatContent(API.Common.getCommentUser(comment).name, 'HTML', false, false, false, false, true)%>
+												</a>
+												<span class="comment-floor">#<%:=index + 1 %></span>
+												<%if(comment.private){%>
+													<span class="comment-private">私密评论</span>
+												<%}%>
+											</div>
+											<div class="comment-time">
+												<i class="fa fa-clock-o mr-1"></i><%:=API.Utils.formatDate(comment.postTime || comment.create_time)%>
+											</div>
 										</div>
 									</div>
-									<div class="comment-text">
-										<div class="messageText">
-											<p><%:=API.Common.formatContent(comment.content, 'HTML', false, false, false, false, true)%></p>
-											<%if(comment.pic){%>
-												<div class="comment-lightgallery">
-													<%for (let cmIdx = 0; cmIdx < comment.pic.length; cmIdx++) {%>
-														<%const image = comment.pic[cmIdx];%>
-														<a class="comment-img-lightbox" data-idx="<%:=cmIdx%>" data-sub-html="<%:=API.Common.formatContent(comment.content, 'HTML', false, false, false, false, true)%>"
-															data-src="<%:=(image.custom_filepath || image.custom_url || image.o_url || image.hd_url || image.b_url || image.s_url || image.url)%>">
-															<img src="<%:=(image.custom_filepath || image.custom_url || image.o_url || image.hd_url || image.b_url || image.s_url || image.url)%>" class="comment-img img-thumbnail">
-														</a>
-													<%}%>
-												</div>
-											<%}%>
-										</div>
-										<% const replies = comment.replies || comment.list_3 || []%>
-										<%if(replies.length > 0){%>
+									<div class="comment-body">
+										<p><%:=API.Common.formatContent(comment.content, 'HTML', false, false, false, false, true)%></p>
+										<%if(comment.pic){%>
+											<div class="comment-lightgallery">
+												<%for (let cmIdx = 0; cmIdx < comment.pic.length; cmIdx++) {%>
+													<%const image = comment.pic[cmIdx];%>
+													<a class="comment-img-lightbox" data-idx="<%:=cmIdx%>" data-sub-html="<%:=API.Common.formatContent(comment.content, 'HTML', false, false, false, false, true)%>"
+														data-src="<%:=(image.custom_filepath || image.custom_url || image.o_url || image.hd_url || image.b_url || image.s_url || image.url)%>">
+														<img src="<%:=(image.custom_filepath || image.custom_url || image.o_url || image.hd_url || image.b_url || image.s_url || image.url)%>" class="comment-img">
+													</a>
+												<%}%>
+											</div>
+										<%}%>
+									</div>
+									<% const replies = comment.replies || comment.list_3 || []%>
+									<%if(replies.length > 0){%>
+										<div class="reply-list">
 											<%for(const reply of replies){%>
-												<div class="comments">
-													<div class="comment">
-														<div class="d-flex justify-content-start">
-															<div class="comment-avatar">
-																<a class="avatar p-0 m-0 " target="_blank" href="<%:=API.Common.getUserUrl(API.Common.getCommentUser(reply).uin)%>">
-																	<img class="lazyload loading w-100 h-100 border rounded-circle" src="<%:=API.Common.getUserLogoLocalUrl(API.Common.getCommentUser(reply).uin, true)%>">
-																</a>
-															</div>
-															<div class="comment-infos ml-2">
-																<a target="_blank" href="<%:=API.Common.getUserUrl(API.Common.getCommentUser(reply).uin)%>">
-																	<span><%:=API.Common.formatContent(API.Common.getCommentUser(reply).name, 'HTML', false, false, false, false, true)%></span>
+												<div class="reply-card">
+													<div class="reply-header">
+														<div class="reply-avatar">
+															<a target="_blank" href="<%:=API.Common.getUserUrl(API.Common.getCommentUser(reply).uin)%>">
+																<img src="<%:=API.Common.getUserLogoLocalUrl(API.Common.getCommentUser(reply).uin, true)%>" alt="avatar">
+															</a>
+														</div>
+														<div class="reply-info">
+															<div>
+																<a class="comment-author" target="_blank" href="<%:=API.Common.getUserUrl(API.Common.getCommentUser(reply).uin)%>">
+																	<%:=API.Common.formatContent(API.Common.getCommentUser(reply).name, 'HTML', false, false, false, false, true)%>
 																</a>
 																<%if(reply.private){%>
-																	<span class="text-warning"> 私密回复 </span>
+																	<span class="comment-private">私密回复</span>
 																<%}%>
-																<div class="text-muted small"><%:=API.Utils.formatDate(reply.postTime || reply.create_time)%></div>
 															</div>
-														</div>
-														<div class="comment-text">
-															<div class="messageText">
-																<p><%:=API.Common.formatContent(reply.content, 'HTML', false, false, false, false, true)%></p>
-																<%if(reply.pic){%>
-																	<div class="comment-lightgallery">
-																		<%for (let cmIdx = 0; cmIdx < reply.pic.length; cmIdx++) {%>
-																			<%const image = reply.pic[cmIdx];%>
-																			<a class="comment-img-lightbox" data-idx="<%:=cmIdx%>" data-sub-html="<%:=API.Common.formatContent(reply.content, 'HTML', false, false, false, false, true)%>" 
-																				data-src="<%:=(image.custom_filepath || image.custom_url || image.o_url || image.hd_url || image.b_url || image.s_url || image.url)%>">
-																				<img src="<%:=(image.custom_filepath || image.custom_url || image.o_url || image.hd_url || image.b_url || image.s_url || image.url)%>" class="comment-img img-thumbnail">
-																			</a>
-																		<%}%>
-																	</div>
-																<%}%>
+															<div class="comment-time">
+																<i class="fa fa-clock-o mr-1"></i><%:=API.Utils.formatDate(reply.postTime || reply.create_time)%>
 															</div>
 														</div>
 													</div>
+													<div class="reply-body">
+														<p><%:=API.Common.formatContent(reply.content, 'HTML', false, false, false, false, true)%></p>
+														<%if(reply.pic){%>
+															<div class="comment-lightgallery">
+																<%for (let cmIdx = 0; cmIdx < reply.pic.length; cmIdx++) {%>
+																	<%const image = reply.pic[cmIdx];%>
+																	<a class="comment-img-lightbox" data-idx="<%:=cmIdx%>" data-sub-html="<%:=API.Common.formatContent(reply.content, 'HTML', false, false, false, false, true)%>" 
+																		data-src="<%:=(image.custom_filepath || image.custom_url || image.o_url || image.hd_url || image.b_url || image.s_url || image.url)%>">
+																		<img src="<%:=(image.custom_filepath || image.custom_url || image.o_url || image.hd_url || image.b_url || image.s_url || image.url)%>" class="comment-img">
+																	</a>
+																<%}%>
+															</div>
+														<%}%>
+													</div>
 												</div>
 											<%}%>
-										<%}%>
-									</div>
+										</div>
+									<%}%>
 								</div>
+							<%}%>
+						<%}else{%>
+							<div class="no-comments">
+								<i class="fa fa-comment-o d-block"></i>
+								<p>暂无评论</p>
 							</div>
 						<%}%>
-					<%}%>
-				</script>
+					</script>
+				</div>
 			</div>
 		</div>
 	</main>
+	
+	<footer class="footer mt-auto py-3 bloginfo-footer">
+		<div class="container text-center">
+			<span class="text-white footer-text">
+				<i class="fa fa-leaf mr-2"></i>落叶随风，青春，稀纵即逝
+			</span>
+		</div>
+	</footer>
 </body>
 
 </html>
