@@ -1252,24 +1252,25 @@ pre {
     opacity: 1;
 }
 
-/* 左右导航按钮 - 放在弹窗内容区内部 */
+/* 左右导航按钮 - 相对于视频弹窗容器定位，保持位置稳定 */
 .video-nav-btn {
     position: absolute;
+    /* 垂直居中 */
     top: 50%;
     transform: translateY(-50%);
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border: none;
     border-radius: 50%;
     color: #fff;
     font-size: 16px;
     cursor: pointer;
-    z-index: 10;
+    z-index: 100;
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: all 0.3s ease;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
     box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
 
@@ -1278,12 +1279,16 @@ pre {
     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
 }
 
+.video-nav-btn:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
 .video-nav-prev {
-    left: 12px;
+    left: 15px;
 }
 
 .video-nav-next {
-    right: 12px;
+    right: 15px;
 }
 
 /* 视频弹窗容器 */
@@ -1457,14 +1462,15 @@ pre {
     width: 50px;
     height: 50px;
     font-size: 20px;
+    top: 50%;
 }
 
 .video-modal.fullscreen-mode .video-nav-prev {
-    left: 20px;
+    left: 30px;
 }
 
 .video-modal.fullscreen-mode .video-nav-next {
-    right: 20px;
+    right: 30px;
 }
 
 /* 响应式适配 */

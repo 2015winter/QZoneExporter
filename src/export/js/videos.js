@@ -58,9 +58,7 @@ $(function() {
                         </div>
                     </div>
                     <div class="video-modal-body">
-                        <button class="video-nav-btn video-nav-prev" title="上一个"><i class="fa fa-chevron-left"></i></button>
                         <video id="modalVideo" controls preload="metadata"></video>
-                        <button class="video-nav-btn video-nav-next" title="下一个"><i class="fa fa-chevron-right"></i></button>
                     </div>
                     <div class="video-modal-footer">
                         <div class="video-modal-info">
@@ -69,6 +67,8 @@ $(function() {
                             <span class="info-item info-comments"><i class="fa fa-comment"></i><span class="info-value">0</span></span>
                         </div>
                     </div>
+                    <button class="video-nav-btn video-nav-prev" title="上一个"><i class="fa fa-chevron-left"></i></button>
+                    <button class="video-nav-btn video-nav-next" title="下一个"><i class="fa fa-chevron-right"></i></button>
                 </div>
             </div>
         `;
