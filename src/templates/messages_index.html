@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+	<link rel="icon" href="../Common/images/favicon.ico"> 
+	<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<title>QQ空间备份-说说</title>
+	<link rel="stylesheet" href="../Common/vendor/css/font-awesome.min.css">
+	<link rel="stylesheet" href="../Common/vendor/css/bootstrap.min.css">
+	<link rel="stylesheet" href="../Common/vendor/css/lightgallery.min.css">
+	<link rel="stylesheet" href="../Common/vendor/css/lightgallery-bundle.min.css">
+	<link rel="stylesheet" type="text/css" href="../Common/css/common.css">
+	<script src="../Common/vendor/js/jquery.min.js"></script>
+	<script src="../Common/vendor/js/bootstrap.bundle.min.js"></script>
+	<script src="../Common/vendor/js/lodash.min.js"></script>
+	<script src="../Common/vendor/js/lazyload.min.js"></script>
+	<script src="../Common/vendor/js/lightgallery.min.js"></script>
+	<script src="../Common/vendor/js/lg-zoom.min.js"></script>
+	<script src="../Common/vendor/js/lg-thumbnail.min.js"></script>
+	<script src="../Common/vendor/js/lg-rotate.min.js"></script>
+	<script src="../Common/vendor/js/lg-fullscreen.min.js"></script>
+	<script src="../Common/vendor/js/index.aio.min.js"></script>
+	<script src="../Common/vendor/js/clicklove.min.js"></script>
+	<script type="text/javascript" src="../Common/json/config.js"></script>
+	<script type="text/javascript" src="json/messages.js"></script>
+	<script type="text/javascript" src="../Common/js/common.js"></script>
+</head>
+
+<body class="messages-page">
+	<header>
+		<nav class="navbar navbar-expand-lg navbar-dark fixed-top messages-navbar">
+			<a class="navbar-brand" target="_blank" href="https://github.com/ShunCai/QZoneExport">
+				<i class="fa fa-cloud-download mr-2"></i>QQ空间导出助手
+			</a>
+			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarSupportedContent">
+				<nav aria-label="breadcrumb">
+					<ol class="breadcrumb messages-breadcrumb">
+						<li class="breadcrumb-item"><a href="../index.html"><i class="fa fa-home mr-1"></i>个人中心</a></li>
+						<li class="breadcrumb-item active" aria-current="page"><i class="fa fa-commenting mr-1"></i>说说</li>
+					</ol>
+				</nav>
+			</div>
+		</nav>
+	</header>
+	
+	<main role="main" class="flex-shrink-0">
+		<div class="container messages">
+			<div class="messages-index-card">
+				<!-- 页面标题 -->
+				<div class="messages-index-header">
+					<i class="fa fa-commenting messages-index-icon"></i>
+					<h1 class="messages-index-title">说说时光机</h1>
+					<p class="messages-index-subtitle">共 <span class="messages-total-count"><%:=total%></span> 条说说，记录了 <span class="messages-year-count"><%:=yearList.length%></span> 年的青春时光</p>
+				</div>
+				
+				<!-- 那年今日区块（整合在说说时光机卡片内） -->
+				<div id="that-year-today" class="that-year-today-section" style="display: none;">
+					<div class="that-year-today-header">
+						<i class="fa fa-history"></i>
+						<span class="that-year-today-title">那年今日</span>
+						<span class="that-year-today-subtitle" id="that-year-today-subtitle"></span>
+					</div>
+					<div id="that-year-today-content" class="that-year-today-content"></div>
+				</div>
+				
+				<!-- 年份导航网格 -->
+				<div class="messages-year-grid">
+					<%for (const yearInfo of yearList) {%>
+					<a href="<%:=yearInfo.year%>.html" class="messages-year-card">
+						<div class="year-card-inner">
+							<span class="year-number"><%:=yearInfo.year%></span>
+							<span class="year-label">年</span>
+						</div>
+						<div class="year-stats">
+							<span class="year-count"><%:=yearInfo.count%></span>
+							<span class="year-unit">条说说</span>
+						</div>
+						<div class="year-progress">
+							<div class="year-progress-bar" style="width: <%:=Math.min(100, (yearInfo.count / maxCount) * 100)%>%"></div>
+						</div>
+					</a>
+					<%}%>
+				</div>
+				
+				<!-- 统计信息 -->
+				<div class="messages-stats-row">
+					<div class="stat-item">
+						<i class="fa fa-calendar stat-icon"></i>
+						<div class="stat-info">
+							<span class="stat-value"><%:=yearList.length > 0 ? yearList[yearList.length - 1].year : '-'%></span>
+							<span class="stat-label">最早年份</span>
+						</div>
+					</div>
+					<div class="stat-item">
+						<i class="fa fa-clock-o stat-icon"></i>
+						<div class="stat-info">
+							<span class="stat-value"><%:=yearList.length > 0 ? yearList[0].year : '-'%></span>
+							<span class="stat-label">最近年份</span>
+						</div>
+					</div>
+					<div class="stat-item">
+						<i class="fa fa-fire stat-icon"></i>
+						<div class="stat-info">
+							<span class="stat-value"><%:=maxYear%></span>
+							<span class="stat-label">发说说最多</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+	
+	<footer class="footer mt-auto py-3 messages-footer">
+		<div class="container text-center">
+			<span class="text-white footer-text">
+				<i class="fa fa-leaf mr-2"></i>落叶随风，青春，稀纵即逝
+			</span>
+		</div>
+	</footer>
+	
+	<script>
+	$(function() {
+		// 那年今日功能
+		const date = new Date();
+		const currentYear = date.getFullYear();
+		const currentMonth = date.getMonth() + 1;
+		const currentDay = date.getDate();
+		const currentMonthDay = '-' + String(currentMonth).padStart(2, '0') + '-' + String(currentDay).padStart(2, '0');
+		
+		// 从messages数据中筛选那年今日
+		const thatYearTodayItems = [];
+		if (typeof messages !== 'undefined' && messages.length > 0) {
+			for (const msg of messages) {
+				if (!msg.created_time) continue;
+				const msgDate = new Date(msg.created_time * 1000);
+				const msgYear = msgDate.getFullYear();
+				// 跳过当年
+				if (msgYear >= currentYear) continue;
+				const msgMonthDay = '-' + String(msgDate.getMonth() + 1).padStart(2, '0') + '-' + String(msgDate.getDate()).padStart(2, '0');
+				if (msgMonthDay === currentMonthDay) {
+					thatYearTodayItems.push({
+						year: msgYear,
+						message: msg
+					});
+				}
+			}
+		}
+		
+		// 如果有那年今日数据，显示区块
+		if (thatYearTodayItems.length > 0) {
+			$('#that-year-today').show();
+			$('#that-year-today-subtitle').text(currentMonth + '月' + currentDay + '日，' + thatYearTodayItems.length + ' 条回忆');
+			
+			// 按年份分组
+			const yearGroups = {};
+			for (const item of thatYearTodayItems) {
+				if (!yearGroups[item.year]) {
+					yearGroups[item.year] = [];
+				}
+				yearGroups[item.year].push(item.message);
+			}
+			
+			// 按年份倒序渲染
+			const years = Object.keys(yearGroups).sort((a, b) => b - a);
+			let html = '';
+			for (const year of years) {
+				const yearMessages = yearGroups[year];
+				html += '<div class="that-year-group">';
+				html += '<div class="that-year-header"><span class="that-year-badge">' + year + '年</span><span class="that-year-count">' + yearMessages.length + '条</span></div>';
+				html += '<div class="that-year-items">';
+				for (const msg of yearMessages) {
+					const msgTime = new Date(msg.created_time * 1000);
+					const timeStr = msgTime.getFullYear() + '-' + String(msgTime.getMonth() + 1).padStart(2, '0') + '-' + String(msgTime.getDate()).padStart(2, '0') + ' ' + String(msgTime.getHours()).padStart(2, '0') + ':' + String(msgTime.getMinutes()).padStart(2, '0');
+					const content = (msg.content || '').replace(/<[^>]+>/g, '').substring(0, 100);
+					html += '<a href="' + year + '.html#msg-' + msg.tid + '" class="that-year-item">';
+					html += '<div class="that-year-item-time"><i class="fa fa-clock-o mr-1"></i>' + timeStr + '</div>';
+					html += '<div class="that-year-item-content">' + (content || '[图片/视频]') + (content && content.length >= 100 ? '...' : '') + '</div>';
+					html += '</a>';
+				}
+				html += '</div></div>';
+			}
+			html += '<div class="text-center text-muted mt-3"><i class="fa fa-heart text-danger mr-1"></i>回忆有底线，未来无限量</div>';
+			$('#that-year-today-content').html(html);
+		}
+		
+		// 图片懒加载
+		if (typeof lazyload !== 'undefined') {
+			lazyload();
+		}
+	});
+	</script>
+</body>
+
+</html>

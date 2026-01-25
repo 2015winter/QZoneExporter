@@ -35,18 +35,21 @@
 	<script type="text/javascript" src="js/messages.js"></script>
 </head>
 
-<body>
+<body class="messages-page">
 	<header>
-		<nav class="navbar navbar-expand-lg navbar-dark fixed-top bg-dark">
-			<a class="navbar-brand" target="_blank" href="https://github.com/ShunCai/QZoneExport">QQ空间导出助手</a>
+		<nav class="navbar navbar-expand-lg navbar-dark fixed-top messages-navbar">
+			<a class="navbar-brand" target="_blank" href="https://github.com/ShunCai/QZoneExport">
+				<i class="fa fa-cloud-download mr-2"></i>QQ空间导出助手
+			</a>
 			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
 			</button>
 			<div class="collapse navbar-collapse" id="navbarSupportedContent">
 				<nav aria-label="breadcrumb">
-					<ol class="breadcrumb bg-dark">
-						<li class="breadcrumb-item"><a href="../index.html">个人中心</a></li>
-						<li class="breadcrumb-item active" aria-current="page">说说</li>
+					<ol class="breadcrumb messages-breadcrumb">
+						<li class="breadcrumb-item"><a href="../index.html"><i class="fa fa-home mr-1"></i>个人中心</a></li>
+						<li class="breadcrumb-item"><a href="index.html"><i class="fa fa-commenting mr-1"></i>说说</a></li>
+						<li class="breadcrumb-item active" aria-current="page"><i class="fa fa-calendar mr-1"></i><%:=currentYear%>年</li>
 					</ol>
 				</nav>
 			</div>
@@ -61,7 +64,7 @@
 					<%for (let index = 0; index < monthItems.length; index++) {%>
 						<%const message = monthItems[index]%>
 						<%total = total -1%>
-						<div class="card w-70 mt-2 border">
+						<div id="msg-<%:=message.tid%>" class="card w-70 mt-2 border">
 							<div class="card-body">
 								<div class="d-flex justify-content-start message-infos">
 									<div class="message-avatar-img">
@@ -336,6 +339,14 @@
 			<%}%>
 		</div>
 	</main>
+	
+	<footer class="footer mt-auto py-3 messages-footer">
+		<div class="container text-center">
+			<span class="text-white footer-text">
+				<i class="fa fa-leaf mr-2"></i>落叶随风，青春，稀纵即逝
+			</span>
+		</div>
+	</footer>
 </body>
 
 </html>

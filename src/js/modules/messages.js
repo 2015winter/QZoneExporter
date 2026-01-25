@@ -389,18 +389,36 @@ API.Messages.exportToHtml = async(messages) => {
             let params = {
                 messageMaps: _messageMaps,
                 total: yearItems.length,
+                currentYear: year,
                 config: QZone_Config
             }
             await API.Common.writeHtmlofTpl('messages', params, moduleFolder + "/" + year + ".html");
         }
 
-        // 基于模板生成汇总说说HTML
-        let params = {
-            messageMaps: API.Utils.groupedByTime(messages, "custom_create_time", 'all'),
+        // 构建年份列表数据（用于导航页）
+        let yearList = [];
+        let maxCount = 0;
+        let maxYear = '';
+        for (const [year, yearItems] of yearMaps) {
+            const count = yearItems.length;
+            yearList.push({ year: year, count: count });
+            if (count > maxCount) {
+                maxCount = count;
+                maxYear = year;
+            }
+        }
+        // 按年份倒序排列（最新年份在前）
+        yearList.sort((a, b) => b.year - a.year);
+
+        // 基于模板生成导航页（轻量级，只包含年份入口）
+        let indexParams = {
+            yearList: yearList,
             total: messages.length,
+            maxCount: maxCount,
+            maxYear: maxYear,
             config: QZone_Config
         }
-        await API.Common.writeHtmlofTpl('messages', params, moduleFolder + "/index.html");
+        await API.Common.writeHtmlofTpl('messages_index', indexParams, moduleFolder + "/index.html");
 
     } catch (error) {
         console.error('导出说说到HTML异常', error, messages);
