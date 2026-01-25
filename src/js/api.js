@@ -1915,6 +1915,48 @@ API.Utils = {
     },
 
     /**
+     * 将QQ空间图片URL转换为原图URL
+     * QQ空间图片URL中通常包含尺寸标识符：
+     * - /s/ 或 /m/ 或数字尺寸如 /640 等表示缩略图
+     * - /r/ 或 /0 或 /raw 表示原图
+     * @param {string} url 原始图片URL
+     * @returns {string} 原图URL
+     */
+    toOriginalUrl(url) {
+        if (!url) return url;
+        
+        // 处理 photo.store.qq.com 格式的URL
+        // 例如: https://r.photo.store.qq.com/psb?/xxx/xxx/m/xxx -> https://r.photo.store.qq.com/psb?/xxx/xxx/r/xxx
+        // 或者: https://xxx.photo.store.qq.com/psc?/xxx/m -> https://xxx.photo.store.qq.com/psc?/xxx/r
+        if (url.includes('photo.store.qq.com')) {
+            // 替换 /m/ 为 /r/ (中等尺寸 -> 原图)
+            url = url.replace(/\/m\//gi, '/r/');
+            url = url.replace(/\/m$/gi, '/r');
+            // 替换 /s/ 为 /r/ (小图 -> 原图)
+            url = url.replace(/\/s\//gi, '/r/');
+            url = url.replace(/\/s$/gi, '/r');
+            // 替换 /b/ 为 /r/ (大图 -> 原图，确保是最大)
+            url = url.replace(/\/b\//gi, '/r/');
+            url = url.replace(/\/b$/gi, '/r');
+        }
+        
+        // 处理 qpic.cn 格式的URL
+        // 例如: https://p.qpic.cn/xxx/640 -> https://p.qpic.cn/xxx/0
+        if (url.includes('qpic.cn')) {
+            // 替换数字尺寸为0（原图）
+            // 匹配URL末尾的数字尺寸，如 /640, /720, /1080 等
+            url = url.replace(/\/\d{2,4}($|\?)/gi, '/0$1');
+        }
+        
+        // 处理其他可能的缩略图参数
+        // 某些URL可能使用 spec= 或 size= 参数
+        url = url.replace(/[?&]spec=\d+/gi, '');
+        url = url.replace(/[?&]size=\d+/gi, '');
+        
+        return url;
+    },
+
+    /**
      * 获取Markdown的图片内容
      * @param {string} url 图片地址
      * @param {string} title 图片提示
@@ -4301,22 +4343,30 @@ API.Favorites = {
                     break;
             }
             // 统一处理多媒体信息
-            // 原始配图
+            // 原始配图 - 转换为原图URL
             for (let index = 0; index < temp.custom_origin_images.length; index++) {
                 const url = temp.custom_origin_images[index];
                 temp.custom_origin_images[index] = {
-                    url: url
+                    url: API.Utils.toOriginalUrl(url)
                 };
             }
-            // 缩略配图
+            // 缩略配图 - 转换为原图URL以获取更高分辨率
             for (let index = 0; index < temp.custom_images.length; index++) {
                 const url = temp.custom_images[index];
+                // 将缩略图URL转换为原图URL
+                const originalUrl = API.Utils.toOriginalUrl(url);
                 temp.custom_images[index] = {
-                    url: url
+                    url: originalUrl
                 };
+                // 如果没有原始配图，使用转换后的URL作为原图
+                if (!temp.custom_origin_images[index]) {
+                    temp.custom_origin_images[index] = {
+                        url: originalUrl
+                    };
+                }
                 if (temp.type === 1) {
                     temp.custom_origin_images[index] = {
-                        url: url
+                        url: originalUrl
                     };
                     continue;
                 }
