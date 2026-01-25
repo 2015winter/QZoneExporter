@@ -20,86 +20,275 @@
 	<script type="text/javascript" src="json/videos.js"></script>
 	<script type="text/javascript" src="../Common/js/common.js"></script>
 	<script type="text/javascript" src="../Common/js/sidebar.js"></script>
+	<style>
+		/* 视频页面专属样式 - 与相册页面风格统一 */
+		body {
+			background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+			min-height: 100vh;
+		}
+		
+		/* 顶部导航 */
+		.videos-navbar {
+			background: linear-gradient(135deg, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.95)) !important;
+			backdrop-filter: blur(10px);
+		}
+		
+		/* 主容器 - 考虑左侧栏 */
+		.videos-container {
+			padding: 80px 30px 40px 30px;
+			margin-left: 210px; /* 左侧栏宽度 */
+			max-width: none !important;
+		}
+		
+		#videos_html {
+			max-width: none !important;
+		}
+		
+		/* 视频列表保持原有宽度 */
+		#videos_html .row.videos {
+			max-width: 60vw;
+		}
+		
+		@media (max-width: 1000px) {
+			.videos-container {
+				margin-left: 0;
+				padding: 70px 15px 30px 15px;
+			}
+			#videos_html {
+				max-width: none !important;
+				margin-left: 0 !important;
+			}
+			#videos_html .row.videos {
+				max-width: 100%;
+			}
+		}
+		
+		/* 年份标题 - h1用于侧边栏层级 */
+		h1.sidebar-year {
+			margin: 0 0 24px 0;
+			font-size: inherit;
+			font-weight: normal;
+			width: 100%;
+		}
+		
+		.year-header {
+			display: flex;
+			align-items: center;
+			padding: 16px 24px;
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			border-radius: 16px;
+			box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+			width: 100%;
+		}
+		
+		.year-icon {
+			width: 48px;
+			height: 48px;
+			background: rgba(255, 255, 255, 0.2);
+			border-radius: 12px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			margin-right: 16px;
+			flex-shrink: 0;
+		}
+		
+		.year-icon i {
+			font-size: 24px;
+			color: #fff;
+		}
+		
+		.year-title-text {
+			color: #fff;
+			font-size: 22px;
+			font-weight: 700;
+			text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+			flex: 1;
+		}
+		
+		.year-count {
+			background: rgba(255, 255, 255, 0.25);
+			color: #fff;
+			font-size: 14px;
+			font-weight: 600;
+			padding: 6px 16px;
+			border-radius: 20px;
+			white-space: nowrap;
+			flex-shrink: 0;
+		}
+		
+		/* 月份标题 */
+		.month-section {
+			margin-bottom: 20px;
+			width: 100%;
+		}
+		
+		.month-header {
+			display: flex;
+			align-items: center;
+			padding: 10px 16px;
+			background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+			border-radius: 10px;
+			margin-bottom: 16px;
+			border-left: 4px solid #667eea;
+			width: 100%;
+		}
+		
+		.month-title-text {
+			color: #4a5568;
+			font-size: 16px;
+			font-weight: 600;
+			flex: 1;
+		}
+		
+		.month-title-text i {
+			color: #667eea;
+			margin-right: 8px;
+		}
+		
+		.month-count {
+			background: #667eea;
+			color: #fff;
+			font-size: 12px;
+			font-weight: 600;
+			padding: 4px 12px;
+			border-radius: 15px;
+		}
+		
+		/* 空状态 */
+		.empty-state {
+			text-align: center;
+			padding: 60px 20px;
+			color: #718096;
+		}
+		
+		.empty-state i {
+			font-size: 64px;
+			color: #cbd5e0;
+			margin-bottom: 20px;
+		}
+		
+		.empty-state p {
+			font-size: 18px;
+		}
+		
+		/* 响应式 */
+		@media (max-width: 768px) {
+			.year-header {
+				padding: 12px 16px;
+				border-radius: 12px;
+			}
+			
+			.year-icon {
+				width: 40px;
+				height: 40px;
+			}
+			
+			.year-title-text {
+				font-size: 18px;
+			}
+		}
+	</style>
 </head>
 
 <body>
 	<header>
-		<nav class="navbar navbar-expand-lg navbar-dark fixed-top bg-dark">
-			<a class="navbar-brand" target="_blank" href="https://github.com/ShunCai/QZoneExport">QQ空间导出助手</a>
+		<nav class="navbar navbar-expand-lg navbar-dark fixed-top videos-navbar">
+			<a class="navbar-brand" target="_blank" href="https://github.com/ShunCai/QZoneExport">
+				<i class="fa fa-cloud-download mr-2"></i>QQ空间导出助手
+			</a>
 			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
 			</button>
 			<div class="collapse navbar-collapse" id="navbarSupportedContent">
 				<nav aria-label="breadcrumb">
-					<ol class="breadcrumb bg-dark">
-						<li class="breadcrumb-item"><a href="../index.html">个人中心</a></li>
-						<li class="breadcrumb-item active" aria-current="page">视频</li>
+					<ol class="breadcrumb" style="background: transparent;">
+						<li class="breadcrumb-item"><a href="../index.html" style="color: rgba(255,255,255,0.8);"><i class="fa fa-home mr-1"></i>个人中心</a></li>
+						<li class="breadcrumb-item active" aria-current="page" style="color: rgba(255,255,255,0.95);">视频</li>
 					</ol>
 				</nav>
 			</div>
 		</nav>
 	</header>
 	<main role="main" class="flex-shrink-0">
-		<div id="videos_html" class="container-fluid videos-container">
+		<div id="videos_html" class="videos-container">
 			<%/* 遍历年份 */%>
 			<%for (const [year, yearMap] of videoMaps) {%>
-				<span class="sidebar-h1" data-tag="h1" data-sidebar='<%:=year%>年<span class="badge badge-primary badge-pill itemSize"><%:=API.Utils.sumYearItemSize(yearMap)%></span>'></span>
-				<div class="year-title"><i class="fa fa-calendar-o mr-2"></i><%:=year%>年<span class="badge badge-primary"><%:=API.Utils.sumYearItemSize(yearMap)%>个视频</span></div>
-				<%/* 遍历月份 */%>
-				<%for (const [month, monthVideos] of yearMap) {%>
-					<span class="sidebar-h2" data-tag="h2" data-sidebar='<%:=month%>月<span class="badge badge-secondary badge-pill itemSize"><%:=monthVideos.length%></span>'></span>
-					<div class="month-title"><i class="fa fa-folder-open-o mr-1"></i><%:=month%>月 <small class="text-muted">(<%:=monthVideos.length%>个)</small></div>
-					<div id="lightgallery-<%:=year%>-<%:=month%>" class="row videos">
-						<%/* 遍历视频 */%>
-						<%for (const video of monthVideos) {%>
-							<%video.uid = 'QZ-' + API.Utils.newSimpleUid(16)%>
-							<%/* 获取视频和封面路径 */%>
-							<%const videoSrc = video.custom_filepath || video.custom_url || video.url || ''%>
-							<%const posterSrc = API.Common.getMediaPath(video.pre || video.custom_pre_url, video.custom_pre_filepath) || '../Common/images/loading.gif'%>
-							<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-6 mb-3">
-								<div class="card thumbnail shadow-sm">
-									<div id="<%:=video.uid%>" class='photo-detail' style="display:none">
-										<div class="container">
-											<div class="row">
-												<div class="col text-white-50 text-left">
-													<p>
-														<i title="拍摄/上传时间" class="fa fa-camera text-primary"><%:=API.Utils.formatDate(video.shootTime || video.uploadTime)%></i>
-														<i title="视频类型" class="ml-2">MP4</i>
-													</p>
-												</div>
-												<div class="col text-center text-truncate">
-													<span class="video-title" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(video.name || API.Utils.formatDate(video.uploadTime), 'HTML', false, false, false, false, true)%>"><%:=API.Common.formatContent(video.name || API.Utils.formatDate(video.uploadTime), 'HTML', false, false, false, false, true)%></span>
-													<%if(video.desc){%>
-														<span class="text-white-50" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(video.desc, 'HTML', false, false, false, false, true)%>"><%:=API.Common.formatContent(video.desc, "HTML", false, false, false, false, true)%></span>
-													<%}%>
-												</div>
-												<div class="col"></div>
+			<!-- 年份标题 (h1用于侧边栏一级) -->
+			<h1 class="sidebar-year" data-sidebar='<%:=year%>年<span class="badge badge-primary badge-pill itemSize"><%:=API.Utils.sumYearItemSize(yearMap)%></span>'>
+				<div class="year-header">
+					<div class="year-icon">
+						<i class="fa fa-calendar"></i>
+					</div>
+					<span class="year-title-text"><%:=year%>年</span>
+					<span class="year-count"><%:=API.Utils.sumYearItemSize(yearMap)%> 个视频</span>
+				</div>
+			</h1>
+			
+			<%/* 遍历月份 */%>
+			<%for (const [month, monthVideos] of yearMap) {%>
+			<div class="month-section">
+				<!-- 月份标题 (h2用于侧边栏二级) -->
+				<span class="sidebar-h2" data-tag="h2" data-sidebar='<%:=month%>月<span class="badge badge-secondary badge-pill itemSize"><%:=monthVideos.length%></span>'></span>
+				<div class="month-header">
+					<span class="month-title-text"><i class="fa fa-folder-open"></i><%:=month%>月</span>
+					<span class="month-count"><%:=monthVideos.length%> 个</span>
+				</div>
+				
+				<!-- 视频列表 - 保留原有卡片样式 -->
+				<div id="lightgallery-<%:=year%>-<%:=month%>" class="row videos">
+					<%/* 遍历视频 */%>
+					<%for (const video of monthVideos) {%>
+						<%video.uid = 'QZ-' + API.Utils.newSimpleUid(16)%>
+						<%/* 获取视频和封面路径 */%>
+						<%const videoSrc = video.custom_filepath || video.custom_url || video.url || ''%>
+						<%const posterSrc = API.Common.getMediaPath(video.pre || video.custom_pre_url, video.custom_pre_filepath) || '../Common/images/loading.gif'%>
+						<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-6 mb-3">
+							<div class="card thumbnail shadow-sm">
+								<div id="<%:=video.uid%>" class='photo-detail' style="display:none">
+									<div class="container">
+										<div class="row">
+											<div class="col text-white-50 text-left">
+												<p>
+													<i title="拍摄/上传时间" class="fa fa-camera text-primary"><%:=API.Utils.formatDate(video.shootTime || video.uploadTime)%></i>
+													<i title="视频类型" class="ml-2">MP4</i>
+												</p>
 											</div>
+											<div class="col text-center text-truncate">
+												<span class="video-title" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(video.name || API.Utils.formatDate(video.uploadTime), 'HTML', false, false, false, false, true)%>"><%:=API.Common.formatContent(video.name || API.Utils.formatDate(video.uploadTime), 'HTML', false, false, false, false, true)%></span>
+												<%if(video.desc){%>
+													<span class="text-white-50" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(video.desc, 'HTML', false, false, false, false, true)%>"><%:=API.Common.formatContent(video.desc, "HTML", false, false, false, false, true)%></span>
+												<%}%>
+											</div>
+											<div class="col"></div>
 										</div>
 									</div>
-									<div class="video-wrapper" data-video-src="<%:=videoSrc%>" data-poster="<%:=posterSrc%>">
-										<img class="lazyload loading card-img-top video-poster" src="<%:=posterSrc%>" data-src="<%:=posterSrc%>" />
-										<span class="photo-video play-btn" title="播放视频"></span>
-										<button class="btn-fullscreen" title="全屏播放"><i class="fa fa-expand"></i></button>
-									</div>
-									<div class="card-body p-2 text-truncate" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(video.name || video.desc || API.Utils.formatDate(video.uploadTime), 'HTML', false, false, false, false, true)%>">
-										<small class="card-title"><%:=API.Common.formatContent(video.name || video.desc || API.Utils.formatDate(video.uploadTime), 'HTML', false, false, false, false, true)%></small>
-									</div>
-									<div class="card-footer p-1 d-flex justify-content-around bg-dark">
-										<span class="text-light fa fa-heart cursor viewlikes small" title="查看点赞" data-field="uniKey" data-target="<%:=video.uniKey%>"><%:=video.likes ? video.likes.length : 0%></span>
-										<span class="text-light fa fa-comment cursor viewcomments small" title="查看评论" data-field="uniKey" data-target="<%:=video.uniKey%>"><%:=video.comments ? video.comments.length : 0%></span>
-									</div>
+								</div>
+								<div class="video-wrapper" data-video-src="<%:=videoSrc%>" data-poster="<%:=posterSrc%>">
+									<img class="lazyload loading card-img-top video-poster" src="<%:=posterSrc%>" data-src="<%:=posterSrc%>" />
+									<span class="photo-video play-btn" title="播放视频"></span>
+									<button class="btn-fullscreen" title="全屏播放"><i class="fa fa-expand"></i></button>
+								</div>
+								<div class="card-body p-2 text-truncate" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(video.name || video.desc || API.Utils.formatDate(video.uploadTime), 'HTML', false, false, false, false, true)%>">
+									<small class="card-title"><%:=API.Common.formatContent(video.name || video.desc || API.Utils.formatDate(video.uploadTime), 'HTML', false, false, false, false, true)%></small>
+								</div>
+								<div class="card-footer p-1 d-flex justify-content-around bg-dark">
+									<span class="text-light fa fa-heart cursor viewlikes small" title="查看点赞" data-field="uniKey" data-target="<%:=video.uniKey%>"><%:=video.likes ? video.likes.length : 0%></span>
+									<span class="text-light fa fa-comment cursor viewcomments small" title="查看评论" data-field="uniKey" data-target="<%:=video.uniKey%>"><%:=video.comments ? video.comments.length : 0%></span>
 								</div>
 							</div>
-						<%}%>
-					</div>
-				<%}%>
-			<%}%>
-			<%if(!videoMaps || videoMaps.size === 0){%>
-				<div class="col-12 text-center text-muted py-5">
-					<i class="fa fa-video-camera fa-3x mb-3"></i>
-					<p>暂无视频</p>
+						</div>
+					<%}%>
 				</div>
+			</div>
+			<%}%>
+			<%}%>
+			
+			<%if(!videoMaps || videoMaps.size === 0){%>
+			<div class="empty-state">
+				<i class="fa fa-video-camera"></i>
+				<p>暂无视频</p>
+			</div>
 			<%}%>
 		</div>
 	</main>
