@@ -21,15 +21,15 @@
 	<script type="text/javascript" src="../Common/js/common.js"></script>
 	<script type="text/javascript" src="../Common/js/sidebar.js"></script>
 	<style>
-		/* 视频页面专属样式 - 与相册页面风格统一 */
+		/* 视频页面专属样式 - 红色主题 #ff6b6b */
 		body {
 			background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
 			min-height: 100vh;
 		}
 		
-		/* 顶部导航 */
+		/* 顶部导航 - 红色渐变 */
 		.videos-navbar {
-			background: linear-gradient(135deg, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.95)) !important;
+			background: linear-gradient(135deg, rgba(255, 107, 107, 0.95), rgba(238, 90, 36, 0.95)) !important;
 			backdrop-filter: blur(10px);
 		}
 		
@@ -81,9 +81,9 @@
 			display: flex;
 			align-items: center;
 			padding: 16px 24px;
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
 			border-radius: 16px;
-			box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+			box-shadow: 0 8px 24px rgba(255, 107, 107, 0.3);
 			width: 100%;
 		}
 		
@@ -133,10 +133,10 @@
 			display: flex;
 			align-items: center;
 			padding: 10px 16px;
-			background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+			background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(238, 90, 36, 0.1));
 			border-radius: 10px;
 			margin-bottom: 16px;
-			border-left: 4px solid #667eea;
+			border-left: 4px solid #ff6b6b;
 			width: 100%;
 		}
 		
@@ -148,12 +148,12 @@
 		}
 		
 		.month-title-text i {
-			color: #667eea;
+			color: #ff6b6b;
 			margin-right: 8px;
 		}
 		
 		.month-count {
-			background: #667eea;
+			background: #ff6b6b;
 			color: #fff;
 			font-size: 12px;
 			font-weight: 600;
@@ -195,14 +195,14 @@
 			}
 		}
 		
-		/* 底部统计图标栏 - 渐变紫色背景 */
+		/* 底部统计图标栏 - 红色渐变背景 */
 		#videos_html .card-footer {
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+			background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%) !important;
 		}
-		#videos_html .card-footer .fa-heart { color: #ff6b6b !important; }
-		#videos_html .card-footer .fa-comment { color: #4ecdc4 !important; }
+		#videos_html .card-footer .fa-heart { color: #fff !important; }
+		#videos_html .card-footer .fa-comment { color: #ffeaa7 !important; }
 		
-		/* 播放按钮 - 渐变紫色圆形 */
+		/* 播放按钮 - 红色渐变圆形 */
 		#videos_html .thumbnail .video-wrapper .play-btn {
 			position: absolute;
 			top: 50%;
@@ -211,12 +211,12 @@
 			z-index: 10;
 			width: 40px;
 			height: 40px;
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
 			border-radius: 50%;
 			opacity: 0.9;
 			cursor: pointer;
 			transition: all 0.3s ease;
-			box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+			box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
 		}
 		
 		/* 播放三角形图标 */
@@ -236,7 +236,7 @@
 		#videos_html .thumbnail .video-wrapper:hover .play-btn {
 			opacity: 1;
 			transform: translate(-50%, -50%) scale(1.1);
-			box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+			box-shadow: 0 6px 20px rgba(255, 107, 107, 0.5);
 		}
 	</style>
 </head>

@@ -1319,17 +1319,17 @@ pre {
     }
 }
 
-/* ==================== 说说页面美化样式 - 与首页风格一致 ==================== */
+/* ==================== 说说页面美化样式 - 粉紫色主题 #f093fb ==================== */
 
 /* 说说页面背景 */
 body.messages-page {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #ff9a9e 100%);
     min-height: 100vh;
 }
 
 /* 说说页面导航栏 */
 .messages-navbar {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.95)) !important;
+    background: linear-gradient(135deg, rgba(240, 147, 251, 0.95), rgba(245, 87, 108, 0.95)) !important;
     backdrop-filter: blur(10px);
 }
 
@@ -1388,13 +1388,13 @@ body.messages-page {
 }
 
 .messages-page .sidebar-h1 .badge {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #f093fb, #f5576c);
     font-size: 0.85rem;
     vertical-align: middle;
     margin-left: 10px;
     padding: 6px 14px;
     border-radius: 20px;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);
 }
 
 /* 说说月份标题样式 */
@@ -1526,7 +1526,7 @@ body.messages-page {
 
 .messages-page .message-avatar-img img {
     border: 3px solid #fff !important;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 15px rgba(240, 147, 251, 0.3);
     transition: transform 0.3s ease;
 }
 
@@ -1538,7 +1538,7 @@ body.messages-page {
 .messages-page .message-avatar-name {
     font-size: 16px;
     font-weight: 600;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #f093fb, #f5576c);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -1574,7 +1574,7 @@ body.messages-page {
 .messages-page .source {
     background: linear-gradient(145deg, #f8fafc, #f1f5f9);
     border-left: 4px solid;
-    border-image: linear-gradient(135deg, #667eea, #764ba2) 1;
+    border-image: linear-gradient(135deg, #f093fb, #f5576c) 1;
     padding: 15px;
     margin: 15px 0;
     border-radius: 0 12px 12px 0;
@@ -1612,7 +1612,7 @@ body.messages-page {
 
 .messages-page .comment-avatar img {
     border: 2px solid #fff !important;
-    box-shadow: 0 2px 10px rgba(102, 126, 234, 0.2);
+    box-shadow: 0 2px 10px rgba(240, 147, 251, 0.2);
 }
 
 /* 说说底部信息 */
@@ -1637,7 +1637,7 @@ body.messages-page {
 
 .messages-page .card-footer .fa-thumbs-up,
 .messages-page .card-footer .fa-eye {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #f093fb, #f5576c);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -1650,7 +1650,7 @@ body.messages-page {
 }
 
 .messages-page .card-footer .border-primary {
-    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    background: linear-gradient(135deg, #f093fb, #f5576c) !important;
     color: #fff !important;
     border: none !important;
     padding: 4px 12px !important;
@@ -1659,12 +1659,12 @@ body.messages-page {
 
 /* 展开/收起按钮 */
 .messages-page .readMore {
-    color: #667eea;
+    color: #f093fb;
     transition: color 0.3s ease;
 }
 
 .messages-page .readMore:hover {
-    color: #764ba2;
+    color: #f5576c;
 }
 
 /* 音频播放器美化 */
@@ -1676,7 +1676,7 @@ body.messages-page {
 
 /* 地图链接 */
 .messages-page .fa-map-marker {
-    color: #667eea;
+    color: #f093fb;
 }
 
 /* 响应式调整 */
