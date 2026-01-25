@@ -21,168 +21,546 @@
 	<script type="text/javascript" src="../Common/js/common.js"></script>
 	<script type="text/javascript" src="../Common/js/sidebar.js"></script>
 	<script type="text/javascript" src="js/visitors.js"></script>
+	
+	<style>
+		/* 页面专属样式 */
+		body.visitors-page {
+			background: linear-gradient(135deg, #fd79a8 0%, #e84393 50%, #a29bfe 100%);
+			min-height: 100vh;
+			padding-top: 70px;
+			padding-bottom: 80px;
+		}
+		
+		/* 主卡片容器 */
+		.visitors-main-card {
+			background: rgba(255, 255, 255, 0.95);
+			backdrop-filter: blur(20px);
+			border-radius: 24px;
+			box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+			padding: 40px;
+			margin-top: 20px;
+			animation: fadeInUp 0.6s ease-out;
+		}
+		
+		@keyframes fadeInUp {
+			from {
+				opacity: 0;
+				transform: translateY(30px);
+			}
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+		
+		/* 页面标题区域 */
+		.page-header {
+			text-align: center;
+			margin-bottom: 32px;
+			padding-bottom: 24px;
+			border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+		}
+		
+		.page-title {
+			font-size: 28px;
+			font-weight: 700;
+			background: linear-gradient(135deg, #fd79a8, #e84393);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			margin-bottom: 8px;
+		}
+		
+		.page-subtitle {
+			color: #718096;
+			font-size: 15px;
+		}
+		
+		/* 时间线容器 */
+		.visitors-timeline {
+			position: relative;
+			padding-left: 40px;
+		}
+		
+		.visitors-timeline::before {
+			content: '';
+			position: absolute;
+			left: 15px;
+			top: 0;
+			bottom: 0;
+			width: 3px;
+			background: linear-gradient(180deg, #fd79a8, #a29bfe);
+			border-radius: 3px;
+		}
+		
+		/* 年份标题 */
+		.year-section {
+			margin-bottom: 24px;
+		}
+		
+		.year-badge {
+			display: inline-flex;
+			align-items: center;
+			gap: 10px;
+			background: linear-gradient(135deg, #fd79a8, #e84393);
+			color: #fff;
+			padding: 12px 28px;
+			border-radius: 30px;
+			font-weight: 700;
+			font-size: 18px;
+			margin-left: -25px;
+			position: relative;
+			z-index: 2;
+			box-shadow: 0 6px 20px rgba(253, 121, 168, 0.4);
+		}
+		
+		/* 月份标题 */
+		.month-badge {
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+			background: rgba(253, 121, 168, 0.15);
+			color: #e84393;
+			padding: 8px 20px;
+			border-radius: 20px;
+			font-weight: 600;
+			font-size: 14px;
+			margin: 16px 0 12px -15px;
+			position: relative;
+			z-index: 1;
+		}
+		
+		/* 访客卡片 */
+		.visitor-card {
+			background: #fff;
+			border-radius: 16px;
+			padding: 20px;
+			margin-bottom: 16px;
+			margin-left: -15px;
+			border: 1px solid rgba(0, 0, 0, 0.05);
+			transition: all 0.3s ease;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+			position: relative;
+		}
+		
+		.visitor-card::before {
+			content: '';
+			position: absolute;
+			left: -25px;
+			top: 24px;
+			width: 12px;
+			height: 12px;
+			background: linear-gradient(135deg, #fd79a8, #e84393);
+			border-radius: 50%;
+			border: 3px solid #fff;
+			box-shadow: 0 2px 8px rgba(253, 121, 168, 0.4);
+		}
+		
+		.visitor-card:hover {
+			transform: translateX(8px);
+			box-shadow: 0 12px 32px rgba(253, 121, 168, 0.2);
+		}
+		
+		/* 访客头部 */
+		.visitor-header {
+			display: flex;
+			align-items: center;
+			gap: 16px;
+			margin-bottom: 12px;
+		}
+		
+		.visitor-avatar {
+			width: 50px;
+			height: 50px;
+			border-radius: 50%;
+			border: 3px solid #fff;
+			box-shadow: 0 4px 12px rgba(253, 121, 168, 0.3);
+			transition: transform 0.3s ease;
+		}
+		
+		.visitor-avatar:hover {
+			transform: scale(1.1);
+		}
+		
+		.visitor-info {
+			flex: 1;
+		}
+		
+		.visitor-name {
+			font-weight: 600;
+			color: #2d3748;
+			font-size: 15px;
+		}
+		
+		.visitor-name a {
+			color: inherit;
+			text-decoration: none;
+		}
+		
+		.visitor-name a:hover {
+			color: #e84393;
+		}
+		
+		.visitor-action {
+			color: #718096;
+			font-size: 14px;
+		}
+		
+		.visitor-time {
+			color: #a0aec0;
+			font-size: 13px;
+			background: rgba(253, 121, 168, 0.1);
+			padding: 4px 12px;
+			border-radius: 12px;
+			white-space: nowrap;
+		}
+		
+		/* 访问内容列表 */
+		.visitor-content {
+			margin-top: 12px;
+			margin-left: 66px;
+		}
+		
+		.content-section {
+			margin-bottom: 12px;
+		}
+		
+		.content-type {
+			display: inline-flex;
+			align-items: center;
+			gap: 6px;
+			color: #e84393;
+			font-size: 13px;
+			margin-bottom: 8px;
+		}
+		
+		.content-list {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px;
+		}
+		
+		.content-item {
+			background: rgba(253, 121, 168, 0.08);
+			border-radius: 10px;
+			padding: 10px 14px;
+			font-size: 13px;
+			color: #4a5568;
+			transition: all 0.3s ease;
+			text-decoration: none;
+		}
+		
+		.content-item:hover {
+			background: rgba(253, 121, 168, 0.15);
+			color: #e84393;
+			text-decoration: none;
+		}
+		
+		/* 相册预览卡片 */
+		.album-preview {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 10px;
+		}
+		
+		.album-card {
+			background: #fff;
+			border-radius: 12px;
+			padding: 8px;
+			border: 1px solid rgba(0, 0, 0, 0.05);
+			transition: all 0.3s ease;
+			width: 120px;
+			text-align: center;
+		}
+		
+		.album-card:hover {
+			transform: translateY(-4px);
+			box-shadow: 0 8px 20px rgba(253, 121, 168, 0.2);
+		}
+		
+		.album-card img {
+			width: 100px;
+			height: 100px;
+			object-fit: cover;
+			border-radius: 8px;
+		}
+		
+		.album-card .album-name {
+			font-size: 12px;
+			color: #718096;
+			margin-top: 6px;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+		
+		/* 同行访客 */
+		.same-visitors {
+			margin-top: 16px;
+			padding: 12px;
+			background: rgba(162, 155, 254, 0.1);
+			border-radius: 12px;
+		}
+		
+		.same-visitors-title {
+			font-size: 13px;
+			color: #718096;
+			margin-bottom: 12px;
+		}
+		
+		.same-visitors-list {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 12px;
+		}
+		
+		.same-visitor-card {
+			background: #fff;
+			border-radius: 12px;
+			padding: 10px;
+			text-align: center;
+			width: 100px;
+			transition: all 0.3s ease;
+		}
+		
+		.same-visitor-card:hover {
+			transform: translateY(-4px);
+			box-shadow: 0 8px 20px rgba(162, 155, 254, 0.3);
+		}
+		
+		.same-visitor-card img {
+			width: 60px;
+			height: 60px;
+			border-radius: 50%;
+			border: 2px solid #a29bfe;
+		}
+		
+		.same-visitor-card .name {
+			font-size: 12px;
+			color: #4a5568;
+			margin-top: 6px;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+		
+		.same-visitor-card .time {
+			font-size: 11px;
+			color: #a0aec0;
+		}
+		
+		/* 导航栏样式 */
+		.navbar-visitors {
+			background: linear-gradient(135deg, rgba(253, 121, 168, 0.95), rgba(232, 67, 147, 0.95)) !important;
+			backdrop-filter: blur(10px);
+		}
+		
+		/* 底部样式 */
+		.visitors-footer {
+			background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.9));
+			backdrop-filter: blur(10px);
+		}
+		
+		/* 响应式 */
+		@media (max-width: 768px) {
+			.visitors-main-card {
+				padding: 20px 16px;
+				margin: 10px;
+				border-radius: 20px;
+			}
+			
+			.page-title {
+				font-size: 22px;
+			}
+			
+			.visitors-timeline {
+				padding-left: 30px;
+			}
+			
+			.visitors-timeline::before {
+				left: 10px;
+			}
+			
+			.year-badge {
+				margin-left: -15px;
+				font-size: 16px;
+				padding: 10px 20px;
+			}
+			
+			.month-badge {
+				margin-left: -10px;
+			}
+			
+			.visitor-card {
+				margin-left: -10px;
+				padding: 16px;
+			}
+			
+			.visitor-card::before {
+				left: -20px;
+			}
+			
+			.visitor-content {
+				margin-left: 0;
+				margin-top: 16px;
+			}
+			
+			.visitor-header {
+				flex-wrap: wrap;
+			}
+		}
+	</style>
 </head>
 
-<body>
+<body class="visitors-page">
 	<header>
-		<nav class="navbar navbar-expand-lg navbar-dark fixed-top bg-dark">
-			<a class="navbar-brand" target="_blank" href="https://github.com/ShunCai/QZoneExport">QQ空间导出助手</a>
+		<nav class="navbar navbar-expand-lg navbar-dark fixed-top navbar-visitors">
+			<a class="navbar-brand" target="_blank" href="https://github.com/ShunCai/QZoneExport">
+				<i class="fa fa-cloud-download mr-2"></i>QQ空间导出助手
+			</a>
 			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
 			</button>
 			<div class="collapse navbar-collapse" id="navbarSupportedContent">
 				<nav aria-label="breadcrumb">
-					<ol class="breadcrumb bg-dark">
-						<li class="breadcrumb-item"><a href="../index.html">个人中心</a></li>
-						<li class="breadcrumb-item active" aria-current="page">访客</li>
+					<ol class="breadcrumb" style="background: transparent;">
+						<li class="breadcrumb-item"><a href="../index.html" style="color: rgba(255,255,255,0.8);"><i class="fa fa-home mr-1"></i>个人中心</a></li>
+						<li class="breadcrumb-item active" aria-current="page" style="color: rgba(255,255,255,0.9);">访客</li>
 					</ol>
 				</nav>
 			</div>
 		</nav>
 	</header>
+	
 	<main role="main" class="flex-shrink-0">
-		<div id="visitors_html" class="container messages">
-			<div class="col-xs-10">
-				<div class="timeline2-centered">
+		<div class="container">
+			<div class="visitors-main-card">
+				<!-- 页面标题 -->
+				<div class="page-header">
+					<h1 class="page-title"><i class="fa fa-eye mr-2"></i>访客记录</h1>
+					<p class="page-subtitle">谁来看过我，我都记得</p>
+				</div>
+				
+				<!-- 访客时间线 -->
+				<div id="visitors_html" class="visitors-timeline">
 					<%if(visitors && visitors.length > 0){%>
 						<%/* 年份分组 */%>
 						<%const yearMaps = API.Utils.groupedByTime(visitors, "time", "year");%>
 						<%for (const [year, yearItems] of yearMaps) {%>
-							<div class="timeline2-entry">
-								<div class="timeline2-entry-year">
-									<div class="timeline2-icon">
-										<span class="sidebar-h1" data-tag="h1" data-sidebar='<%:=year%>年<span class="badge badge-primary badge-pill itemSize"><%:=yearItems.length%><span>'><%:=year%></span>
-									</div>
-								</div>
+							<div class="year-section">
+								<span class="year-badge sidebar-h1" data-tag="h1" data-sidebar='<%:=year%>年<span class="badge badge-primary badge-pill itemSize"><%:=yearItems.length%><span>'>
+									<i class="fa fa-calendar"></i><%:=year%>年
+								</span>
 							</div>
 							<%/* 月份分组 */%>
 							<%const monthMaps = API.Utils.groupedByTime(yearItems, "time", "month");%>
 							<%for (const [month, monthItems] of monthMaps) {%>
-								<div class="timeline2-entry">
-									<div class="timeline2-entry-month">
-										<div class="timeline2-icon">
-											<span class="sidebar-h2" data-tag="h2" data-sidebar='<%:=month%>月<span class="badge badge-secondary badge-pill itemSize"><%:=monthItems.length%><span>'><%:=month%>月</span>
-										</div>
-									</div>
-								</div>
+								<span class="month-badge sidebar-h2" data-tag="h2" data-sidebar='<%:=month%>月<span class="badge badge-secondary badge-pill itemSize"><%:=monthItems.length%><span>'>
+									<i class="fa fa-clock-o"></i><%:=month%>月
+								</span>
 								<%/* 遍历同一月份的所有访客 */%>
 								<%for (const item of monthItems) {%>
-										<div class="timeline2-entry">
-											<div class="timeline2-entry-inner">
-												<div class="timeline2-time">
-													<span><%:=API.Utils.formatDate(item.time,'dd日 hh:mm')%></span>
+									<div class="visitor-card">
+										<div class="visitor-header">
+											<a href="<%:=API.Common.getUserUrl(item.uin)%>" target="_blank">
+												<img class="visitor-avatar lazyload loading" src="<%:=API.Common.getUserLogoLocalUrl(item.uin, true)%>">
+											</a>
+											<div class="visitor-info">
+												<div class="visitor-name">
+													<a href="<%:=API.Common.getUserUrl(item.uin)%>" target="_blank"><%:=API.Common.formatContent(item.name, 'HTML', false, false, false, false, true)%></a>
 												</div>
-												<div class="timeline2-icon">
-													<a class="avatar" href="<%:=API.Common.getUserUrl(item.uin)%>" target="_blank">
-														<img class="lazyload loading w-100 h-100 border rounded-circle" src="<%:=API.Common.getUserLogoLocalUrl(item.uin, true)%>"></i>
-													</a>
-												</div>
-												<div class="timeline2-label">
-													<a href="<%:=API.Common.getUserUrl(item.uin)%>" target="_blank"><%:=API.Common.formatContent(item.name, 'HTML', false, false, false, false, true)%></a><span class="ml-1"><%:=API.Visitors.getTitle(item)%></span>
-													<%if(!API.Visitors.isHome(item)){%>
-														<%if(item.shuoshuoes && item.shuoshuoes.length > 0){%>
-															<div class="row visitor-list">
-																<span class="fa fa-wechat ml-3 mt-2" title="说说"></span>
-																<ul id="poster-list" class="list-group list-group-flush col">
-																	<%for(const shuoshuo of item.shuoshuoes){%>
-																		<li class="list-group-item p-1">
-																			<a class="text-muted text-decoration-none" title="访问于 <%:=API.Utils.formatDate(item.time,'hh:mm')%>" href="<%:=shuoshuo.url%>" target="_blank">
-																				<p class="mb-0"><%:=API.Common.formatContent(shuoshuo.name, 'HTML', false, false, false, false, true)%></p>
-																			</a>
-																			<%if(shuoshuo.imgsrc){%>
-																				<div class="poster_img mt-2">
-																					<a href="<%:=shuoshuo.url%>" target="_blank">
-																						<img title="访问于 <%:=API.Utils.formatDate(item.time,'hh:mm')%>" src="<%:=(shuoshuo.custom_filepath || shuoshuo.custom_url)%>">
-																					</a>
-																				</div>
-																			<%}%>
-																		</li>
-																	<%}%>
-																</ul>
-															</div>
-														<%}%>
-														<%if(item.blogs && item.blogs.length > 0){%>
-															<div class="row visitor-list">
-																<span class="fa fa-book ml-3 mt-2" title="日志"></span>
-																<ul id="poster-list" class="list-group list-group-flush col">
-																	<%for(const blog of item.blogs){%>
-																		<li class="list-group-item p-1">
-																			<a class="text-muted text-decoration-none" title="访问于 <%:=API.Utils.formatDate(item.time,'hh:mm')%>" href="<%:=blog.url%>" target="_blank">
-																				<p class="mb-0"><%:=API.Common.formatContent(blog.name, 'HTML', false, false, false, false, true)%></p>
-																			</a>
-																		</li>
-																	<%}%>
-																</ul>
-															</div>
-														<%}%>
-														<%if(item.photoes && item.photoes.length > 0){%>
-															<div class="row visitor-list">
-																<span class="fa fa-photo ml-3 mt-2" title="相册"></span>
-																<ul class="list-group list-group-horizontal col">
-																	<%for(const photo of item.photoes){%>
-																		<li class="list-group-item p-1">
-																			<div class="card album p-1" title="访问于 <%:=API.Utils.formatDate(item.time,'hh:mm')%>">
-																				<a href="<%:=photo.url%>" target="_blank" class="image" style="width: 100px; height: 100px; overflow: hidden;">
-																					<img src="<%:=(photo.custom_filepath || photo.custom_url)%>" height="100">
-																				</a>
-																				<div class="card-body text-center text-truncate p-2">
-																					<a class="text-muted text-decoration-none" href="<%:=photo.url%>" target="_blank"><%:=API.Common.formatContent(photo.name, 'HTML', false, false, false, false, true)%></a>
-																				</div>
-																			</div>
-																		</li>
-																	<%}%>
-																</ul>
-															</div>
-														<%}%>
-														<%if(item.shares && item.shares.length > 0){%>
-															<div class="row visitor-list">
-																<span class="fa fa-share-alt ml-3 mt-2" title="分享"></span>
-																<ul id="poster-list" class="list-group list-group-flush col">
-																	<%for(const share of item.shares){%>
-																		<li class="list-group-item p-1">
-																			<a class="text-muted text-decoration-none" title="访问于 <%:=API.Utils.formatDate(item.time,'hh:mm')%>" href="<%:=share.url%>" target="_blank">
-																				<p class="mb-0"><%:=API.Common.formatContent(share.name, 'HTML', false, false, false, false, true)%></p>
-																			</a>
-																			<%if(share.imgsrc){%>
-																				<div class="poster_img mt-2">
-																					<a href="<%:=share.url%>" target="_blank">
-																						<img title="访问于 <%:=API.Utils.formatDate(item.time,'hh:mm')%>" src="<%:=(share.custom_filepath || share.custom_url)%>">
-																					</a>
-																				</div>
-																			<%}%>
-																		</li>
-																	<%}%>
-																</ul>
-															</div>
-														<%}%>
-														<%if(item.uins && item.uins.length > 0){%>
-															<div class="visitor-list ml-3">
-																<p class="p-2">以下这些访客当天也访问了这些内容： </p>
-																<ul class="list-group list-group-horizontal col">
-																	<%for (const uniItem of item.uins) {%>
-																		<li class="list-group-item p-1">
-																			<div class="card album p-1" title="访问于 <%:=API.Utils.formatDate(uniItem.time,'hh:mm')%>">
-																				<a href="<%:=API.Common.getUserUrl(uniItem.uin)%>" target="_blank" class="image" style="width: 100px; height: 100px; overflow: hidden;">
-																					<img src="<%:=API.Common.getUserLogoLocalUrl(uniItem.uin, true)%>" height="100">
-																				</a>
-																				<div class="card-body text-center text-truncate p-2">
-																					<a class="card-title text-muted text-decoration-none" href="<%:=API.Common.getUserUrl(uniItem.uin)%>" target="_blank"><%:=API.Common.formatContent(uniItem.name, 'HTML', false, false, false, false, true)%></a>
-																				</div>
-																				<p class="card-text text-right border-top">
-																					<small class="text-muted"><%:=API.Utils.formatDate(uniItem.time,'hh:mm')%></small>
-																				</p>
-																			</div>
-																		</li>
-																	<%}%>
-																</ul>
-															</div>
-														<%}%>
-													<%}%>
-												</div>
+												<div class="visitor-action"><%:=API.Visitors.getTitle(item)%></div>
+											</div>
+											<div class="visitor-time">
+												<i class="fa fa-clock-o mr-1"></i><%:=API.Utils.formatDate(item.time,'dd日 hh:mm')%>
 											</div>
 										</div>
-									<%}%>
-								<hr>
+										
+										<%if(!API.Visitors.isHome(item)){%>
+											<div class="visitor-content">
+												<%if(item.shuoshuoes && item.shuoshuoes.length > 0){%>
+													<div class="content-section">
+														<div class="content-type">
+															<i class="fa fa-wechat"></i>查看了说说
+														</div>
+														<div class="content-list">
+															<%for(const shuoshuo of item.shuoshuoes){%>
+																<a class="content-item" href="<%:=shuoshuo.url%>" target="_blank">
+																	<%:=API.Common.formatContent(shuoshuo.name, 'HTML', false, false, false, false, true)%>
+																	<%if(shuoshuo.imgsrc){%>
+																		<img src="<%:=(shuoshuo.custom_filepath || shuoshuo.custom_url)%>" style="width: 40px; height: 40px; border-radius: 6px; margin-left: 8px; object-fit: cover;">
+																	<%}%>
+																</a>
+															<%}%>
+														</div>
+													</div>
+												<%}%>
+												<%if(item.blogs && item.blogs.length > 0){%>
+													<div class="content-section">
+														<div class="content-type">
+															<i class="fa fa-book"></i>查看了日志
+														</div>
+														<div class="content-list">
+															<%for(const blog of item.blogs){%>
+																<a class="content-item" href="<%:=blog.url%>" target="_blank">
+																	<%:=API.Common.formatContent(blog.name, 'HTML', false, false, false, false, true)%>
+																</a>
+															<%}%>
+														</div>
+													</div>
+												<%}%>
+												<%if(item.photoes && item.photoes.length > 0){%>
+													<div class="content-section">
+														<div class="content-type">
+															<i class="fa fa-photo"></i>查看了相册
+														</div>
+														<div class="album-preview">
+															<%for(const photo of item.photoes){%>
+																<a class="album-card" href="<%:=photo.url%>" target="_blank">
+																	<img src="<%:=(photo.custom_filepath || photo.custom_url)%>">
+																	<div class="album-name"><%:=API.Common.formatContent(photo.name, 'HTML', false, false, false, false, true)%></div>
+																</a>
+															<%}%>
+														</div>
+													</div>
+												<%}%>
+												<%if(item.shares && item.shares.length > 0){%>
+													<div class="content-section">
+														<div class="content-type">
+															<i class="fa fa-share-alt"></i>查看了分享
+														</div>
+														<div class="content-list">
+															<%for(const share of item.shares){%>
+																<a class="content-item" href="<%:=share.url%>" target="_blank">
+																	<%:=API.Common.formatContent(share.name, 'HTML', false, false, false, false, true)%>
+																	<%if(share.imgsrc){%>
+																		<img src="<%:=(share.custom_filepath || share.custom_url)%>" style="width: 40px; height: 40px; border-radius: 6px; margin-left: 8px; object-fit: cover;">
+																	<%}%>
+																</a>
+															<%}%>
+														</div>
+													</div>
+												<%}%>
+												<%if(item.uins && item.uins.length > 0){%>
+													<div class="same-visitors">
+														<div class="same-visitors-title">
+															<i class="fa fa-users mr-1"></i>以下访客当天也访问了这些内容
+														</div>
+														<div class="same-visitors-list">
+															<%for (const uniItem of item.uins) {%>
+																<a class="same-visitor-card" href="<%:=API.Common.getUserUrl(uniItem.uin)%>" target="_blank">
+																	<img src="<%:=API.Common.getUserLogoLocalUrl(uniItem.uin, true)%>">
+																	<div class="name"><%:=API.Common.formatContent(uniItem.name, 'HTML', false, false, false, false, true)%></div>
+																	<div class="time"><%:=API.Utils.formatDate(uniItem.time,'hh:mm')%></div>
+																</a>
+															<%}%>
+														</div>
+													</div>
+												<%}%>
+											</div>
+										<%}%>
+									</div>
+								<%}%>
 							<%}%>
 						<%}%>
 					<%}%>
@@ -190,6 +568,14 @@
 			</div>
 		</div>
 	</main>
+	
+	<footer class="footer mt-auto py-3 fixed-bottom visitors-footer">
+		<div class="container text-center">
+			<span class="text-white" style="font-size: 14px; letter-spacing: 1px;">
+				<i class="fa fa-eye mr-2"></i>每一次访问，都是一份牵挂
+			</span>
+		</div>
+	</footer>
 </body>
 
 </html>

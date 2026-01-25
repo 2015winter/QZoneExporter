@@ -34,198 +34,540 @@
 	<script type="text/javascript" src="../Common/js/sidebar.js"></script>
 	<script type="text/javascript" src="json/favorites.js"></script>
 	<script type="text/javascript" src="js/favorites.js"></script>
+	
+	<style>
+		/* 页面专属样式 */
+		body.favorites-page {
+			background: linear-gradient(135deg, #feca57 0%, #ff9f43 50%, #f093fb 100%);
+			min-height: 100vh;
+			padding-top: 70px;
+			padding-bottom: 80px;
+		}
+		
+		/* 主卡片容器 */
+		.favorites-main-card {
+			background: rgba(255, 255, 255, 0.95);
+			backdrop-filter: blur(20px);
+			border-radius: 24px;
+			box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+			padding: 40px;
+			margin-top: 20px;
+			animation: fadeInUp 0.6s ease-out;
+		}
+		
+		@keyframes fadeInUp {
+			from {
+				opacity: 0;
+				transform: translateY(30px);
+			}
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+		
+		/* 页面标题区域 */
+		.page-header {
+			text-align: center;
+			margin-bottom: 32px;
+			padding-bottom: 24px;
+			border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+		}
+		
+		.page-title {
+			font-size: 28px;
+			font-weight: 700;
+			background: linear-gradient(135deg, #feca57, #ff9f43);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			margin-bottom: 8px;
+		}
+		
+		.page-subtitle {
+			color: #718096;
+			font-size: 15px;
+		}
+		
+		/* 统计信息 */
+		.favorites-stats {
+			display: flex;
+			align-items: center;
+			gap: 16px;
+			margin-bottom: 24px;
+		}
+		
+		.stats-badge {
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+			background: linear-gradient(135deg, #feca57, #ff9f43);
+			color: #fff;
+			padding: 8px 20px;
+			border-radius: 25px;
+			font-weight: 600;
+			font-size: 14px;
+		}
+		
+		/* 年份分组标题 */
+		.year-group {
+			margin-top: 32px;
+			margin-bottom: 16px;
+		}
+		
+		.year-title {
+			display: inline-flex;
+			align-items: center;
+			gap: 10px;
+			background: linear-gradient(135deg, #feca57, #ff9f43);
+			color: #fff;
+			padding: 10px 24px;
+			border-radius: 25px;
+			font-weight: 600;
+			font-size: 16px;
+		}
+		
+		.month-title {
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+			background: rgba(254, 202, 87, 0.2);
+			color: #ff9f43;
+			padding: 6px 16px;
+			border-radius: 20px;
+			font-weight: 500;
+			font-size: 14px;
+			margin: 16px 0 12px;
+		}
+		
+		/* 收藏卡片 */
+		.favorite-card {
+			background: #fff;
+			border-radius: 16px;
+			padding: 24px;
+			margin-bottom: 20px;
+			border: 1px solid rgba(0, 0, 0, 0.05);
+			transition: all 0.3s ease;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+		}
+		
+		.favorite-card:hover {
+			transform: translateY(-4px);
+			box-shadow: 0 12px 32px rgba(254, 202, 87, 0.25);
+		}
+		
+		/* 用户信息 */
+		.favorite-user {
+			display: flex;
+			align-items: flex-start;
+			gap: 16px;
+			margin-bottom: 16px;
+		}
+		
+		.favorite-avatar {
+			width: 50px;
+			height: 50px;
+			border-radius: 50%;
+			border: 3px solid #fff;
+			box-shadow: 0 4px 12px rgba(254, 202, 87, 0.3);
+			transition: transform 0.3s ease;
+		}
+		
+		.favorite-avatar:hover {
+			transform: scale(1.1);
+		}
+		
+		.favorite-user-info {
+			flex: 1;
+		}
+		
+		.favorite-username {
+			font-weight: 600;
+			color: #2d3748;
+			margin-bottom: 4px;
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			flex-wrap: wrap;
+		}
+		
+		.favorite-username a {
+			color: inherit;
+			text-decoration: none;
+		}
+		
+		.favorite-username a:hover {
+			color: #ff9f43;
+		}
+		
+		.type-badge {
+			background: linear-gradient(135deg, #feca57, #ff9f43);
+			color: #fff;
+			padding: 3px 12px;
+			border-radius: 12px;
+			font-size: 12px;
+			font-weight: 600;
+		}
+		
+		.floor-badge {
+			background: linear-gradient(135deg, #667eea, #764ba2);
+			color: #fff;
+			padding: 2px 10px;
+			border-radius: 12px;
+			font-size: 12px;
+			font-weight: 600;
+		}
+		
+		.favorite-time {
+			color: #a0aec0;
+			font-size: 13px;
+		}
+		
+		/* 收藏内容 */
+		.favorite-content {
+			color: #4a5568;
+			font-size: 15px;
+			line-height: 1.8;
+			margin-top: 16px;
+		}
+		
+		.favorite-content pre {
+			white-space: pre-wrap;
+			word-wrap: break-word;
+			font-family: inherit;
+			margin: 0 0 12px;
+			padding: 16px;
+			background: rgba(254, 202, 87, 0.1);
+			border-radius: 12px;
+			border-left: 4px solid #feca57;
+		}
+		
+		.favorite-content hr {
+			border: none;
+			border-top: 1px dashed rgba(0, 0, 0, 0.1);
+			margin: 16px 0;
+		}
+		
+		.favorite-content a {
+			color: #ff9f43;
+			text-decoration: none;
+		}
+		
+		.favorite-content a:hover {
+			text-decoration: underline;
+		}
+		
+		/* 媒体内容区域 */
+		.favorite-media {
+			margin-top: 16px;
+		}
+		
+		.medias {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px;
+		}
+		
+		.medias-item {
+			border-radius: 12px;
+			overflow: hidden;
+			transition: transform 0.3s ease;
+		}
+		
+		.medias-item:hover {
+			transform: scale(1.02);
+		}
+		
+		.medias-item img {
+			border-radius: 12px;
+		}
+		
+		/* 音乐内容 */
+		.music-list {
+			background: rgba(254, 202, 87, 0.1);
+			border-radius: 12px;
+			padding: 16px;
+			margin-top: 12px;
+		}
+		
+		.music-list ul {
+			margin: 0;
+			padding: 0;
+		}
+		
+		.music-list li {
+			list-style: none;
+			padding: 8px 0;
+		}
+		
+		/* 卡片底部 */
+		.favorite-footer {
+			margin-top: 16px;
+			padding-top: 16px;
+			border-top: 1px solid rgba(0, 0, 0, 0.05);
+			text-align: right;
+		}
+		
+		/* 导航栏样式 */
+		.navbar-favorites {
+			background: linear-gradient(135deg, rgba(254, 202, 87, 0.95), rgba(255, 159, 67, 0.95)) !important;
+			backdrop-filter: blur(10px);
+		}
+		
+		/* 底部样式 */
+		.favorites-footer {
+			background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.9));
+			backdrop-filter: blur(10px);
+		}
+		
+		/* 响应式 */
+		@media (max-width: 768px) {
+			.favorites-main-card {
+				padding: 20px 16px;
+				margin: 10px;
+				border-radius: 20px;
+			}
+			
+			.page-title {
+				font-size: 22px;
+			}
+			
+			.favorite-user {
+				flex-wrap: wrap;
+			}
+			
+			.favorite-username {
+				flex-direction: column;
+				align-items: flex-start;
+				gap: 6px;
+			}
+		}
+		
+		/* 隐藏详情 */
+		.photo-detail {
+			display: none !important;
+		}
+	</style>
 </head>
 
-<body>
+<body class="favorites-page">
 	<header>
-		<nav class="navbar navbar-expand-lg navbar-dark fixed-top bg-dark">
-			<a class="navbar-brand" target="_blank" href="https://github.com/ShunCai/QZoneExport">QQ空间导出助手</a>
+		<nav class="navbar navbar-expand-lg navbar-dark fixed-top navbar-favorites">
+			<a class="navbar-brand" target="_blank" href="https://github.com/ShunCai/QZoneExport">
+				<i class="fa fa-cloud-download mr-2"></i>QQ空间导出助手
+			</a>
 			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
 			</button>
 			<div class="collapse navbar-collapse" id="navbarSupportedContent">
 				<nav aria-label="breadcrumb">
-					<ol class="breadcrumb bg-dark">
-						<li class="breadcrumb-item"><a href="../index.html">个人中心</a></li>
-						<li class="breadcrumb-item active" aria-current="page">收藏</li>
+					<ol class="breadcrumb" style="background: transparent;">
+						<li class="breadcrumb-item"><a href="../index.html" style="color: rgba(255,255,255,0.8);"><i class="fa fa-home mr-1"></i>个人中心</a></li>
+						<li class="breadcrumb-item active" aria-current="page" style="color: rgba(255,255,255,0.9);">收藏</li>
 					</ol>
 				</nav>
 			</div>
 		</nav>
 	</header>
+	
 	<main role="main" class="flex-shrink-0">
-		<div id="favorites_html" class="container favorites">
-			<%for (const [year, yearMap] of dataMaps) {%>
-				<span class="sidebar-h1" data-tag="h1" data-sidebar='<%:=year%>年<span class="badge badge-primary badge-pill itemSize"><%:=API.Utils.sumYearItemSize(yearMap)%><span>'></span>
-				<%for (const [month, monthItems] of yearMap) {%>
-					<span class="sidebar-h2" data-tag="h2" data-sidebar='<%:=month%>月<span class="badge badge-secondary badge-pill itemSize"><%:=monthItems.length%><span>'></span>
-					<%for (let index = 0; index < monthItems.length; index++) {%>
-						<%const favorite = monthItems[index]%>
-						<%favorite.uid = 'QZFAV-' + API.Utils.newSimpleUid(16)%>
-						<%total = total -1%>
-						<div class="card w-70 mt-3 border">
-							<div class="card-body">
-								<div class="comments">
-									<div class="comment p-0">
-										<div class="d-flex justify-content-start ">
-											<div class="comment-avatar">
-												<a class="avatar p-0 m-0" target="_blank" href="<%:=API.Common.getUserUrl(API.Favorites.getFavoriteOwner(favorite).uin)%>">
-													<img class="lazyload loading w-100 h-100 border rounded-circle" src="<%:=API.Common.getUserLogoLocalUrl(API.Favorites.getFavoriteOwner(favorite).uin, true)%>" >
-												</a>
-											</div>
-											<div class="comment-infos ml-2">
+		<div class="container">
+			<div class="favorites-main-card">
+				<!-- 页面标题 -->
+				<div class="page-header">
+					<h1 class="page-title"><i class="fa fa-star mr-2"></i>我的收藏</h1>
+					<p class="page-subtitle">收藏的每一份内容，都是曾经打动你的瞬间</p>
+				</div>
+				
+				<!-- 收藏列表 -->
+				<div id="favorites_html" class="favorites-list">
+					<%for (const [year, yearMap] of dataMaps) {%>
+						<div class="year-group">
+							<span class="year-title sidebar-h1" data-tag="h1" data-sidebar='<%:=year%>年<span class="badge badge-primary badge-pill itemSize"><%:=API.Utils.sumYearItemSize(yearMap)%><span>'>
+								<i class="fa fa-calendar"></i><%:=year%>年
+							</span>
+						</div>
+						<%for (const [month, monthItems] of yearMap) {%>
+							<span class="month-title sidebar-h2" data-tag="h2" data-sidebar='<%:=month%>月<span class="badge badge-secondary badge-pill itemSize"><%:=monthItems.length%><span>'>
+								<i class="fa fa-clock-o"></i><%:=month%>月
+							</span>
+							<%for (let index = 0; index < monthItems.length; index++) {%>
+								<%const favorite = monthItems[index]%>
+								<%favorite.uid = 'QZFAV-' + API.Utils.newSimpleUid(16)%>
+								<%total = total -1%>
+								<div class="favorite-card">
+									<div class="favorite-user">
+										<a target="_blank" href="<%:=API.Common.getUserUrl(API.Favorites.getFavoriteOwner(favorite).uin)%>">
+											<img class="favorite-avatar lazyload loading" src="<%:=API.Common.getUserLogoLocalUrl(API.Favorites.getFavoriteOwner(favorite).uin, true)%>">
+										</a>
+										<div class="favorite-user-info">
+											<div class="favorite-username">
 												<a target="_blank" href="<%:=API.Common.getUserUrl(API.Favorites.getFavoriteOwner(favorite).uin)%>">
-													<span><%:=API.Common.formatContent(API.Favorites.getFavoriteOwner(favorite).name, 'HTML', false, false, false, false, true)%></span>
+													<%:=API.Common.formatContent(API.Favorites.getFavoriteOwner(favorite).name, 'HTML', false, false, false, false, true)%>
 												</a>
-												<span class="border-warning border rounded text-warning small p-1"><%:=API.Favorites.getType(favorite.type)%></span>
-												<div class="text-muted small mt-1"><%:=API.Common.formatContent(favorite.custom_create_time)%></div>
+												<span class="type-badge"><%:=API.Favorites.getType(favorite.type)%></span>
+												<span class="floor-badge">#<%:=total + 1 %></span>
+											</div>
+											<div class="favorite-time">
+												<i class="fa fa-clock-o mr-1"></i><%:=API.Common.formatContent(favorite.custom_create_time)%>
 											</div>
 										</div>
-										<div class="messageText mt-2">
-											<%if(favorite.shuoshuo_info && favorite.shuoshuo_info.reason  && favorite.shuoshuo_info.reason.trim() !== ''){%>
-												<pre><%:=API.Common.formatContent(favorite.shuoshuo_info.reason,'HTML', false, true, false, false, true)%></pre>
-												<hr>
-											<%}%>
-											<%if(favorite.share_info && favorite.share_info.reason  && favorite.share_info.reason.trim() !== ''){%>
-												<pre><%:=API.Common.formatContent(favorite.share_info.reason,'HTML', false, true, false, false, true)%></pre>
-												<hr>
-											<%}%>
-											<%if(favorite.type === 5){%>
-												<%/* 说说 */%>
-												<%if(favorite.shuoshuo_info && favorite.shuoshuo_info.detail_shuoshuo_info && favorite.shuoshuo_info.detail_shuoshuo_info.content){%>
-													<pre><%:=API.Common.formatContent(favorite.shuoshuo_info.detail_shuoshuo_info.content,'HTML', false, false, false, false, true)%></pre>
-												<%}else{%>
-													<pre><%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, false, false, false, true)%></pre>
-												<%}%>
-											<%}else if(favorite.type === 7){%>
-												<%/* 分享 */%>
-												<%if(favorite.title && favorite.title.trim() !== ''){%>
-													<pre><a target="_blank" href="<%:=API.Favorites.getShareUrl(favorite.share_info)%>"><%:=favorite.title%></a></pre>
-												<%}%>
-												<%if(favorite.abstract && favorite.abstract.trim() !== ''){%>
-													<pre><%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, true, false, false, true)%></pre>
-												<%}%>
-											<%}else if(favorite.type === 3){%>
-												<%/* 日志 */%>
-												<%if(favorite.title && favorite.title.trim() !== ''){%>
-													<pre><a target="_blank" href="http://user.qzone.qq.com/<%:=favorite.blog_info.owner_uin%>/blog/<%:=favorite.blog_info.id%>"><%:=favorite.title%></a></pre>
-												<%}%>
-												<%if(favorite.abstract && favorite.abstract.trim() !== ''){%>
-													<pre><%:=API.Common.formatContent(favorite.abstract,'HTML', false, true, false, false, true)%></pre>
-												<%}%>
+									</div>
+									
+									<div class="favorite-content">
+										<%if(favorite.shuoshuo_info && favorite.shuoshuo_info.reason  && favorite.shuoshuo_info.reason.trim() !== ''){%>
+											<pre><%:=API.Common.formatContent(favorite.shuoshuo_info.reason,'HTML', false, true, false, false, true)%></pre>
+											<hr>
+										<%}%>
+										<%if(favorite.share_info && favorite.share_info.reason  && favorite.share_info.reason.trim() !== ''){%>
+											<pre><%:=API.Common.formatContent(favorite.share_info.reason,'HTML', false, true, false, false, true)%></pre>
+											<hr>
+										<%}%>
+										<%if(favorite.type === 5){%>
+											<%/* 说说 */%>
+											<%if(favorite.shuoshuo_info && favorite.shuoshuo_info.detail_shuoshuo_info && favorite.shuoshuo_info.detail_shuoshuo_info.content){%>
+												<pre><%:=API.Common.formatContent(favorite.shuoshuo_info.detail_shuoshuo_info.content,'HTML', false, false, false, false, true)%></pre>
 											<%}else{%>
+												<pre><%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, false, false, false, true)%></pre>
+											<%}%>
+										<%}else if(favorite.type === 7){%>
+											<%/* 分享 */%>
+											<%if(favorite.title && favorite.title.trim() !== ''){%>
+												<pre><a target="_blank" href="<%:=API.Favorites.getShareUrl(favorite.share_info)%>"><%:=favorite.title%></a></pre>
+											<%}%>
+											<%if(favorite.abstract && favorite.abstract.trim() !== ''){%>
 												<pre><%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, true, false, false, true)%></pre>
 											<%}%>
-										</div>
+										<%}else if(favorite.type === 3){%>
+											<%/* 日志 */%>
+											<%if(favorite.title && favorite.title.trim() !== ''){%>
+												<pre><a target="_blank" href="http://user.qzone.qq.com/<%:=favorite.blog_info.owner_uin%>/blog/<%:=favorite.blog_info.id%>"><%:=favorite.title%></a></pre>
+											<%}%>
+											<%if(favorite.abstract && favorite.abstract.trim() !== ''){%>
+												<pre><%:=API.Common.formatContent(favorite.abstract,'HTML', false, true, false, false, true)%></pre>
+											<%}%>
+										<%}else{%>
+											<pre><%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, true, false, false, true)%></pre>
+										<%}%>
 									</div>
-								</div>
-								<div id="<%:=favorite.uid%>" class='photo-detail' style="display:none">
-									<div class="container">
-										<div class="row">
-											<div class="col text-white-50 text-left">
-												<p>
-													<i title="收藏时间" class="fa fa-clock-o text-primary"><%:=favorite.custom_create_time%></i>
-												</p>
-											</div>
-											<div class="col text-white text-truncate">
-												<%if(favorite.shuoshuo_info && favorite.shuoshuo_info.reason && favorite.shuoshuo_info.reason.trim() !== ''){%>
-													<pre class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.shuoshuo_info.reason,'HTML', false, true, false, false, true)%>"><%:=API.Common.formatContent(favorite.shuoshuo_info.reason,'HTML', false, true, false, false, true)%></pre>
-												<%}%>
-												<%if(favorite.share_info && favorite.share_info.reason && favorite.share_info.reason.trim() !== ''){%>
-													<pre class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.share_info.reason,'HTML', false, true, false, false, true)%>"><%:=API.Common.formatContent(favorite.share_info.reason,'HTML', false, true, false, false, true)%></pre>
-												<%}%>
-												<%if(favorite.type === 5){%>
-													<%/* 说说 */%>
-													<%if(favorite.shuoshuo_info && favorite.shuoshuo_info.detail_shuoshuo_info && favorite.shuoshuo_info.detail_shuoshuo_info.content){%>
-														<pre class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.shuoshuo_info.detail_shuoshuo_info.content,'HTML', false, false, false, false, true)%>"><%:=API.Common.formatContent(favorite.shuoshuo_info.detail_shuoshuo_info.content,'HTML', false, false, false, false, true)%></pre>
+									
+									<div id="<%:=favorite.uid%>" class='photo-detail' style="display:none">
+										<div class="container">
+											<div class="row">
+												<div class="col text-white-50 text-left">
+													<p>
+														<i title="收藏时间" class="fa fa-clock-o text-primary"><%:=favorite.custom_create_time%></i>
+													</p>
+												</div>
+												<div class="col text-white text-truncate">
+													<%if(favorite.shuoshuo_info && favorite.shuoshuo_info.reason && favorite.shuoshuo_info.reason.trim() !== ''){%>
+														<pre class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.shuoshuo_info.reason,'HTML', false, true, false, false, true)%>"><%:=API.Common.formatContent(favorite.shuoshuo_info.reason,'HTML', false, true, false, false, true)%></pre>
+													<%}%>
+													<%if(favorite.share_info && favorite.share_info.reason && favorite.share_info.reason.trim() !== ''){%>
+														<pre class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.share_info.reason,'HTML', false, true, false, false, true)%>"><%:=API.Common.formatContent(favorite.share_info.reason,'HTML', false, true, false, false, true)%></pre>
+													<%}%>
+													<%if(favorite.type === 5){%>
+														<%/* 说说 */%>
+														<%if(favorite.shuoshuo_info && favorite.shuoshuo_info.detail_shuoshuo_info && favorite.shuoshuo_info.detail_shuoshuo_info.content){%>
+															<pre class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.shuoshuo_info.detail_shuoshuo_info.content,'HTML', false, false, false, false, true)%>"><%:=API.Common.formatContent(favorite.shuoshuo_info.detail_shuoshuo_info.content,'HTML', false, false, false, false, true)%></pre>
+														<%}else{%>
+															<pre class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, false, false, false, true)%>"><%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, false, false, false, true)%></pre>
+														<%}%>
+													<%}else if(favorite.type === 7){%>
+														<%/* 分享 */%>
+														<%if(favorite.title && favorite.title.trim() !== ''){%>
+															<pre class="text-white" data-toggle="tooltip" data-html="true"><a target="_blank" href="<%:=API.Favorites.getShareUrl(favorite.share_info)%>"><%:=favorite.title%></a></pre>
+														<%}%>
+														<%if(favorite.abstract && favorite.abstract.trim() !== ''){%>
+															<pre class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, true, false, false, true)%>"><%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, true, false, false, true)%></pre>
+														<%}%>
+													<%}else if(favorite.type === 3){%>
+														<%/* 日志 */%>
+														<%if(favorite.title){%>
+															<pre class="text-white" data-toggle="tooltip" data-html="true" title="<%:=favorite.title%>"><a target="_blank" href="http://user.qzone.qq.com/<%:=favorite.blog_info.owner_uin%>/blog/<%:=favorite.blog_info.id%>"><%:=favorite.title%></a></pre>
+														<%}%>
+														<%if(favorite.abstract && favorite.abstract.trim() !== ''){%>
+															<pre class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.abstract,'HTML', false, true, false, false, true)%>"><%:=API.Common.formatContent(favorite.abstract,'HTML', false, true, false, false, true)%></pre>
+														<%}%>
 													<%}else{%>
-														<pre class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, false, false, false, true)%>"><%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, false, false, false, true)%></pre>
-													<%}%>
-												<%}else if(favorite.type === 7){%>
-													<%/* 分享 */%>
-													<%if(favorite.title && favorite.title.trim() !== ''){%>
-														<pre class="text-white" data-toggle="tooltip" data-html="true"><a target="_blank" href="<%:=API.Favorites.getShareUrl(favorite.share_info)%>"><%:=favorite.title%></a></pre>
-													<%}%>
-													<%if(favorite.abstract && favorite.abstract.trim() !== ''){%>
 														<pre class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, true, false, false, true)%>"><%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, true, false, false, true)%></pre>
 													<%}%>
-												<%}else if(favorite.type === 3){%>
-													<%/* 日志 */%>
-													<%if(favorite.title){%>
-														<pre class="text-white" data-toggle="tooltip" data-html="true" title="<%:=favorite.title%>"><a target="_blank" href="http://user.qzone.qq.com/<%:=favorite.blog_info.owner_uin%>/blog/<%:=favorite.blog_info.id%>"><%:=favorite.title%></a></pre>
-													<%}%>
-													<%if(favorite.abstract && favorite.abstract.trim() !== ''){%>
-														<pre class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.abstract,'HTML', false, true, false, false, true)%>"><%:=API.Common.formatContent(favorite.abstract,'HTML', false, true, false, false, true)%></pre>
-													<%}%>
-												<%}else{%>
-													<pre class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, true, false, false, true)%>"><%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, true, false, false, true)%></pre>
-												<%}%>
+												</div>
+												<div class="col"></div>
 											</div>
-											<div class="col"></div>
 										</div>
 									</div>
+									
+									<%/* 多媒体内容 */%>
+									<div class="favorite-media">
+										<div class="medias row p-3 lightgallery <%:=API.Common.getImgClassType(favorite)%>">
+										<%/* 视频内容 */%>
+										<%if(favorite.custom_videos){%>
+											<%let imgIdex = 0%>
+											<%for(let video of favorite.custom_videos){%>
+												<% video.vid = 'QZ-' + API.Utils.newSimpleUid(16); %>
+											<%if(video.play_url){%>
+												<a class="medias-item border message-lightbox-external" target="_blank" href="<%:=video.play_url%>">
+													<span class="message-video"></span>
+													<img class="lazyload loading w-100 h-100" src="<%:=video.custom_pre_filepath ? video.custom_pre_filepath : (video.preview_img || '../Common/images/loading.gif')%>" data-src="<%:=video.custom_pre_filepath ? video.custom_pre_filepath : video.preview_img%>">
+												</a>
+											<%}else{%>
+												<a class="medias-item border message-lightbox"  data-video='{"source": [{"src":"<%:=video.custom_filepath ? video.custom_filepath : video.url%>", "type":"video/mp4"}],"attributes": {"preload": false, "controls": true}}' 
+													data-poster="<%:=video.custom_pre_filepath ? video.custom_pre_filepath : video.preview_img%>" data-sub-html="#<%:=favorite.uid%>">
+													<span class="message-video"></span>
+													<img class="lazyload loading w-100 h-100" data-idx="<%:=imgIdex%>" src="<%:=video.custom_pre_filepath ? video.custom_pre_filepath : (video.preview_img || '../Common/images/loading.gif')%>" data-src="<%:=video.custom_pre_filepath ? video.custom_pre_filepath : video.preview_img%>" />
+												</a>
+												<%imgIdex++%>
+											<%}%>
+											<%}%>
+										<%}%>
+										<%/* 图片内容 */%>
+										<%if(favorite.custom_origin_images || favorite.custom_images){%>
+											<%let imgIdex = 0%>
+											<%let favImages = favorite.custom_origin_images || favorite.custom_images%>
+											<%for(let image of favImages){%>
+												<a class="medias-item border message-lightbox" target="_blank" href="<%:=image.custom_filepath ? image.custom_filepath : image.custom_url%>" data-src="<%:=image.custom_filepath ? image.custom_filepath : image.custom_url%>" data-sub-html="#<%:=favorite.uid%>">
+													<img class="lazyload loading w-100 h-100" data-idx="<%:=imgIdex%>" src="<%:=image.custom_filepath ? image.custom_filepath : (image.custom_url || '../Common/images/loading.gif')%>" data-src="<%:=image.custom_filepath ? image.custom_filepath : image.custom_url%>">
+												</a>
+												<%imgIdex++%>
+											<%}%>
+										<%}%>
+										</div>
+									</div>
+									
+									<%/* 音乐内容（目前PC端已无法正常播放，直接显示专辑图片与歌曲信息） */%>
+									<%if(favorite.custom_audios && favorite.custom_audios.length > 0){%>
+										<div class="music-list">
+											<ul class="list-unstyled">
+												<%let imgIdex = 0%>
+												<%for(let music of favorite.custom_audios){%>
+													<li>
+														<a class="medias-item text-center message-lightbox" href="<%:=music.playurl || music.play_url%>" data-src="<%:=music.custom_filepath ? music.custom_filepath : music.custom_url%>" data-sub-html="#<%:=favorite.uid%>">
+															<img class="lazyload loading" style="width: 60px; height: 60px; border-radius: 8px;" data-idx="<%:=imgIdex%>" src="<%:=music.custom_filepath ? music.custom_filepath : (music.custom_url || '../Common/images/loading.gif')%>" data-src="<%:=music.custom_filepath ? music.custom_filepath : music.custom_url%>">
+															<span class="ml-2"><%:=music.song_name%></span>
+														</a>
+													</li>
+													<%imgIdex++%>
+												<%}%>
+											</ul>
+										</div>
+									<%}%>
 								</div>
-								<%/* 多媒体内容 */%>
-								<div class="medias row p-3 lightgallery <%:=API.Common.getImgClassType(favorite)%>">
-								<%/* 视频内容 */%>
-								<%if(favorite.custom_videos){%>
-									<%let imgIdex = 0%>
-									<%for(let video of favorite.custom_videos){%>
-										<% video.vid = 'QZ-' + API.Utils.newSimpleUid(16); %>
-									<%if(video.play_url){%>
-										<a class="medias-item border message-lightbox-external" target="_blank" href="<%:=video.play_url%>">
-											<span class="message-video"></span>
-											<img class="lazyload loading w-100 h-100" src="<%:=video.custom_pre_filepath ? video.custom_pre_filepath : (video.preview_img || '../Common/images/loading.gif')%>" data-src="<%:=video.custom_pre_filepath ? video.custom_pre_filepath : video.preview_img%>">
-										</a>
-									<%}else{%>
-										<a class="medias-item border message-lightbox"  data-video='{"source": [{"src":"<%:=video.custom_filepath ? video.custom_filepath : video.url%>", "type":"video/mp4"}],"attributes": {"preload": false, "controls": true}}' 
-											data-poster="<%:=video.custom_pre_filepath ? video.custom_pre_filepath : video.preview_img%>" data-sub-html="#<%:=favorite.uid%>">
-											<span class="message-video"></span>
-											<img class="lazyload loading w-100 h-100" data-idx="<%:=imgIdex%>" src="<%:=video.custom_pre_filepath ? video.custom_pre_filepath : (video.preview_img || '../Common/images/loading.gif')%>" data-src="<%:=video.custom_pre_filepath ? video.custom_pre_filepath : video.preview_img%>" />
-										</a>
-										<%imgIdex++%>
-									<%}%>
-									<%}%>
-								<%}%>
-							<%/* 图片内容 */%>
-							<%if(favorite.custom_origin_images || favorite.custom_images){%>
-								<%let imgIdex = 0%>
-								<%let favImages = favorite.custom_origin_images || favorite.custom_images%>
-								<%for(let image of favImages){%>
-									<a class="medias-item border message-lightbox" target="_blank" href="<%:=image.custom_filepath ? image.custom_filepath : image.custom_url%>" data-src="<%:=image.custom_filepath ? image.custom_filepath : image.custom_url%>" data-sub-html="#<%:=favorite.uid%>">
-										<img class="lazyload loading w-100 h-100" data-idx="<%:=imgIdex%>" src="<%:=image.custom_filepath ? image.custom_filepath : (image.custom_url || '../Common/images/loading.gif')%>" data-src="<%:=image.custom_filepath ? image.custom_filepath : image.custom_url%>">
-									</a>
-									<%imgIdex++%>
-								<%}%>
 							<%}%>
-								</div>
-						<%/* 音乐内容（目前PC端已无法正常播放，直接显示专辑图片与歌曲信息） */%>
-						<%if(favorite.custom_audios && favorite.custom_audios.length > 0){%>
-							<div class="medias row p-3 ml-5 border">
-								<ul class="list-unstyled">
-									<%let imgIdex = 0%>
-									<%for(let music of favorite.custom_audios){%>
-										<li>
-											<a class="medias-item text-center message-lightbox" href="<%:=music.playurl || music.play_url%>" data-src="<%:=music.custom_filepath ? music.custom_filepath : music.custom_url%>" data-sub-html="#<%:=favorite.uid%>">
-												<img class="lazyload loading w-100 h-100" data-idx="<%:=imgIdex%>" src="<%:=music.custom_filepath ? music.custom_filepath : (music.custom_url || '../Common/images/loading.gif')%>" data-src="<%:=music.custom_filepath ? music.custom_filepath : music.custom_url%>">
-												<span><%:=music.song_name%></span>
-											</a>
-										</li>
-										<%imgIdex++%>
-									<%}%>
-								</ul>
-							</div>
 						<%}%>
-							</div>
-							<div class="card-footer text-muted">
-								<span class="border-primary border rounded text-primary small p-1 float-right" title="当前楼层">#<%:=total + 1 %></span>
-							</div>
-						</div>
 					<%}%>
-				<%}%>
-			<%}%>
+				</div>
+			</div>
 		</div>
 	</main>
+	
+	<footer class="footer mt-auto py-3 fixed-bottom favorites-footer">
+		<div class="container text-center">
+			<span class="text-white" style="font-size: 14px; letter-spacing: 1px;">
+				<i class="fa fa-star mr-2"></i>收藏美好，珍藏回忆
+			</span>
+		</div>
+	</footer>
 </body>
 
 </html>
