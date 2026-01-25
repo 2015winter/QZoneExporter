@@ -365,7 +365,8 @@
 				<nav aria-label="breadcrumb">
 					<ol class="breadcrumb" style="background: transparent;">
 						<li class="breadcrumb-item"><a href="../index.html" style="color: rgba(255,255,255,0.8);"><i class="fa fa-home mr-1"></i>个人中心</a></li>
-						<li class="breadcrumb-item active" aria-current="page" style="color: rgba(255,255,255,0.9);">留言</li>
+						<li class="breadcrumb-item"><a href="index.html" style="color: rgba(255,255,255,0.8);"><i class="fa fa-envelope-o mr-1"></i>留言</a></li>
+						<li class="breadcrumb-item active" aria-current="page" style="color: rgba(255,255,255,0.9);"><i class="fa fa-calendar mr-1"></i><%:=currentYear%>年</li>
 					</ol>
 				</nav>
 			</div>
@@ -377,18 +378,8 @@
 			<div class="boards-main-card">
 				<!-- 页面标题 -->
 				<div class="page-header">
-					<h1 class="page-title"><i class="fa fa-envelope-o mr-2"></i>留言板</h1>
+					<h1 class="page-title"><i class="fa fa-envelope-o mr-2"></i><%:=currentYear%>年留言板</h1>
 					<p class="page-subtitle">那些年，朋友们留下的温暖话语</p>
-				</div>
-				
-				<!-- 主人寄语 -->
-				<div class="slogan-card">
-					<div class="slogan-title">
-						<i class="fa fa-quote-left"></i>主人寄语
-					</div>
-					<div class="slogan-content sidebar-h1" data-tag="h1" data-sidebar="主人寄语">
-						<%:=authorInfo.message || '说些寄语，欢迎您的空间访客吧'%>
-					</div>
 				</div>
 				
 				<!-- 留言统计 -->

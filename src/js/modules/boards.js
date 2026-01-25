@@ -261,6 +261,22 @@ API.Boards.exportToHtml = async(boardInfo) => {
 
         // 留言数据根据年份分组
         const yearMaps = API.Utils.groupedByTime(boardInfo.items, "pubtime", 'year');
+        
+        // 生成年份列表数据（用于索引页）
+        const yearList = [];
+        let maxCount = 0;
+        let maxYear = '';
+        for (const [year, yearItems] of yearMaps) {
+            const count = yearItems.length;
+            yearList.push({ year: year, count: count });
+            if (count > maxCount) {
+                maxCount = count;
+                maxYear = year;
+            }
+        }
+        // 按年份倒序排列
+        yearList.sort((a, b) => b.year - a.year);
+        
         // 基于模板生成年份留言HTML
         for (const [year, yearItems] of yearMaps) {
             // 基于模板生成所有留言HTML
@@ -270,18 +286,21 @@ API.Boards.exportToHtml = async(boardInfo) => {
             const params = {
                 boardMaps: _boardMaps,
                 total: yearItems.length,
-                authorInfo: boardInfo.authorInfo
+                authorInfo: boardInfo.authorInfo,
+                currentYear: year
             }
             const yearFile = await API.Common.writeHtmlofTpl('boards', params, moduleFolder + "/" + year + ".html");
         }
 
-        // 基于模板生成汇总说说HTML
-        const params = {
-            boardMaps: API.Utils.groupedByTime(boardInfo.items, "pubtime", 'all'),
+        // 基于模板生成索引页HTML
+        const indexParams = {
+            yearList: yearList,
             total: boardInfo.total,
+            maxCount: maxCount,
+            maxYear: maxYear,
             authorInfo: boardInfo.authorInfo
         }
-        await API.Common.writeHtmlofTpl('boards', params, moduleFolder + "/index.html");
+        await API.Common.writeHtmlofTpl('boards_index', indexParams, moduleFolder + "/index.html");
 
     } catch (error) {
         console.error('导出留言到HTML异常', error, boardInfo);

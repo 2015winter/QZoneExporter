@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+	<link rel="icon" href="../Common/images/favicon.ico"> 
+	<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<title>QQ空间备份-留言</title>
+	<link rel="stylesheet" href="../Common/vendor/css/font-awesome.min.css">
+	<link rel="stylesheet" href="../Common/vendor/css/bootstrap.min.css">
+	<link rel="stylesheet" href="../Common/vendor/css/lightgallery.min.css">
+	<link rel="stylesheet" href="../Common/vendor/css/lightgallery-bundle.min.css">
+	<link rel="stylesheet" type="text/css" href="../Common/css/common.css">
+	<script src="../Common/vendor/js/jquery.min.js"></script>
+	<script src="../Common/vendor/js/bootstrap.bundle.min.js"></script>
+	<script src="../Common/vendor/js/lodash.min.js"></script>
+	<script src="../Common/vendor/js/lazyload.min.js"></script>
+	<script src="../Common/vendor/js/lightgallery.min.js"></script>
+	<script src="../Common/vendor/js/lg-zoom.min.js"></script>
+	<script src="../Common/vendor/js/lg-thumbnail.min.js"></script>
+	<script src="../Common/vendor/js/lg-rotate.min.js"></script>
+	<script src="../Common/vendor/js/lg-fullscreen.min.js"></script>
+	<script src="../Common/vendor/js/index.aio.min.js"></script>
+	<script src="../Common/vendor/js/clicklove.min.js"></script>
+	<script type="text/javascript" src="../Common/json/config.js"></script>
+	<script type="text/javascript" src="json/boards.js"></script>
+	<script type="text/javascript" src="../Common/js/common.js"></script>
+	
+	<style>
+		/* 留言板索引页专属样式 */
+		body.boards-index-page {
+			background: linear-gradient(135deg, #4ecdc4 0%, #556270 50%, #36d1dc 100%);
+			min-height: 100vh;
+			padding-top: 70px;
+			padding-bottom: 80px;
+		}
+		
+		/* 导航栏样式 */
+		.boards-navbar {
+			background: linear-gradient(135deg, rgba(78, 205, 196, 0.95), rgba(85, 98, 112, 0.95)) !important;
+			backdrop-filter: blur(10px);
+		}
+		
+		.boards-breadcrumb {
+			background: transparent !important;
+			margin-bottom: 0;
+			padding: 0;
+		}
+		
+		.boards-breadcrumb .breadcrumb-item a {
+			color: rgba(255, 255, 255, 0.8);
+			transition: color 0.3s ease;
+		}
+		
+		.boards-breadcrumb .breadcrumb-item a:hover {
+			color: #fff;
+		}
+		
+		.boards-breadcrumb .breadcrumb-item.active {
+			color: rgba(255, 255, 255, 0.9);
+		}
+		
+		.boards-breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+			color: rgba(255, 255, 255, 0.5);
+		}
+		
+		/* 主卡片 */
+		.boards-index-card {
+			background: rgba(255, 255, 255, 0.95);
+			backdrop-filter: blur(20px);
+			border-radius: 24px;
+			box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+			padding: 40px;
+			margin-top: 20px;
+			animation: fadeInUp 0.6s ease-out;
+		}
+		
+		@keyframes fadeInUp {
+			from {
+				opacity: 0;
+				transform: translateY(30px);
+			}
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+		
+		/* 页面标题 */
+		.boards-index-header {
+			text-align: center;
+			margin-bottom: 32px;
+			padding-bottom: 24px;
+			border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+		}
+		
+		.boards-index-icon {
+			font-size: 48px;
+			background: linear-gradient(135deg, #4ecdc4, #556270);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			margin-bottom: 16px;
+			display: block;
+		}
+		
+		.boards-index-title {
+			font-size: 28px;
+			font-weight: 700;
+			background: linear-gradient(135deg, #4ecdc4, #556270);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			margin-bottom: 8px;
+		}
+		
+		.boards-index-subtitle {
+			color: #718096;
+			font-size: 15px;
+		}
+		
+		.boards-total-count,
+		.boards-year-count {
+			color: #4ecdc4;
+			font-weight: 600;
+		}
+		
+		/* 主人寄语卡片 */
+		.boards-slogan-card {
+			background: linear-gradient(145deg, #f8fafc, #fff);
+			border-radius: 16px;
+			padding: 24px;
+			margin-bottom: 32px;
+			border: 1px solid rgba(78, 205, 196, 0.2);
+			position: relative;
+			overflow: hidden;
+		}
+		
+		.boards-slogan-card::before {
+			content: '\f10d';
+			font-family: 'FontAwesome';
+			position: absolute;
+			top: 16px;
+			left: 20px;
+			font-size: 24px;
+			color: rgba(78, 205, 196, 0.2);
+		}
+		
+		.boards-slogan-title {
+			font-size: 16px;
+			font-weight: 600;
+			color: #4ecdc4;
+			margin-bottom: 12px;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+		}
+		
+		.boards-slogan-content {
+			color: #4a5568;
+			font-size: 15px;
+			line-height: 1.8;
+			padding-left: 32px;
+			font-style: italic;
+		}
+		
+		/* 那年今日区块 */
+		.that-year-today-section {
+			background: linear-gradient(145deg, #fff8e1, #fff);
+			border-radius: 16px;
+			padding: 24px;
+			margin-bottom: 32px;
+			border: 1px solid rgba(255, 193, 7, 0.3);
+		}
+		
+		.that-year-today-header {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			margin-bottom: 16px;
+			color: #f59e0b;
+			font-size: 16px;
+			font-weight: 600;
+		}
+		
+		.that-year-today-header i {
+			font-size: 20px;
+		}
+		
+		.that-year-today-subtitle {
+			font-size: 14px;
+			font-weight: 400;
+			color: #92400e;
+		}
+		
+		.that-year-group {
+			margin-bottom: 16px;
+		}
+		
+		.that-year-header {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			margin-bottom: 10px;
+		}
+		
+		.that-year-badge {
+			background: linear-gradient(135deg, #fbbf24, #f59e0b);
+			color: #fff;
+			padding: 4px 12px;
+			border-radius: 15px;
+			font-size: 13px;
+			font-weight: 600;
+		}
+		
+		.that-year-count {
+			color: #92400e;
+			font-size: 13px;
+		}
+		
+		.that-year-items {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+		}
+		
+		.that-year-item {
+			display: block;
+			padding: 12px 16px;
+			background: rgba(255, 255, 255, 0.8);
+			border-radius: 10px;
+			text-decoration: none;
+			transition: all 0.3s ease;
+			border: 1px solid rgba(245, 158, 11, 0.1);
+		}
+		
+		.that-year-item:hover {
+			background: #fff;
+			transform: translateX(4px);
+			box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+			text-decoration: none;
+		}
+		
+		.that-year-item-time {
+			font-size: 12px;
+			color: #f59e0b;
+			margin-bottom: 4px;
+		}
+		
+		.that-year-item-content {
+			font-size: 14px;
+			color: #4a5568;
+			line-height: 1.5;
+		}
+		
+		/* 年份导航网格 */
+		.boards-year-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+			gap: 16px;
+			margin-bottom: 32px;
+		}
+		
+		.boards-year-card {
+			background: linear-gradient(145deg, #fff, #f8fafc);
+			border-radius: 16px;
+			padding: 20px;
+			text-decoration: none;
+			transition: all 0.3s ease;
+			border: 2px solid transparent;
+			position: relative;
+			overflow: hidden;
+		}
+		
+		.boards-year-card::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			height: 4px;
+			background: linear-gradient(90deg, #4ecdc4, #556270);
+			transform: scaleX(0);
+			transform-origin: left;
+			transition: transform 0.3s ease;
+		}
+		
+		.boards-year-card:hover {
+			transform: translateY(-4px);
+			box-shadow: 0 12px 32px rgba(78, 205, 196, 0.25);
+			border-color: rgba(78, 205, 196, 0.3);
+			text-decoration: none;
+		}
+		
+		.boards-year-card:hover::before {
+			transform: scaleX(1);
+		}
+		
+		.year-card-inner {
+			display: flex;
+			align-items: baseline;
+			gap: 4px;
+			margin-bottom: 8px;
+		}
+		
+		.year-number {
+			font-size: 32px;
+			font-weight: 700;
+			background: linear-gradient(135deg, #4ecdc4, #556270);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+		}
+		
+		.year-label {
+			font-size: 16px;
+			color: #718096;
+		}
+		
+		.year-stats {
+			display: flex;
+			align-items: baseline;
+			gap: 4px;
+			margin-bottom: 12px;
+		}
+		
+		.year-count {
+			font-size: 20px;
+			font-weight: 600;
+			color: #2d3748;
+		}
+		
+		.year-unit {
+			font-size: 13px;
+			color: #a0aec0;
+		}
+		
+		.year-progress {
+			height: 4px;
+			background: rgba(78, 205, 196, 0.15);
+			border-radius: 2px;
+			overflow: hidden;
+		}
+		
+		.year-progress-bar {
+			height: 100%;
+			background: linear-gradient(90deg, #4ecdc4, #556270);
+			border-radius: 2px;
+			transition: width 0.6s ease;
+		}
+		
+		/* 统计信息行 */
+		.boards-stats-row {
+			display: flex;
+			justify-content: center;
+			gap: 32px;
+			flex-wrap: wrap;
+			padding-top: 24px;
+			border-top: 1px solid rgba(0, 0, 0, 0.08);
+		}
+		
+		.stat-item {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
+		
+		.stat-icon {
+			width: 44px;
+			height: 44px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background: linear-gradient(135deg, rgba(78, 205, 196, 0.1), rgba(85, 98, 112, 0.1));
+			border-radius: 12px;
+			color: #4ecdc4;
+			font-size: 18px;
+		}
+		
+		.stat-info {
+			display: flex;
+			flex-direction: column;
+		}
+		
+		.stat-value {
+			font-size: 20px;
+			font-weight: 700;
+			color: #2d3748;
+		}
+		
+		.stat-label {
+			font-size: 13px;
+			color: #a0aec0;
+		}
+		
+		/* 底部样式 */
+		.boards-footer {
+			background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.9));
+			backdrop-filter: blur(10px);
+			position: fixed;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			z-index: 1000;
+		}
+		
+		.footer-text {
+			font-size: 14px;
+			letter-spacing: 1px;
+		}
+		
+		/* 响应式 */
+		@media (max-width: 768px) {
+			.boards-index-card {
+				padding: 20px 16px;
+				margin: 10px;
+				border-radius: 20px;
+			}
+			
+			.boards-index-title {
+				font-size: 22px;
+			}
+			
+			.boards-year-grid {
+				grid-template-columns: repeat(2, 1fr);
+				gap: 12px;
+			}
+			
+			.boards-stats-row {
+				flex-direction: column;
+				align-items: center;
+				gap: 16px;
+			}
+		}
+	</style>
+</head>
+
+<body class="boards-index-page">
+	<header>
+		<nav class="navbar navbar-expand-lg navbar-dark fixed-top boards-navbar">
+			<a class="navbar-brand" target="_blank" href="https://github.com/ShunCai/QZoneExport">
+				<i class="fa fa-cloud-download mr-2"></i>QQ空间导出助手
+			</a>
+			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarSupportedContent">
+				<nav aria-label="breadcrumb">
+					<ol class="breadcrumb boards-breadcrumb">
+						<li class="breadcrumb-item"><a href="../index.html"><i class="fa fa-home mr-1"></i>个人中心</a></li>
+						<li class="breadcrumb-item active" aria-current="page"><i class="fa fa-envelope-o mr-1"></i>留言</li>
+					</ol>
+				</nav>
+			</div>
+		</nav>
+	</header>
+	
+	<main role="main" class="flex-shrink-0">
+		<div class="container boards">
+			<div class="boards-index-card">
+				<!-- 页面标题 -->
+				<div class="boards-index-header">
+					<i class="fa fa-envelope-o boards-index-icon"></i>
+					<h1 class="boards-index-title">留言时光机</h1>
+					<p class="boards-index-subtitle">共 <span class="boards-total-count"><%:=total%></span> 条留言，记录了 <span class="boards-year-count"><%:=yearList.length%></span> 年的友情岁月</p>
+				</div>
+				
+				<!-- 主人寄语 -->
+				<div class="boards-slogan-card">
+					<div class="boards-slogan-title">
+						<i class="fa fa-quote-left"></i>主人寄语
+					</div>
+					<div class="boards-slogan-content">
+						<%:=authorInfo.message || '说些寄语，欢迎您的空间访客吧'%>
+					</div>
+				</div>
+				
+				<!-- 那年今日区块 -->
+				<div id="that-year-today" class="that-year-today-section" style="display: none;">
+					<div class="that-year-today-header">
+						<i class="fa fa-history"></i>
+						<span class="that-year-today-title">那年今日</span>
+						<span class="that-year-today-subtitle" id="that-year-today-subtitle"></span>
+					</div>
+					<div id="that-year-today-content" class="that-year-today-content"></div>
+				</div>
+				
+				<!-- 年份导航网格 -->
+				<div class="boards-year-grid">
+					<%for (const yearInfo of yearList) {%>
+					<a href="<%:=yearInfo.year%>.html" class="boards-year-card">
+						<div class="year-card-inner">
+							<span class="year-number"><%:=yearInfo.year%></span>
+							<span class="year-label">年</span>
+						</div>
+						<div class="year-stats">
+							<span class="year-count"><%:=yearInfo.count%></span>
+							<span class="year-unit">条留言</span>
+						</div>
+						<div class="year-progress">
+							<div class="year-progress-bar" style="width: <%:=Math.min(100, (yearInfo.count / maxCount) * 100)%>%"></div>
+						</div>
+					</a>
+					<%}%>
+				</div>
+				
+				<!-- 统计信息 -->
+				<div class="boards-stats-row">
+					<div class="stat-item">
+						<i class="fa fa-calendar stat-icon"></i>
+						<div class="stat-info">
+							<span class="stat-value"><%:=yearList.length > 0 ? yearList[yearList.length - 1].year : '-'%></span>
+							<span class="stat-label">最早年份</span>
+						</div>
+					</div>
+					<div class="stat-item">
+						<i class="fa fa-clock-o stat-icon"></i>
+						<div class="stat-info">
+							<span class="stat-value"><%:=yearList.length > 0 ? yearList[0].year : '-'%></span>
+							<span class="stat-label">最近年份</span>
+						</div>
+					</div>
+					<div class="stat-item">
+						<i class="fa fa-fire stat-icon"></i>
+						<div class="stat-info">
+							<span class="stat-value"><%:=maxYear%></span>
+							<span class="stat-label">留言最多</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+	
+	<footer class="footer mt-auto py-3 boards-footer">
+		<div class="container text-center">
+			<span class="text-white footer-text">
+				<i class="fa fa-envelope-o mr-2"></i>留言如信，字字珍贵
+			</span>
+		</div>
+	</footer>
+	
+	<script>
+	$(function() {
+		// 那年今日功能
+		const date = new Date();
+		const currentYear = date.getFullYear();
+		const currentMonth = date.getMonth() + 1;
+		const currentDay = date.getDate();
+		const currentMonthDay = '-' + String(currentMonth).padStart(2, '0') + '-' + String(currentDay).padStart(2, '0');
+		
+		// 从boards数据中筛选那年今日
+		const thatYearTodayItems = [];
+		if (typeof boardInfo !== 'undefined' && boardInfo.items && boardInfo.items.length > 0) {
+			for (const board of boardInfo.items) {
+				if (!board.pubtime) continue;
+				const boardDate = new Date(board.pubtime * 1000);
+				const boardYear = boardDate.getFullYear();
+				// 跳过当年
+				if (boardYear >= currentYear) continue;
+				const boardMonthDay = '-' + String(boardDate.getMonth() + 1).padStart(2, '0') + '-' + String(boardDate.getDate()).padStart(2, '0');
+				if (boardMonthDay === currentMonthDay) {
+					thatYearTodayItems.push({
+						year: boardYear,
+						board: board
+					});
+				}
+			}
+		}
+		
+		// 如果有那年今日数据，显示区块
+		if (thatYearTodayItems.length > 0) {
+			$('#that-year-today').show();
+			$('#that-year-today-subtitle').text(currentMonth + '月' + currentDay + '日，' + thatYearTodayItems.length + ' 条回忆');
+			
+			// 按年份分组
+			const yearGroups = {};
+			for (const item of thatYearTodayItems) {
+				if (!yearGroups[item.year]) {
+					yearGroups[item.year] = [];
+				}
+				yearGroups[item.year].push(item.board);
+			}
+			
+			// 按年份倒序渲染
+			const years = Object.keys(yearGroups).sort((a, b) => b - a);
+			let html = '';
+			for (const year of years) {
+				const yearBoards = yearGroups[year];
+				html += '<div class="that-year-group">';
+				html += '<div class="that-year-header"><span class="that-year-badge">' + year + '年</span><span class="that-year-count">' + yearBoards.length + '条</span></div>';
+				html += '<div class="that-year-items">';
+				for (const board of yearBoards) {
+					const boardTime = new Date(board.pubtime * 1000);
+					const timeStr = boardTime.getFullYear() + '-' + String(boardTime.getMonth() + 1).padStart(2, '0') + '-' + String(boardTime.getDate()).padStart(2, '0') + ' ' + String(boardTime.getHours()).padStart(2, '0') + ':' + String(boardTime.getMinutes()).padStart(2, '0');
+					const content = (board.htmlContent || '').replace(/<[^>]+>/g, '').substring(0, 100);
+					const nickname = board.nickname || '访客';
+					html += '<a href="' + year + '.html" class="that-year-item">';
+					html += '<div class="that-year-item-time"><i class="fa fa-clock-o mr-1"></i>' + timeStr + ' - ' + nickname + '</div>';
+					html += '<div class="that-year-item-content">' + (content || '[图片/表情]') + (content && content.length >= 100 ? '...' : '') + '</div>';
+					html += '</a>';
+				}
+				html += '</div></div>';
+			}
+			html += '<div class="text-center text-muted mt-3"><i class="fa fa-heart text-danger mr-1"></i>友情有底线，回忆无限量</div>';
+			$('#that-year-today-content').html(html);
+		}
+		
+		// 图片懒加载
+		if (typeof lazyload !== 'undefined') {
+			lazyload();
+		}
+	});
+	</script>
+</body>
+
+</html>
