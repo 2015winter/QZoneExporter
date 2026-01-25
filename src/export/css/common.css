@@ -235,8 +235,9 @@ body {
 
 .photo-video {
     background: url(../images/video-play.png) no-repeat;
-    height: 64px;
-    width: 64px;
+    background-size: contain;
+    height: 36px;
+    width: 36px;
     opacity: .8;
     cursor: pointer;
     position: absolute;
@@ -1167,7 +1168,7 @@ pre {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%) scale(0.6);
+    transform: translate(-50%, -50%) scale(0.4);
     z-index: 10;
     opacity: 0.6;
     cursor: pointer;
@@ -1175,7 +1176,7 @@ pre {
 
 #videos_html .thumbnail .video-wrapper:hover .photo-video {
     opacity: 0.9;
-    transform: translate(-50%, -50%) scale(0.7);
+    transform: translate(-50%, -50%) scale(0.5);
     transition: all 0.2s ease;
 }
 
@@ -1214,14 +1215,22 @@ pre {
 }
 
 #videos_html .thumbnail .card-body {
-    background: #f8f9fa;
+    background: linear-gradient(180deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.25) 100%);
+    border-top: none;
+}
+
+#videos_html .thumbnail .card-body .card-title {
+    color: #495057;
 }
 
 #videos_html .thumbnail .card-footer {
     border-radius: 0 0 0.5rem 0.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
 }
 
-/* 视频弹窗样式 */
+/* ==================== 视频弹窗样式 - 与相片预览风格统一 ==================== */
+
+/* 视频预览遮罩层 */
 .video-modal {
     display: none;
     position: fixed;
@@ -1230,50 +1239,290 @@ pre {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
     z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.video-modal-content {
+.video-modal.show {
+    display: flex;
+    opacity: 1;
+}
+
+/* 左右导航按钮 - 放在弹窗内容区内部 */
+.video-nav-btn {
     position: absolute;
     top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    max-width: 90%;
-    max-height: 90%;
-    background: #000;
-    border-radius: 8px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-}
-
-.video-modal-close {
-    position: absolute;
-    top: -12px;
-    right: -12px;
-    width: 32px;
-    height: 32px;
-    background: #ff4757;
-    border: 2px solid #fff;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
     border-radius: 50%;
     color: #fff;
-    font-size: 20px;
-    line-height: 26px;
-    text-align: center;
+    font-size: 16px;
     cursor: pointer;
-    z-index: 10001;
-    transition: all 0.2s;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
 
-.video-modal-close:hover {
-    background: #ff6b81;
+.video-nav-btn:hover {
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.video-nav-prev {
+    left: 12px;
+}
+
+.video-nav-next {
+    right: 12px;
+}
+
+/* 视频弹窗容器 */
+.video-modal-content {
+    position: relative;
+    background: linear-gradient(145deg, #1e1e1e, #2d2d2d);
+    border-radius: 24px;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255,255,255,0.1);
+    max-width: 85vw;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+    transform: scale(0.9) translateY(20px);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.video-modal.show .video-modal-content {
+    transform: scale(1) translateY(0);
+}
+
+/* 视频弹窗头部工具栏 */
+.video-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-bottom: none;
+}
+
+.video-modal-title {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.video-modal-counter {
+    color: rgba(255,255,255,0.9);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 4px 12px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 12px;
+}
+
+.video-modal-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.video-modal-btn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 14px;
+    backdrop-filter: blur(10px);
+}
+
+.video-modal-btn:hover {
+    background: rgba(255,255,255,0.3);
     transform: scale(1.1);
 }
 
+.video-modal-btn.btn-close-video {
+    background: rgba(255,100,100,0.4);
+}
+
+.video-modal-btn.btn-close-video:hover {
+    background: rgba(255,100,100,0.6);
+}
+
+.video-modal-btn.btn-fullscreen-video {
+    background: rgba(100,200,255,0.4);
+}
+
+.video-modal-btn.btn-fullscreen-video:hover {
+    background: rgba(100,200,255,0.6);
+}
+
+/* 视频内容区域 */
+.video-modal-body {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    overflow: auto;
+    min-height: 300px;
+    background: radial-gradient(ellipse at center, #2a2a2a 0%, #1a1a1a 100%);
+    position: relative;
+}
+
 #modalVideo {
-    display: block;
-    max-width: 80vw;
-    max-height: 80vh;
-    border-radius: 8px;
+    max-width: 100%;
+    max-height: calc(80vh - 140px);
+    border-radius: 6px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+}
+
+/* 视频弹窗底部信息栏 */
+.video-modal-footer {
+    padding: 12px 20px;
+    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(30,30,30,0.85) 100%);
+    border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.video-modal-info {
+    color: #aaa;
+    font-size: 12px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.video-modal-info .info-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 16px;
+    transition: all 0.2s ease;
+}
+
+.video-modal-info .info-item:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.video-modal-info .info-item i {
+    color: #667eea;
+}
+
+.video-modal-info .info-likes i {
+    color: #ff6b6b;
+}
+
+.video-modal-info .info-comments i {
+    color: #4ecdc4;
+}
+
+/* 页内全屏模式 */
+.video-modal.fullscreen-mode .video-modal-content {
+    max-width: 100vw;
+    max-height: 100vh;
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+}
+
+.video-modal.fullscreen-mode #modalVideo {
+    max-width: 100%;
+    max-height: calc(100vh - 120px);
+}
+
+.video-modal.fullscreen-mode .video-nav-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+}
+
+.video-modal.fullscreen-mode .video-nav-prev {
+    left: 20px;
+}
+
+.video-modal.fullscreen-mode .video-nav-next {
+    right: 20px;
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) {
+    .video-modal-content {
+        max-width: 95vw;
+        max-height: 90vh;
+        border-radius: 16px;
+    }
+    
+    #modalVideo {
+        max-height: calc(85vh - 140px);
+    }
+    
+    .video-modal-title {
+        max-width: 120px;
+        font-size: 12px;
+    }
+    
+    .video-modal-counter {
+        font-size: 11px;
+        padding: 3px 8px;
+    }
+    
+    .video-modal-header {
+        padding: 10px 14px;
+    }
+    
+    .video-modal-footer {
+        padding: 10px 14px;
+    }
+    
+    .video-modal-body {
+        padding: 14px;
+    }
+    
+    .video-modal-info {
+        gap: 6px;
+    }
+    
+    .video-modal-info .info-item {
+        padding: 4px 10px;
+        font-size: 11px;
+    }
+    
+    .video-nav-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+    }
+    
+    .video-nav-prev {
+        left: 8px;
+    }
+    
+    .video-nav-next {
+        right: 8px;
+    }
 }
 
 

@@ -188,6 +188,50 @@
 				font-size: 18px;
 			}
 		}
+		
+		/* 底部统计图标栏 - 渐变紫色背景 */
+		#videos_html .card-footer {
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+		}
+		#videos_html .card-footer .fa-heart { color: #ff6b6b !important; }
+		#videos_html .card-footer .fa-comment { color: #4ecdc4 !important; }
+		
+		/* 播放按钮 - 渐变紫色圆形 */
+		#videos_html .thumbnail .video-wrapper .play-btn {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			z-index: 10;
+			width: 40px;
+			height: 40px;
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			border-radius: 50%;
+			opacity: 0.9;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+		}
+		
+		/* 播放三角形图标 */
+		#videos_html .thumbnail .video-wrapper .play-btn::after {
+			content: '';
+			position: absolute;
+			top: 50%;
+			left: 54%;
+			transform: translate(-50%, -50%);
+			width: 0;
+			height: 0;
+			border-style: solid;
+			border-width: 8px 0 8px 14px;
+			border-color: transparent transparent transparent #fff;
+		}
+		
+		#videos_html .thumbnail .video-wrapper:hover .play-btn {
+			opacity: 1;
+			transform: translate(-50%, -50%) scale(1.1);
+			box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+		}
 	</style>
 </head>
 
@@ -266,15 +310,15 @@
 								</div>
 								<div class="video-wrapper" data-video-src="<%:=videoSrc%>" data-poster="<%:=posterSrc%>">
 									<img class="lazyload loading card-img-top video-poster" src="<%:=posterSrc%>" data-src="<%:=posterSrc%>" />
-									<span class="photo-video play-btn" title="播放视频"></span>
+									<span class="play-btn" title="播放视频"></span>
 									<button class="btn-fullscreen" title="全屏播放"><i class="fa fa-expand"></i></button>
 								</div>
 								<div class="card-body p-2 text-truncate" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(video.name || video.desc || API.Utils.formatDate(video.uploadTime), 'HTML', false, false, false, false, true)%>">
 									<small class="card-title"><%:=API.Common.formatContent(video.name || video.desc || API.Utils.formatDate(video.uploadTime), 'HTML', false, false, false, false, true)%></small>
 								</div>
-								<div class="card-footer p-1 d-flex justify-content-around bg-dark">
-									<span class="text-light fa fa-heart cursor viewlikes small" title="查看点赞" data-field="uniKey" data-target="<%:=video.uniKey%>"><%:=video.likes ? video.likes.length : 0%></span>
-									<span class="text-light fa fa-comment cursor viewcomments small" title="查看评论" data-field="uniKey" data-target="<%:=video.uniKey%>"><%:=video.comments ? video.comments.length : 0%></span>
+								<div class="card-footer p-1 d-flex justify-content-around">
+									<span class="fa fa-heart cursor viewlikes small" title="查看点赞" data-field="uniKey" data-target="<%:=video.uniKey%>"><%:=video.likes ? video.likes.length : 0%></span>
+									<span class="fa fa-comment cursor viewcomments small" title="查看评论" data-field="uniKey" data-target="<%:=video.uniKey%>"><%:=video.comments ? video.comments.length : 0%></span>
 								</div>
 							</div>
 						</div>

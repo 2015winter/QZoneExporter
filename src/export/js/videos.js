@@ -8,15 +8,67 @@ $(function() {
     // 图片懒加载
     lazyload();
 
-    // 创建视频弹窗
+    // 视频列表管理
+    let videoList = [];
+    let currentVideoIndex = 0;
+
+    // 收集所有视频信息
+    function collectVideoList() {
+        videoList = [];
+        $('.video-wrapper').each(function(index) {
+            const $wrapper = $(this);
+            const $card = $wrapper.closest('.card');
+            const videoSrc = $wrapper.data('video-src');
+            const posterSrc = $wrapper.data('poster');
+            const title = $card.find('.card-title').text() || '视频播放';
+            // 获取上传时间
+            const $detail = $card.find('.photo-detail');
+            const uploadTime = $detail.find('.fa-camera').text() || '';
+            // 获取点赞和评论数
+            const likes = $card.find('.viewlikes').text() || '0';
+            const comments = $card.find('.viewcomments').text() || '0';
+            
+            if (videoSrc) {
+                videoList.push({
+                    index: index,
+                    src: videoSrc,
+                    poster: posterSrc,
+                    title: title,
+                    uploadTime: uploadTime,
+                    likes: likes,
+                    comments: comments
+                });
+            }
+        });
+    }
+
+    // 创建视频弹窗 - 与相片预览风格统一
     function createVideoModal() {
         if ($('#videoModal').length > 0) return;
         
         const modalHtml = `
             <div id="videoModal" class="video-modal">
                 <div class="video-modal-content">
-                    <button class="video-modal-close" title="关闭">&times;</button>
-                    <video id="modalVideo" controls preload="metadata"></video>
+                    <div class="video-modal-header">
+                        <span class="video-modal-title"><i class="fa fa-video-camera mr-2"></i>视频播放</span>
+                        <div class="video-modal-counter">1 / 1</div>
+                        <div class="video-modal-actions">
+                            <button class="video-modal-btn btn-fullscreen-video" title="全屏"><i class="fa fa-expand"></i></button>
+                            <button class="video-modal-btn btn-close-video" title="关闭"><i class="fa fa-times"></i></button>
+                        </div>
+                    </div>
+                    <div class="video-modal-body">
+                        <button class="video-nav-btn video-nav-prev" title="上一个"><i class="fa fa-chevron-left"></i></button>
+                        <video id="modalVideo" controls preload="metadata"></video>
+                        <button class="video-nav-btn video-nav-next" title="下一个"><i class="fa fa-chevron-right"></i></button>
+                    </div>
+                    <div class="video-modal-footer">
+                        <div class="video-modal-info">
+                            <span class="info-item info-time"><i class="fa fa-clock-o"></i><span class="info-value">--</span></span>
+                            <span class="info-item info-likes"><i class="fa fa-heart"></i><span class="info-value">0</span></span>
+                            <span class="info-item info-comments"><i class="fa fa-comment"></i><span class="info-value">0</span></span>
+                        </div>
+                    </div>
                 </div>
             </div>
         `;
@@ -30,14 +82,98 @@ $(function() {
         });
 
         // 关闭按钮
-        $('.video-modal-close').on('click', closeVideoModal);
+        $('.btn-close-video').on('click', closeVideoModal);
 
-        // ESC 键关闭
-        $(document).on('keydown', function(e) {
-            if (e.key === 'Escape' && $('#videoModal').is(':visible')) {
-                closeVideoModal();
+        // 全屏按钮 - 页内全屏
+        $('.btn-fullscreen-video').on('click', function() {
+            $('#videoModal').toggleClass('fullscreen-mode');
+            const $icon = $(this).find('i');
+            if ($('#videoModal').hasClass('fullscreen-mode')) {
+                $icon.removeClass('fa-expand').addClass('fa-compress');
+            } else {
+                $icon.removeClass('fa-compress').addClass('fa-expand');
             }
         });
+
+        // 上一个视频
+        $('.video-nav-prev').on('click', function(e) {
+            e.stopPropagation();
+            navigateVideo(-1);
+        });
+
+        // 下一个视频
+        $('.video-nav-next').on('click', function(e) {
+            e.stopPropagation();
+            navigateVideo(1);
+        });
+
+        // 键盘事件
+        $(document).on('keydown.videoModal', function(e) {
+            if (!$('#videoModal').is(':visible')) return;
+            
+            switch(e.key) {
+                case 'Escape':
+                    closeVideoModal();
+                    break;
+                case 'ArrowLeft':
+                    navigateVideo(-1);
+                    break;
+                case 'ArrowRight':
+                    navigateVideo(1);
+                    break;
+            }
+        });
+    }
+
+    // 切换视频
+    function navigateVideo(direction) {
+        if (videoList.length === 0) return;
+        
+        const video = $('#modalVideo')[0];
+        if (video) {
+            video.pause();
+        }
+        
+        currentVideoIndex += direction;
+        if (currentVideoIndex < 0) {
+            currentVideoIndex = videoList.length - 1;
+        } else if (currentVideoIndex >= videoList.length) {
+            currentVideoIndex = 0;
+        }
+        
+        const videoInfo = videoList[currentVideoIndex];
+        loadVideo(videoInfo);
+    }
+
+    // 加载视频
+    function loadVideo(videoInfo) {
+        const video = $('#modalVideo')[0];
+        video.poster = videoInfo.poster || '';
+        video.src = videoInfo.src;
+        
+        // 更新标题
+        $('.video-modal-title').html('<i class="fa fa-video-camera mr-2"></i>' + videoInfo.title);
+        
+        // 更新计数器
+        $('.video-modal-counter').text((currentVideoIndex + 1) + ' / ' + videoList.length);
+        
+        // 更新底部信息
+        $('.info-time .info-value').text(videoInfo.uploadTime || '--');
+        $('.info-likes .info-value').text(videoInfo.likes);
+        $('.info-comments .info-value').text(videoInfo.comments);
+        
+        // 更新导航按钮状态
+        updateNavButtons();
+        
+        video.play().catch(err => console.warn('视频播放失败:', err));
+    }
+
+    // 更新导航按钮状态
+    function updateNavButtons() {
+        const hasPrev = videoList.length > 1;
+        const hasNext = videoList.length > 1;
+        $('.video-nav-prev').toggle(hasPrev);
+        $('.video-nav-next').toggle(hasNext);
     }
 
     // 关闭弹窗
@@ -47,42 +183,64 @@ $(function() {
             video.pause();
             video.src = '';
         }
-        $('#videoModal').fadeOut(200);
+        $('#videoModal').removeClass('show fullscreen-mode');
+        // 重置全屏按钮图标
+        $('.btn-fullscreen-video i').removeClass('fa-compress').addClass('fa-expand');
+        setTimeout(() => {
+            $('#videoModal').hide();
+        }, 300);
     }
 
     // 弹窗播放视频
-    function playVideoInModal(videoSrc, posterSrc) {
+    function playVideoInModal(videoIndex) {
+        collectVideoList();
         createVideoModal();
-        const video = $('#modalVideo')[0];
-        video.poster = posterSrc || '';
-        video.src = videoSrc;
-        $('#videoModal').fadeIn(200);
-        video.play().catch(err => console.warn('视频播放失败:', err));
+        
+        currentVideoIndex = videoIndex;
+        const videoInfo = videoList[currentVideoIndex];
+        
+        $('#videoModal').show();
+        setTimeout(() => {
+            $('#videoModal').addClass('show');
+        }, 10);
+        
+        loadVideo(videoInfo);
     }
 
-    // 全屏播放视频
-    function playVideoFullscreen(videoSrc, posterSrc) {
+    // 页内全屏播放视频
+    function playVideoFullscreen(videoIndex) {
+        collectVideoList();
         createVideoModal();
-        const video = $('#modalVideo')[0];
-        video.poster = posterSrc || '';
-        video.src = videoSrc;
-        $('#videoModal').fadeIn(200);
-        video.play().then(() => {
-            requestFullscreen(video);
-        }).catch(err => console.warn('视频播放失败:', err));
+        
+        currentVideoIndex = videoIndex;
+        const videoInfo = videoList[currentVideoIndex];
+        
+        $('#videoModal').show();
+        setTimeout(() => {
+            $('#videoModal').addClass('show fullscreen-mode');
+            $('.btn-fullscreen-video i').removeClass('fa-expand').addClass('fa-compress');
+        }, 10);
+        
+        loadVideo(videoInfo);
     }
 
-    // 请求全屏
-    function requestFullscreen(el) {
-        if (el.requestFullscreen) {
-            el.requestFullscreen();
-        } else if (el.webkitRequestFullscreen) {
-            el.webkitRequestFullscreen();
-        } else if (el.mozRequestFullScreen) {
-            el.mozRequestFullScreen();
-        } else if (el.msRequestFullscreen) {
-            el.msRequestFullscreen();
+    // 获取视频在列表中的索引
+    function getVideoIndex($wrapper) {
+        let index = 0;
+        $('.video-wrapper').each(function(i) {
+            if ($(this).is($wrapper)) {
+                index = i;
+                return false;
+            }
+        });
+        // 找到在有效视频列表中的索引
+        collectVideoList();
+        for (let i = 0; i < videoList.length; i++) {
+            if (videoList[i].index === index) {
+                return i;
+            }
         }
+        return 0;
     }
 
     // 视频播放功能
@@ -92,9 +250,9 @@ $(function() {
             e.stopPropagation();
             const wrapper = $(this).closest('.video-wrapper');
             const videoSrc = wrapper.data('video-src');
-            const posterSrc = wrapper.data('poster');
             if (videoSrc) {
-                playVideoInModal(videoSrc, posterSrc);
+                const videoIndex = getVideoIndex(wrapper);
+                playVideoInModal(videoIndex);
             }
         });
 
@@ -103,9 +261,9 @@ $(function() {
             e.stopPropagation();
             const wrapper = $(this).closest('.video-wrapper');
             const videoSrc = wrapper.data('video-src');
-            const posterSrc = wrapper.data('poster');
             if (videoSrc) {
-                playVideoFullscreen(videoSrc, posterSrc);
+                const videoIndex = getVideoIndex(wrapper);
+                playVideoFullscreen(videoIndex);
             }
         });
 
@@ -114,9 +272,9 @@ $(function() {
             e.stopPropagation();
             const wrapper = $(this).closest('.video-wrapper');
             const videoSrc = wrapper.data('video-src');
-            const posterSrc = wrapper.data('poster');
             if (videoSrc) {
-                playVideoInModal(videoSrc, posterSrc);
+                const videoIndex = getVideoIndex(wrapper);
+                playVideoInModal(videoIndex);
             }
         });
     }
