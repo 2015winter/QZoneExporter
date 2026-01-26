@@ -1837,7 +1837,7 @@ body.messages-page {
 }
 
 #videos_html .thumbnail .card-body {
-    background: linear-gradient(180deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.25) 100%);
+    background: linear-gradient(180deg, rgba(255, 107, 107, 0.15) 0%, rgba(238, 90, 36, 0.25) 100%);
     border-top: none;
 }
 
@@ -1847,7 +1847,7 @@ body.messages-page {
 
 #videos_html .thumbnail .card-footer {
     border-radius: 0 0 0.5rem 0.5rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%) !important;
 }
 
 /* ==================== 视频弹窗样式 - 与相片预览风格统一 ==================== */
@@ -1874,7 +1874,7 @@ body.messages-page {
     opacity: 1;
 }
 
-/* 左右导航按钮 - 相对于视频弹窗容器定位，保持位置稳定 */
+/* 左右导航按钮 - 相对于视频弹窗容器定位，保持位置稳定 - 红色主题 */
 .video-nav-btn {
     position: absolute;
     /* 垂直居中 */
@@ -1882,7 +1882,7 @@ body.messages-page {
     transform: translateY(-50%);
     width: 44px;
     height: 44px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
     border: none;
     border-radius: 50%;
     color: #fff;
@@ -1898,7 +1898,7 @@ body.messages-page {
 
 .video-nav-btn:hover {
     transform: translateY(-50%) scale(1.1);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
 }
 
 .video-nav-btn:active {
@@ -1932,13 +1932,13 @@ body.messages-page {
     transform: scale(1) translateY(0);
 }
 
-/* 视频弹窗头部工具栏 */
+/* 视频弹窗头部工具栏 - 红色主题 #ff6b6b */
 .video-modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 14px 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
     border-bottom: none;
 }
 
@@ -2055,7 +2055,7 @@ body.messages-page {
 }
 
 .video-modal-info .info-item i {
-    color: #667eea;
+    color: #ff6b6b;
 }
 
 .video-modal-info .info-likes i {
@@ -2063,7 +2063,7 @@ body.messages-page {
 }
 
 .video-modal-info .info-comments i {
-    color: #4ecdc4;
+    color: #ffeaa7;
 }
 
 /* 页内全屏模式 */
