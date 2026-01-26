@@ -21,87 +21,295 @@ $(function() {
     // 图片懒加载
     lazyload();
 
-    // 点击图片查看时，实例化画廊相册
-    $('.lightgallery .message-lightbox').on('click', function() {
+    // ==================== 动态创建预览弹窗DOM ====================
+    if (!$('#messagePreviewOverlay').length) {
+        const previewModalHtml = `
+        <div class="photo-preview-overlay" id="messagePreviewOverlay">
+            <div class="photo-preview-modal">
+                <div class="photo-preview-header">
+                    <span class="photo-preview-title" id="messagePreviewTitle">媒体预览</span>
+                    <div class="photo-preview-actions">
+                        <button class="photo-preview-btn btn-fullscreen" id="btnMessageFullscreen" title="全屏查看">
+                            <i class="fa fa-expand"></i>
+                        </button>
+                        <button class="photo-preview-btn btn-close-preview" id="btnCloseMessagePreview" title="关闭">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <button class="photo-preview-nav prev" id="btnPrevMessage" title="上一张">
+                    <i class="fa fa-chevron-left"></i>
+                </button>
+                <div class="photo-preview-content" id="messagePreviewContent">
+                    <div class="photo-preview-loading" id="messagePreviewLoading">加载中...</div>
+                </div>
+                <button class="photo-preview-nav next" id="btnNextMessage" title="下一张">
+                    <i class="fa fa-chevron-right"></i>
+                </button>
+                <div class="photo-preview-footer">
+                    <div class="photo-preview-info" id="messagePreviewInfo"></div>
+                </div>
+            </div>
+        </div>`;
+        $('body').append(previewModalHtml);
+    }
 
-        // 画廊相册DOM
-        const $galleryDom = $(this).parent().get(0);
+    // ==================== 自定义小窗预览功能 ====================
+    
+    // 预览状态管理
+    const previewState = {
+        currentIndex: 0,
+        currentItems: [], // 当前说说的所有媒体项
+        isFullscreen: false
+    };
+
+    // 获取预览DOM元素
+    const $overlay = $('#messagePreviewOverlay');
+    const $content = $('#messagePreviewContent');
+    const $title = $('#messagePreviewTitle');
+    const $info = $('#messagePreviewInfo');
+    const $loading = $('#messagePreviewLoading');
+    const $btnPrev = $('#btnPrevMessage');
+    const $btnNext = $('#btnNextMessage');
+    const $btnFullscreen = $('#btnMessageFullscreen');
+    const $btnClose = $('#btnCloseMessagePreview');
+
+    // 打开预览弹窗
+    function openPreview(items, index) {
+        previewState.currentItems = items;
+        previewState.currentIndex = index;
+        updatePreviewContent();
+        $overlay.addClass('show');
+        $('body').css('overflow', 'hidden');
+        updateNavButtons();
+    }
+
+    // 关闭预览弹窗
+    function closePreview() {
+        $overlay.removeClass('show fullscreen-mode');
+        previewState.isFullscreen = false;
+        $btnFullscreen.find('i').removeClass('fa-compress').addClass('fa-expand');
+        $btnFullscreen.attr('title', '全屏查看');
+        $('body').css('overflow', '');
+        // 暂停视频播放
+        $content.find('video').each(function() {
+            this.pause();
+        });
+    }
+
+    // 更新预览内容
+    function updatePreviewContent() {
+        const item = previewState.currentItems[previewState.currentIndex];
+        if (!item) return;
+
+        $loading.addClass('show');
+        $content.find('img, video').remove();
+
+        // 设置标题
+        const title = item.title || '说说媒体预览';
+        $title.text(title);
+
+        if (item.isVideo) {
+            // 视频类型
+            const $video = $('<video>', {
+                controls: true,
+                poster: item.poster || '',
+                preload: 'metadata'
+            }).append($('<source>', {
+                src: item.src,
+                type: 'video/mp4'
+            }));
+
+            $video.on('loadeddata', function() {
+                $loading.removeClass('show');
+            }).on('error', function() {
+                $loading.removeClass('show');
+            });
+
+            $content.append($video);
+        } else {
+            // 图片类型
+            const $img = $('<img>', {
+                src: item.src,
+                alt: title
+            });
+
+            $img.on('load', function() {
+                $loading.removeClass('show');
+            }).on('error', function() {
+                $loading.removeClass('show');
+                $(this).attr('src', '../Common/images/loading.gif');
+            });
+
+            $content.append($img);
+        }
+
+        // 更新信息栏
+        const indexInfo = `${previewState.currentIndex + 1} / ${previewState.currentItems.length}`;
+        $info.html(`
+            <span class="info-item"><i class="fa fa-image"></i> ${indexInfo}</span>
+            ${item.time ? `<span class="info-item"><i class="fa fa-clock-o"></i> ${item.time}</span>` : ''}
+        `);
+    }
+
+    // 更新导航按钮状态
+    function updateNavButtons() {
+        $btnPrev.prop('disabled', previewState.currentIndex <= 0);
+        $btnNext.prop('disabled', previewState.currentIndex >= previewState.currentItems.length - 1);
+    }
+
+    // 上一张
+    function showPrev() {
+        if (previewState.currentIndex > 0) {
+            // 暂停当前视频
+            $content.find('video').each(function() { this.pause(); });
+            previewState.currentIndex--;
+            updatePreviewContent();
+            updateNavButtons();
+        }
+    }
+
+    // 下一张
+    function showNext() {
+        if (previewState.currentIndex < previewState.currentItems.length - 1) {
+            // 暂停当前视频
+            $content.find('video').each(function() { this.pause(); });
+            previewState.currentIndex++;
+            updatePreviewContent();
+            updateNavButtons();
+        }
+    }
+
+    // 切换全屏模式（页面内全屏）
+    function toggleFullscreen() {
+        previewState.isFullscreen = !previewState.isFullscreen;
+        if (previewState.isFullscreen) {
+            $overlay.addClass('fullscreen-mode');
+            $btnFullscreen.find('i').removeClass('fa-expand').addClass('fa-compress');
+            $btnFullscreen.attr('title', '退出全屏');
+        } else {
+            $overlay.removeClass('fullscreen-mode');
+            $btnFullscreen.find('i').removeClass('fa-compress').addClass('fa-expand');
+            $btnFullscreen.attr('title', '全屏查看');
+        }
+    }
+
+    // 绑定事件
+    $btnClose.on('click', closePreview);
+    $btnPrev.on('click', showPrev);
+    $btnNext.on('click', showNext);
+    $btnFullscreen.on('click', toggleFullscreen);
+
+    // 点击遮罩层关闭
+    $overlay.on('click', function(e) {
+        if (e.target === this) {
+            closePreview();
+        }
+    });
+
+    // 键盘导航
+    $(document).on('keydown', function(e) {
+        if (!$overlay.hasClass('show')) return;
+        
+        switch(e.keyCode) {
+            case 27: // ESC
+                closePreview();
+                break;
+            case 37: // 左箭头
+                showPrev();
+                break;
+            case 39: // 右箭头
+                showNext();
+                break;
+        }
+    });
+
+    // 从 lightbox 元素收集媒体数据
+    function collectMediaItems($container) {
+        const items = [];
+        $container.find('.message-lightbox').each(function() {
+            const $item = $(this);
+            const videoData = $item.attr('data-video');
+            const imgSrc = $item.attr('data-src') || $item.find('img').attr('data-src') || $item.find('img').attr('src');
+            const poster = $item.attr('data-poster');
+            
+            if (videoData) {
+                // 视频
+                try {
+                    const video = JSON.parse(videoData);
+                    const videoSrc = video.source && video.source[0] && video.source[0].src;
+                    if (videoSrc) {
+                        items.push({
+                            isVideo: true,
+                            src: videoSrc,
+                            poster: poster || '',
+                            title: '视频'
+                        });
+                    }
+                } catch (e) {
+                    console.error('解析视频数据失败:', e);
+                }
+            } else if (imgSrc) {
+                // 图片
+                items.push({
+                    isVideo: false,
+                    src: imgSrc,
+                    title: '图片'
+                });
+            }
+        });
+        return items;
+    }
+
+    // 点击图片/视频查看（说说主体：支持左右切换）
+    $('.lightgallery .message-lightbox').on('click', function(e) {
+        e.preventDefault();
+        
+        const $container = $(this).closest('.lightgallery');
         const $clickedItem = $(this);
+        const $allItems = $container.find('.message-lightbox');
+        const clickedIndex = $allItems.index($clickedItem);
         
-        // 获取当前容器下所有的 .message-lightbox 元素
-        const $allItems = $(this).parent().find('.message-lightbox');
+        // 收集当前说说的所有媒体项
+        const items = collectMediaItems($container);
         
-        // 计算被点击元素在同级元素中的实际索引位置（基于DOM顺序）
-        const actualIdx = $allItems.index($clickedItem);
-        
-        if ($galleryDom.galleryIns) {
-            $galleryDom.galleryIns.openGallery(actualIdx >= 0 ? actualIdx : 0);
-            return;
+        if (items.length > 0) {
+            // 显示导航按钮和计数信息
+            $btnPrev.show();
+            $btnNext.show();
+            $info.show();
+            openPreview(items, clickedIndex >= 0 ? clickedIndex : 0);
         }
+    });
 
-        // 注册监听
-        $galleryDom.moduleName = 'Messages';
-        API.Common.registerEvents($galleryDom);
-
-        // 实例化画廊相册
-        const galleryIns = lightGallery($galleryDom, {
-            plugins: [
-                lgZoom,
-                lgAutoplay,
-                lgComment,
-                lgFullscreen,
-                lgRotate,
-                lgThumbnail,
-                lgVideo
-            ],
-            mode: 'lg-fade',
-            selector: '.message-lightbox',
-            download: false,
-            thumbnail: false,
-            mousewheel: true,
-            commentBox: true,
-            loop: false,
-            autoplayVideoOnSlide: false,
-            commentsMarkup: '<div id="lg-comment-box" class="lg-comment-box lg-fb-comment-box"><div class="lg-comment-header"><h3 class="lg-comment-title">评论</h3><span class="lg-comment-close lg-icon"></span></div><div class="lg-comment-body"></div></div>'
-        });
-
-        $galleryDom.galleryIns = galleryIns;
-
-        // 打开画廊，使用实际的DOM索引
-        galleryIns.openGallery(actualIdx >= 0 ? actualIdx : 0);
-    })
-
-    // 查看评论中的图片
-    $('.comment-lightgallery .comment-img-lightbox').on('click', function() {
-        // 画廊相册DOM
-        const $galleryDom = $(this).parent().parent().get(0);
-        // 点击的图片的索引位置
-        const imgIdx = $(this).attr('data-idx');
-
-        if ($galleryDom.galleryIns) {
-            $galleryDom.galleryIns.openGallery(imgIdx * 1);
-            return;
+    // 查看评论中的图片/视频（简化版：只预览单个，有关闭和全屏按钮）
+    $('.comment-lightgallery .comment-img-lightbox').on('click', function(e) {
+        e.preventDefault();
+        
+        const $el = $(this);
+        const videoData = $el.attr('data-video');
+        const imgSrc = $el.attr('data-src') || $el.find('img').attr('data-src') || $el.find('img').attr('src');
+        
+        let item = null;
+        if (videoData) {
+            try {
+                const video = JSON.parse(videoData);
+                const videoSrc = video.source && video.source[0] && video.source[0].src;
+                if (videoSrc) {
+                    item = { isVideo: true, src: videoSrc, poster: $el.attr('data-poster') || '', title: '评论视频' };
+                }
+            } catch (e) {}
+        } else if (imgSrc) {
+            item = { isVideo: false, src: imgSrc, title: '评论图片' };
         }
-
-        // 实例化画廊相册
-        const galleryIns = lightGallery($galleryDom, {
-            plugins: [
-                lgZoom,
-                lgFullscreen,
-                lgThumbnail,
-                lgRotate
-            ],
-            mode: 'lg-fade',
-            selector: '.comment-img-lightbox',
-            download: false,
-            thumbnail: false,
-            loop: false
-        });
-        $galleryDom.galleryIns = galleryIns;
-
-        // 打开画廊
-        galleryIns.openGallery(imgIdx * 1);
-    })
+        
+        if (item) {
+            $btnPrev.hide();
+            $btnNext.hide();
+            $info.hide();
+            openPreview([item], 0);
+        }
+    });
 
     // 点赞列表
     API.Common.registerShowVisitorsWin(messages);
