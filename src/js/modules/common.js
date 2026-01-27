@@ -248,14 +248,18 @@ API.Common.exportUserToHtml = async(userInfo) => {
         return;
     }
 
-    // 导出HTML依赖的JS、CSS
-    for (let index = 0; index < QZone.Common.ExportFiles.length; index++) {
-        const pathInfo = QZone.Common.ExportFiles[index];
-        let paths = (API.Common.getRootFolder() + '/' + pathInfo.target).split('/');
-        let filename = paths.pop();
-        await API.Utils.createFolder(paths.join('/'));
-        await API.Utils.downloadToFile(chrome.runtime.getURL(pathInfo.original), paths.join('/') + '/' + filename);
-    }
+    // 导出HTML依赖的JS、CSS - 并行下载优化
+    const downloadTasks = QZone.Common.ExportFiles.map(pathInfo => {
+        return async () => {
+            let paths = (API.Common.getRootFolder() + '/' + pathInfo.target).split('/');
+            let filename = paths.pop();
+            await API.Utils.createFolder(paths.join('/'));
+            await API.Utils.downloadToFile(chrome.runtime.getURL(pathInfo.original), paths.join('/') + '/' + filename);
+        };
+    });
+    
+    // 使用并发限制器，同时下载5个文件
+    await API.Utils.parallelLimit(downloadTasks, task => task(), 5);
 
     console.info('生成首页HTML文件开始', userInfo);
     // 基于模板生成HTML

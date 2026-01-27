@@ -96,7 +96,7 @@ API.Videos.getAllList = async() => {
     // 视频配置项
     const CONFIG = QZone_Config.Videos;
 
-    const nextPage = async function(pageIndex, indicator) {
+    const nextPage = async function _nextPage(pageIndex, indicator) {
         // 下一页索引
         const nextPageIndex = pageIndex + 1;
 
@@ -108,13 +108,13 @@ API.Videos.getAllList = async() => {
                 return QZone.Videos.Data;
             }
             // 递归获取下一页
-            return await API.Common.callNextPage(nextPageIndex, CONFIG, QZone.Videos.total, QZone.Videos.Data, arguments.callee, nextPageIndex, indicator);
+            return await API.Common.callNextPage(nextPageIndex, CONFIG, QZone.Videos.total, QZone.Videos.Data, _nextPage, nextPageIndex, indicator);
         }).catch(async(e) => {
             console.error("获取视频列表异常，当前页：", pageIndex + 1, e);
             indicator.addFailed(new PageInfo(pageIndex, CONFIG.pageSize));
             // 当前页失败后，跳过继续请求下一页
             // 递归获取下一页
-            return await API.Common.callNextPage(nextPageIndex, CONFIG, QZone.Videos.total, QZone.Videos.Data, arguments.callee, nextPageIndex, indicator);
+            return await API.Common.callNextPage(nextPageIndex, CONFIG, QZone.Videos.total, QZone.Videos.Data, _nextPage, nextPageIndex, indicator);
         });
     }
 
@@ -171,7 +171,7 @@ API.Videos.getAllComments = async(videos) => {
             continue;
         }
 
-        const nextPage = async function(video, pageIndex) {
+        const nextPage = async function _nextPage(video, pageIndex) {
             // 下一页索引
             const nextPageIndex = pageIndex + 1;
 
@@ -199,13 +199,13 @@ API.Videos.getAllComments = async(videos) => {
                 }
 
                 // 递归获取下一页
-                return await API.Common.callNextPage(nextPageIndex, CONFIG, video.cmtTotal, video.comments, arguments.callee, video, nextPageIndex, indicator);
+                return await API.Common.callNextPage(nextPageIndex, CONFIG, video.cmtTotal, video.comments, _nextPage, video, nextPageIndex, indicator);
 
             }).catch(async(e) => {
                 console.error("获取视频评论列表异常：", pageIndex + 1, video, e);
                 // 当前页失败后，跳过继续请求下一页
                 // 递归获取下一页
-                return await API.Common.callNextPage(nextPageIndex, CONFIG, video.cmtTotal, video.comments, arguments.callee, video, nextPageIndex, indicator);
+                return await API.Common.callNextPage(nextPageIndex, CONFIG, video.cmtTotal, video.comments, _nextPage, video, nextPageIndex, indicator);
             });
         }
 

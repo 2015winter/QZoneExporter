@@ -153,7 +153,7 @@ const parseEmoji = (content) => {
         if (item.type === 2) {
             newContentList.push({
                 type: item.type,
-                content: content.substr(item.idx, item.code.length),
+                content: content.substring(item.idx, item.idx + item.code.length),
                 image: emotionMap[item.code].image
             })
         } else {
@@ -195,6 +195,57 @@ const API = {
  * 工具类
  */
 API.Utils = {
+
+    /**
+     * 并发限制执行器
+     * @param {Array} items 待处理数据
+     * @param {Function} handler 处理函数，接收单个item，返回Promise
+     * @param {number} concurrency 并发数，默认10
+     * @returns {Promise<Array>} 返回所有结果
+     */
+    async parallelLimit(items, handler, concurrency = 10) {
+        const results = [];
+        const executing = [];
+        
+        for (let i = 0; i < items.length; i++) {
+            const promise = Promise.resolve().then(() => handler(items[i], i));
+            results.push(promise);
+            
+            if (concurrency <= items.length) {
+                const e = promise.then(() => executing.splice(executing.indexOf(e), 1));
+                executing.push(e);
+                if (executing.length >= concurrency) {
+                    await Promise.race(executing);
+                }
+            }
+        }
+        return Promise.allSettled(results);
+    },
+
+    /**
+     * 分批并发执行
+     * @param {Array} items 待处理数据
+     * @param {Function} handler 处理函数
+     * @param {number} batchSize 每批数量
+     * @param {number} sleepMs 批次间隔毫秒数
+     */
+    async batchProcess(items, handler, batchSize = 10, sleepMs = 500) {
+        const chunks = _.chunk(items, batchSize);
+        const results = [];
+        
+        for (let i = 0; i < chunks.length; i++) {
+            const batchResults = await Promise.allSettled(
+                chunks[i].map((item, idx) => handler(item, i * batchSize + idx))
+            );
+            results.push(...batchResults);
+            
+            // 批次间休息
+            if (i < chunks.length - 1 && sleepMs > 0) {
+                await API.Utils.sleep(sleepMs);
+            }
+        }
+        return results;
+    },
 
     /**
      * 转换为ArrayBuffer
@@ -462,28 +513,28 @@ API.Utils = {
                 QZone.Common.Filer.open(fullPath, (f) => {
                     let reader = new FileReader();
                     reader.onload = function(event) {
-                        QZone.Common.Zip.file(entry.fullPath.startsWith('/') ? entry.fullPath.substr(1) : entry.fullPath, event.target.result, { binary: true });
+                        QZone.Common.Zip.file(entry.fullPath.startsWith('/') ? entry.fullPath.substring(1) : entry.fullPath, event.target.result, { binary: true });
                     }
                     reader.readAsArrayBuffer(f);
                 }, reject);
             };
 
-            (function(path) {
-                let cl = arguments.callee;
+            const processPath = function(path) {
                 QZone.Common.Filer.ls(path, (entries) => {
                     var i = 0;
                     for (i = 0; i < entries.length; i++) {
                         var entry = entries[i];
                         if (entry.isDirectory) {
-                            QZone.Common.Zip.folder(entry.fullPath.startsWith('/') ? entry.fullPath.substr(1) : entry.fullPath);
-                            cl(entry.fullPath);
+                            QZone.Common.Zip.folder(entry.fullPath.startsWith('/') ? entry.fullPath.substring(1) : entry.fullPath);
+                            processPath(entry.fullPath);
                         } else {
                             zipOneFile(entry);
                         }
                     }
                     resolve();
                 }, reject);
-            })(root);
+            };
+            processPath(root);
         });
     },
 
@@ -631,7 +682,7 @@ API.Utils = {
      */
     getUrlParam(name) {
         const reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
-        const r = window.location.search.substr(1).match(reg);
+        const r = window.location.search.substring(1).match(reg);
         if (r != null) {
             return decodeURI(r[2]);
         }
@@ -855,7 +906,7 @@ API.Utils = {
      */
     decode(b) {
         return b && b.replace(/(%2C|%25|%7D)/g, function(b) {
-            return unescape(b);
+            return decodeURIComponent(b);
         })
     },
 
@@ -1853,19 +1904,33 @@ API.Utils = {
     },
 
     /**
-     * Base64编码
+     * Base64编码 (支持Unicode)
      * @param {string} str 原始字符串
      */
     utf8ToBase64(str) {
-        return btoa(unescape(encodeURIComponent(str)));
+        // 使用 TextEncoder 处理 Unicode 字符
+        const encoder = new TextEncoder();
+        const bytes = encoder.encode(str);
+        let binary = '';
+        for (let i = 0; i < bytes.length; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return btoa(binary);
     },
 
     /**
-     * Base64解码
+     * Base64解码 (支持Unicode)
      * @param {string} str base64字符串
      */
     base64ToUtf8(str) {
-        return decodeURIComponent(escape(atob(str)));
+        // 使用 TextDecoder 处理 Unicode 字符
+        const binary = atob(str);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+            bytes[i] = binary.charCodeAt(i);
+        }
+        const decoder = new TextDecoder();
+        return decoder.decode(bytes);
     },
 
     /**

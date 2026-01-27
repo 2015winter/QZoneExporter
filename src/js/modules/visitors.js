@@ -47,7 +47,7 @@ API.Visitors.getAllList = async() => {
 
     const CONFIG = QZone_Config.Visitors;
 
-    const nextPage = async function(pageIndex) {
+    const nextPage = async function _nextPage(pageIndex) {
 
         // 下一页索引
         const nextPageIndex = pageIndex + 1;
@@ -93,7 +93,7 @@ API.Visitors.getAllList = async() => {
             const max = CONFIG.randomSeconds.max;
             const seconds = API.Utils.randomSeconds(min, max);
             await API.Utils.sleep(seconds * 1000);
-            return await arguments.callee.apply(undefined, [nextPageIndex]);
+            return await _nextPage(nextPageIndex);
         }).catch(async(e) => {
             console.error("获取访客列表异常，当前页：", nextPageIndex, e);
             // PATCH: 如果服务器错误，则判断页数再进入重试
@@ -109,7 +109,7 @@ API.Visitors.getAllList = async() => {
             const max = CONFIG.randomSeconds.max;
             const seconds = API.Utils.randomSeconds(min, max);
             await API.Utils.sleep(seconds * 1000);
-            return await arguments.callee.apply(undefined, [nextPageIndex]);
+            return await _nextPage(nextPageIndex);
         });
     }
 

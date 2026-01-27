@@ -1,24 +1,32 @@
+// 安全的原型扩展：检查是否已存在，使用 defineProperty 使其不可枚举
 // 对Date的扩展，将 Date 转化为指定格式的String
 // 月(M)、日(d)、小时(h)、分(m)、秒(s)、季度(q) 可以用 1-2 个占位符， 
 // 年(y)可以用 1-4 个占位符，毫秒(S)只能用 1 个占位符(是 1-3 位的数字) 
 // 例子： 
 // (new Date()).Format("yyyy-MM-dd hh:mm:ss.S") ==> 2006-07-02 08:09:04.423 
 // (new Date()).Format("yyyy-M-d h:m:s.S")      ==> 2006-7-2 8:9:4.18 
-Date.prototype.format = function(fmt) {
-    var o = {
-        "M+": this.getMonth() + 1, //月份 
-        "d+": this.getDate(), //日 
-        "h+": this.getHours(), //小时 
-        "m+": this.getMinutes(), //分 
-        "s+": this.getSeconds(), //秒 
-        "q+": Math.floor((this.getMonth() + 3) / 3), //季度 
-        "S": this.getMilliseconds() //毫秒 
-    };
-    if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
-    for (var k in o)
-        if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
-    return fmt;
-};
+if (!Date.prototype.format) {
+    Object.defineProperty(Date.prototype, 'format', {
+        value: function(fmt) {
+            var o = {
+                "M+": this.getMonth() + 1, //月份 
+                "d+": this.getDate(), //日 
+                "h+": this.getHours(), //小时 
+                "m+": this.getMinutes(), //分 
+                "s+": this.getSeconds(), //秒 
+                "q+": Math.floor((this.getMonth() + 3) / 3), //季度 
+                "S": this.getMilliseconds() //毫秒 
+            };
+            if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substring(4 - RegExp.$1.length));
+            for (var k in o)
+                if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substring(("" + o[k]).length)));
+            return fmt;
+        },
+        writable: true,
+        configurable: true,
+        enumerable: false
+    });
+}
 
 /**
  * String.format
@@ -28,76 +36,104 @@ Date.prototype.format = function(fmt) {
  * var result1=template1.format("loogn",22);
  * var result2=template2.format({name:"loogn",age:22});
  */
-String.prototype.format = function(args) {
-    var result = this;
-    if (arguments.length <= 0) {
-        return result;
-    }
-    if (arguments.length == 1 && Array.isArray(args)) {
-        for (var i = 0; i < args.length; i++) {
-            if (args[i] != undefined) {
-                var reg = new RegExp("({)" + i + "(})", "g");
-                result = result.replace(reg, args[i]);
+if (!String.prototype.format) {
+    Object.defineProperty(String.prototype, 'format', {
+        value: function(args) {
+            var result = this;
+            if (arguments.length <= 0) {
+                return result;
             }
-        }
-    } else if (arguments.length == 1 && typeof(args) == "object") {
-        // 支持属性多层嵌套替换
-        const getValueByPath = (obj, path) => {
-            const arr = path.split('.')
-            const len = arr.length - 1
-            return arr.reduce((cur, key, index) => {
-                if (index === len) {
-                    return cur[key] || ''
+            if (arguments.length == 1 && Array.isArray(args)) {
+                for (var i = 0; i < args.length; i++) {
+                    if (args[i] != undefined) {
+                        var reg = new RegExp("({)" + i + "(})", "g");
+                        result = result.replace(reg, args[i]);
+                    }
                 }
-                return cur[key] || ''
-            }, obj)
-        }
-        for (var key in args) {
-            if (args[key] != undefined) {
-                var reg = new RegExp("({" + key + "})", "g");
-                result = result.replace(reg, args[key]);
+            } else if (arguments.length == 1 && typeof(args) == "object") {
+                // 支持属性多层嵌套替换
+                const getValueByPath = (obj, path) => {
+                    const arr = path.split('.')
+                    const len = arr.length - 1
+                    return arr.reduce((cur, key, index) => {
+                        if (index === len) {
+                            return cur[key] || ''
+                        }
+                        return cur[key] || ''
+                    }, obj)
+                }
+                for (var key in args) {
+                    if (args[key] != undefined) {
+                        var reg = new RegExp("({" + key + "})", "g");
+                        result = result.replace(reg, args[key]);
+                    }
+                }
+            } else {
+                for (var i = 0; i < arguments.length; i++) {
+                    if (arguments[i] != undefined) {
+                        var reg = new RegExp("({)" + i + "(})", "g");
+                        result = result.replace(reg, arguments[i]);
+                    }
+                }
             }
-        }
-    } else {
-        for (var i = 0; i < arguments.length; i++) {
-            if (arguments[i] != undefined) {
-                var reg = new RegExp("({)" + i + "(})", "g");
-                result = result.replace(reg, arguments[i]);
-            }
-        }
-    }
-    return result;
+            return result;
+        },
+        writable: true,
+        configurable: true,
+        enumerable: false
+    });
 }
 
 /**
- * ReplaceAll的实现
+ * ReplaceAll的实现 - ES2021已原生支持，仅在不存在时添加
  * @param {String} search 搜索字符
  * @param {String} target 替换字符
  */
-String.prototype.replaceAll = function(search, target) {
-    return this.replace(new RegExp(search, "gm"), target);
+if (!String.prototype.replaceAll) {
+    Object.defineProperty(String.prototype, 'replaceAll', {
+        value: function(search, target) {
+            return this.replace(new RegExp(search, "gm"), target);
+        },
+        writable: true,
+        configurable: true,
+        enumerable: false
+    });
 }
 
 /**
  * 数组查找索引
  */
-Array.prototype.getIndex = function(val, field) {
-    if (field) {
-        return this.findIndex((obj) => obj[field] == val);
-    } else {
-        return this.indexOf(val);
-    }
-};
+if (!Array.prototype.getIndex) {
+    Object.defineProperty(Array.prototype, 'getIndex', {
+        value: function(val, field) {
+            if (field) {
+                return this.findIndex((obj) => obj[field] == val);
+            } else {
+                return this.indexOf(val);
+            }
+        },
+        writable: true,
+        configurable: true,
+        enumerable: false
+    });
+}
 
 /**
  * 删除元素
  */
-Array.prototype.remove = function(val, field) {
-    var index = this.getIndex(val, field);
-    if (index > -1) {
-        this.splice(index, 1);
-    }
-};
+if (!Array.prototype.remove) {
+    Object.defineProperty(Array.prototype, 'remove', {
+        value: function(val, field) {
+            var index = this.getIndex(val, field);
+            if (index > -1) {
+                this.splice(index, 1);
+            }
+        },
+        writable: true,
+        configurable: true,
+        enumerable: false
+    });
+}
 
 // WeChat Emoji Datas
 const emojis = [{ "index": 2002, "key": "Smirk", "cn": "[奸笑]", "en": "[Smirk]", "image": "2_02.png" }, { "index": 2004, "key": "Hey", "cn": "[嘿哈]", "en": "[Hey]", "image": "2_04.png" }, { "index": 2005, "key": "Facepalm", "cn": "[捂脸]", "en": "[Facepalm]", "image": "2_05.png" }, { "index": 2006, "key": "Smart", "cn": "[机智]", "en": "[Smart]", "image": "2_06.png" }, { "index": 2007, "key": "Tea", "cn": "[茶]", "en": "[Tea]", "image": "2_07.png" }, { "index": 2009, "key": "Packet", "cn": "[红包]", "en": "[Packet]", "image": "2_09.png" }, { "index": 2010, "key": "Candle", "cn": "[蜡烛]", "en": "[Candle]", "image": "2_10.png" }, { "index": 2011, "key": "Yeah!", "cn": "[耶]", "en": "[Yeah!]", "image": "2_11.png" }, { "index": 2018, "key": "Concerned", "cn": "[皱眉]", "en": "[Concerned]", "image": "2_12.png" }, { "index": 2013, "key": "Blush", "cn": "[囧]", "en": "[Blush]", "image": "smiley_17b.png" }, { "index": 2014, "key": "Salute", "cn": "[抱拳]", "en": "[Salute]", "image": "smiley_17b.png" }, { "index": 2015, "key": "Chick", "cn": "[鸡]", "en": "[Chick]", "image": "2_14.png" }, { "index": 2016, "key": "Blessing", "cn": "[福]", "en": "[Blessing]", "image": "2_15.png" }, { "index": 2017, "key": "Bye", "cn": "[再见]", "en": "[Bye]", "image": "smiley_39b.png" }, { "index": 2019, "key": "Rich", "cn": "[發]", "en": "[Rich]", "image": "2_16.png" }, { "index": 2020, "key": "Pup", "cn": "[小狗]", "en": "[Pup]", "image": "2_17.png" }, { "index": 2021, "key": "Onlooker", "cn": "[吃瓜]", "en": "[Onlooker]", "image": "Watermelon.png" }, { "index": 2022, "key": "GoForIt", "cn": "[加油]", "en": "[GoForIt]", "image": "Addoil.png" }, { "index": 2023, "key": "Sweats", "cn": "[汗]", "en": "[Sweats]", "image": "Sweat.png" }, { "index": 2025, "key": "OMG", "cn": "[天啊]", "en": "[OMG]", "image": "Shocked!.png" }, { "index": 2027, "key": "Emm", "cn": "[Emm]", "en": "[Emm]", "image": "Cold.png" }, { "index": 2028, "key": "Respect", "cn": "[社会社会]", "en": "[Respect]", "image": "Social.png" }, { "index": 2030, "key": "Doge", "cn": "[旺柴]", "en": "[Doge]", "image": "Yellowdog.png" }, { "index": 2034, "key": "NoProb", "cn": "[旺柴]", "en": "[NoProb]", "image": "NoProb.png" }, { "index": 2036, "key": "MyBad", "cn": "[打脸]", "en": "[MyBad]", "image": "Slap.png" }, { "index": 2037, "key": "Wow", "cn": "[哇]", "en": "[Wow]", "image": "Wow!.png" }, { "index": 2038, "key": "KeepFighting", "cn": "[哇]", "en": "[KeepFighting]", "image": "KeepFighting.png" }, { "index": 2043, "key": "Boring", "cn": "[翻白眼]", "en": "[Boring]", "image": "Boring.png" }, { "index": 2044, "key": "666", "cn": "[666]", "en": "[Awesome]", "image": "666.png" }, { "index": 2045, "key": "LetMeSee", "cn": "[让我看看]", "en": "[LetMeSee]", "image": "LetMeSee.png" }, { "index": 2046, "key": "Sigh", "cn": "[叹气]", "en": "[Sigh]", "image": "Sigh.png" }, { "index": 2047, "key": "Hurt", "cn": "[苦涩]", "en": "[Hurt]", "image": "Hurt.png" }, { "index": 2048, "key": "Broken", "cn": "[裂开]", "en": "[Broken]", "image": "Broken.png" }, { "index": 2049, "key": "Flushed", "cn": "[脸红]", "en": "[Flushed]", "image": "Flushed.png" }, { "index": 2050, "key": "Happy", "cn": "[笑脸]", "en": "[Happy]", "image": "Happy.png" }, { "index": 2051, "key": "Lol", "cn": "[破涕为笑]", "en": "[Lol]", "image": "Lol.png" }, { "index": 2052, "key": "Fireworks", "cn": "[烟花]", "en": "[Fireworks]", "image": "Fireworks.png" }, { "index": 2053, "key": "gift", "cn": "[礼物]", "en": "[Gift]", "image": "Gift.png" }, { "index": 2054, "key": "Party", "cn": "[庆祝]", "en": "[Party]", "image": "Party.png" }, { "index": 2055, "key": "Terror", "cn": "[恐惧]", "en": "[Terror]", "image": "Terror.png" }, { "index": 2056, "key": "Duh", "cn": "[恐惧]", "en": "[Duh]", "image": "Duh.png" }, { "index": 2057, "key": "LetDown", "cn": "[失望]", "en": "[Let Down]", "image": "Let Down.png" }, { "index": 2058, "key": "Sick", "cn": "[生病]", "en": "[Sick]", "image": "Sick.png" }, { "index": 2059, "key": "Worship", "cn": "[合十]", "en": "[Worship]", "image": "Worship.png" }];
@@ -142,7 +178,7 @@ const parseEmoji = (content) => {
         if (item.type === 2) {
             newContentList.push({
                 type: item.type,
-                content: content.substr(item.idx, item.code.length),
+                content: content.substring(item.idx, item.idx + item.code.length),
                 image: emotionMap[item.code].image
             })
         } else {
@@ -191,7 +227,7 @@ API.Utils = {
      */
     getUrlParam(name) {
         const reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
-        const r = window.location.search.substr(1).match(reg);
+        const r = window.location.search.substring(1).match(reg);
         if (r != null) {
             return decodeURI(r[2]);
         }

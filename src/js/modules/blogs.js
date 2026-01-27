@@ -229,7 +229,7 @@ API.Blogs.getAllList = async() => {
 
     const CONFIG = QZone_Config.Blogs;
 
-    const nextPage = async function(pageIndex, indicator) {
+    const nextPage = async function _nextPage(pageIndex, indicator) {
 
         // 下一页索引
         const nextPageIndex = pageIndex + 1;
@@ -246,14 +246,14 @@ API.Blogs.getAllList = async() => {
                 return QZone.Blogs.Data;
             }
             // 递归获取下一页
-            return await API.Common.callNextPage(nextPageIndex, CONFIG, QZone.Blogs.total, QZone.Blogs.Data, arguments.callee, nextPageIndex, indicator);
+            return await API.Common.callNextPage(nextPageIndex, CONFIG, QZone.Blogs.total, QZone.Blogs.Data, _nextPage, nextPageIndex, indicator);
 
         }).catch(async(e) => {
             console.error("获取日志列表异常，当前页：", pageIndex + 1, e);
             indicator.addFailed(new PageInfo(pageIndex, CONFIG.pageSize));
             // 当前页失败后，跳过继续请求下一页
             // 递归获取下一页
-            return await API.Common.callNextPage(nextPageIndex, CONFIG, QZone.Blogs.total, QZone.Blogs.Data, arguments.callee, nextPageIndex, indicator);
+            return await API.Common.callNextPage(nextPageIndex, CONFIG, QZone.Blogs.total, QZone.Blogs.Data, _nextPage, nextPageIndex, indicator);
         });
     }
 
@@ -349,7 +349,7 @@ API.Blogs.getItemAllCommentList = async(item) => {
     // 更新总数
     const total = item.replynum || 0;
 
-    const nextPage = async function(item, pageIndex) {
+    const nextPage = async function _nextPage(item, pageIndex) {
 
         // 下一页索引
         const nextPageIndex = pageIndex + 1;
@@ -360,12 +360,12 @@ API.Blogs.getItemAllCommentList = async(item) => {
             item.comments = item.comments.concat(dataList || []);
 
             // 递归获取下一页
-            return await API.Common.callNextPage(nextPageIndex, CONFIG, total, item.comments, arguments.callee, item, nextPageIndex);
+            return await API.Common.callNextPage(nextPageIndex, CONFIG, total, item.comments, _nextPage, item, nextPageIndex);
         }).catch(async(e) => {
             console.error("获取日志评论列表异常，当前页：", pageIndex + 1, item, e);
             // 当前页失败后，跳过继续请求下一页
             // 递归获取下一页
-            return await API.Common.callNextPage(nextPageIndex, CONFIG, total, item.comments, arguments.callee, item, nextPageIndex);
+            return await API.Common.callNextPage(nextPageIndex, CONFIG, total, item.comments, _nextPage, item, nextPageIndex);
         });
     }
 
@@ -854,7 +854,7 @@ API.Blogs.getItemAllVisitorsList = async(item) => {
     // 说说最近访问配置
     const CONFIG = QZone_Config.Blogs.Visitor;
 
-    const nextPage = async function(item, pageIndex) {
+    const nextPage = async function _nextPage(item, pageIndex) {
         // 下一页索引
         const nextPageIndex = pageIndex + 1;
 
@@ -872,13 +872,13 @@ API.Blogs.getItemAllVisitorsList = async(item) => {
             item.custom_visitor.list = item.custom_visitor.list.concat(data.list || []);
 
             // 递归获取下一页
-            return await API.Common.callNextPage(nextPageIndex, CONFIG, item.custom_visitor.totalNum, item.custom_visitor.list, arguments.callee, item, nextPageIndex);
+            return await API.Common.callNextPage(nextPageIndex, CONFIG, item.custom_visitor.totalNum, item.custom_visitor.list, _nextPage, item, nextPageIndex);
         }).catch(async(e) => {
             console.error("获取日志最近访问列表异常，当前页：", pageIndex + 1, item, e);
 
             // 当前页失败后，跳过继续请求下一页
             // 递归获取下一页
-            return await API.Common.callNextPage(nextPageIndex, CONFIG, item.custom_visitor.totalNum, item.custom_visitor.list, arguments.callee, item, nextPageIndex);
+            return await API.Common.callNextPage(nextPageIndex, CONFIG, item.custom_visitor.totalNum, item.custom_visitor.list, _nextPage, item, nextPageIndex);
         });
     }
 

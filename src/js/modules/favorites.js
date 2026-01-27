@@ -79,7 +79,7 @@ API.Favorites.getAllList = async() => {
 
     const CONFIG = QZone_Config.Favorites;
 
-    const nextPage = async function(pageIndex, indicator) {
+    const nextPage = async function _nextPage(pageIndex, indicator) {
         // 下一页索引
         const nextPageIndex = pageIndex + 1;
 
@@ -92,13 +92,13 @@ API.Favorites.getAllList = async() => {
                 return QZone.Favorites.Data;
             }
             // 递归获取下一页
-            return await API.Common.callNextPage(nextPageIndex, CONFIG, QZone.Favorites.total, QZone.Favorites.Data, arguments.callee, nextPageIndex, indicator);
+            return await API.Common.callNextPage(nextPageIndex, CONFIG, QZone.Favorites.total, QZone.Favorites.Data, _nextPage, nextPageIndex, indicator);
         }).catch(async(e) => {
             console.error("获取收藏列表异常，当前页：", pageIndex + 1, e);
             indicator.addFailed(new PageInfo(pageIndex, CONFIG.pageSize));
             // 当前页失败后，跳过继续请求下一页
             // 递归获取下一页
-            return await API.Common.callNextPage(nextPageIndex, CONFIG, QZone.Favorites.total, QZone.Favorites.Data, arguments.callee, nextPageIndex, indicator);
+            return await API.Common.callNextPage(nextPageIndex, CONFIG, QZone.Favorites.total, QZone.Favorites.Data, _nextPage, nextPageIndex, indicator);
         });
     }
 
