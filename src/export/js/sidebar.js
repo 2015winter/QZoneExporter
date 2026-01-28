@@ -84,7 +84,9 @@ const initSidebarResize = function() {
     const $sidebar = $('#BlogAnchor');
     const $handle = $sidebar.find('.resize-handle');
     // 增加容器类选择器，确保能匹配到各种页面的主内容区
-    const $content = $('#messages_html, #albums_html, #boards_html, #favorites_html, #shares_html, #visitors_html, #videos_html, #blogs-type-list, #friends-type-list, .albums-container, .photos-container, .videos-container');
+    const $content = $('#messages_html, #albums_html, #boards_html, #shares_html, #visitors_html, #videos_html, #blogs-type-list, #friends-type-list, .albums-container, .photos-container, .videos-container');
+    // 收藏页面需要调整父容器而不是 #favorites_html
+    const $favoritesCard = $('.favorites-main-card');
     
     let isResizing = false;
     let startX, startWidth;
@@ -110,6 +112,10 @@ const initSidebarResize = function() {
         
         $sidebar.css('width', newWidth + 'px');
         $content.css('margin-left', (newWidth + 10) + 'px');
+        // 收藏页面调整卡片的左边距
+        if ($favoritesCard.length) {
+            $favoritesCard.css('margin-left', (newWidth + 10) + 'px');
+        }
     });
 
     $(document).on('mouseup', function() {
@@ -131,6 +137,10 @@ const initSidebarResize = function() {
         if (width >= 150 && width <= 400) {
             $sidebar.css('width', width + 'px');
             $content.css('margin-left', (width + 10) + 'px');
+            // 收藏页面恢复卡片的左边距
+            if ($favoritesCard.length) {
+                $favoritesCard.css('margin-left', (width + 10) + 'px');
+            }
         }
     }
 }

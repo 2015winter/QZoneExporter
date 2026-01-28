@@ -2549,10 +2549,18 @@ blockquote.source {
     #messages_html,
     #albums_html,
     #boards_html,
-    #favorites_html,
     #shares_html,
     #visitors_html,
     #videos_html {
+        max-width: 60vw;
+        margin-left: 220px;
+    }
+    /* 收藏页面 - 调整主卡片容器 */
+    .favorites-page .container {
+        max-width: none;
+        padding: 0;
+    }
+    .favorites-main-card {
         max-width: 60vw;
         margin-left: 220px;
     }
