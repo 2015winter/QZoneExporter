@@ -284,7 +284,9 @@ $(function() {
         if (!photo) return;
 
         $loading.addClass('show');
-        $content.find('img, video').remove();
+        
+        // 获取旧的媒体元素，先淡出再移除（避免闪烁）
+        const $oldMedia = $content.find('img, video');
 
         // 设置标题
         const title = photo.name || API.Utils.formatDate(photo.uploadtime || photo.uploadTime) || '相片预览';
@@ -299,7 +301,8 @@ $(function() {
             const $video = $('<video>', {
                 controls: true,
                 poster: videoPoster,
-                preload: 'metadata'
+                preload: 'metadata',
+                css: { opacity: 0 }
             }).append($('<source>', {
                 src: videoSrc,
                 type: 'video/mp4'
@@ -307,8 +310,13 @@ $(function() {
 
             $video.on('loadeddata', function() {
                 $loading.removeClass('show');
+                // 移除旧媒体，淡入新媒体
+                $oldMedia.remove();
+                $video.animate({ opacity: 1 }, 150);
             }).on('error', function() {
                 $loading.removeClass('show');
+                $oldMedia.remove();
+                $video.animate({ opacity: 1 }, 150);
             });
 
             $content.append($video);
@@ -318,14 +326,20 @@ $(function() {
             
             const $img = $('<img>', {
                 src: photoHref,
-                alt: title
+                alt: title,
+                css: { opacity: 0 }
             });
 
             $img.on('load', function() {
                 $loading.removeClass('show');
+                // 移除旧媒体，淡入新媒体
+                $oldMedia.remove();
+                $img.animate({ opacity: 1 }, 150);
             }).on('error', function() {
                 $loading.removeClass('show');
+                $oldMedia.remove();
                 $(this).attr('src', '../Common/images/loading.gif');
+                $img.animate({ opacity: 1 }, 150);
             });
 
             $content.append($img);
