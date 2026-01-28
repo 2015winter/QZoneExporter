@@ -132,24 +132,23 @@ src/
 **本预览内容基于HTML备份类型生成，[点击这里浏览完整预览](https://demo.lvshuncai.com/qzone-export/index.html)**
 
 ### 首页预览
-![首页预览](https://s1.ax1x.com/2022/10/25/xWCMyF.png)
+![首页预览](https://media.githubusercontent.com/media/2015winter/ImageHosting/refs/heads/main/Q/QZone/首页.png)
 
 ### 说说预览
-![说说预览](https://s1.ax1x.com/2022/10/25/xWC8oR.png)
+![说说预览](https://media.githubusercontent.com/media/2015winter/ImageHosting/refs/heads/main/Q/QZone/说说.png)
 
 ### 日志预览
-![日志预览](https://s1.ax1x.com/2022/10/25/xWCtW6.png)
-![日志详情](https://s1.ax1x.com/2022/10/25/xWCdyD.png)
+![日志预览](https://media.githubusercontent.com/media/2015winter/ImageHosting/refs/heads/main/Q/QZone/日志.png)
 
 ### 相册预览
-![相册预览](https://s1.ax1x.com/2022/10/25/xWCDwd.png)
-![相片预览](https://s1.ax1x.com/2022/10/25/xWCrTA.png)
+![相册预览](https://media.githubusercontent.com/media/2015winter/ImageHosting/refs/heads/main/Q/QZone/相册1.png)
+![相片预览](https://media.githubusercontent.com/media/2015winter/ImageHosting/refs/heads/main/Q/QZone/相册2.png)
 
 ### 留言预览
-![留言预览](https://s1.ax1x.com/2022/10/25/xWC2Sf.png)
+![留言预览](https://media.githubusercontent.com/media/2015winter/ImageHosting/refs/heads/main/Q/QZone/留言.png)
 
 ### 好友预览
-![好友预览](https://s1.ax1x.com/2022/10/25/xWCITs.png)
+![好友预览](https://media.githubusercontent.com/media/2015winter/ImageHosting/refs/heads/main/Q/QZone/好友.png)
 
 ## 项目依赖
 
