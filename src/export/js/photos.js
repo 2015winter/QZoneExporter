@@ -283,14 +283,27 @@ $(function() {
         const photo = getPhotoFromLightbox(currentLightbox);
         if (!photo) return;
 
-        $loading.addClass('show');
-        
-        // 获取旧的媒体元素，先淡出再移除（避免闪烁）
+        // 获取旧的媒体元素
         const $oldMedia = $content.find('img, video');
+        
+        // 记录旧媒体的尺寸，用于保持内容区域稳定
+        let oldWidth = 0, oldHeight = 0;
+        if ($oldMedia.length > 0) {
+            oldWidth = $oldMedia.outerWidth();
+            oldHeight = $oldMedia.outerHeight();
+        }
 
         // 设置标题
         const title = photo.name || API.Utils.formatDate(photo.uploadtime || photo.uploadTime) || '相片预览';
         $title.text(title);
+
+        // 创建加载完成后的处理函数
+        const onMediaReady = function($newMedia) {
+            // 直接切换：移除旧的，显示新的
+            $oldMedia.remove();
+            $newMedia.css('opacity', 1);
+            $loading.removeClass('show');
+        };
 
         // 判断是视频还是图片
         if (photo.is_video && photo.video_info) {
@@ -302,24 +315,36 @@ $(function() {
                 controls: true,
                 poster: videoPoster,
                 preload: 'metadata',
-                css: { opacity: 0 }
+                css: { 
+                    opacity: 0,
+                    position: 'absolute'
+                }
             }).append($('<source>', {
                 src: videoSrc,
                 type: 'video/mp4'
             }));
 
-            $video.on('loadeddata', function() {
-                $loading.removeClass('show');
-                // 移除旧媒体，淡入新媒体
-                $oldMedia.remove();
-                $video.animate({ opacity: 1 }, 150);
-            }).on('error', function() {
-                $loading.removeClass('show');
-                $oldMedia.remove();
-                $video.animate({ opacity: 1 }, 150);
-            });
-
+            // 先添加到DOM
             $content.append($video);
+            
+            // 显示加载中（只在旧媒体存在时）
+            if ($oldMedia.length > 0) {
+                $loading.addClass('show');
+            }
+
+            $video.on('loadeddata', function() {
+                // 恢复正常定位
+                $video.css('position', '');
+                onMediaReady($video);
+            }).on('error', function() {
+                $video.css('position', '');
+                onMediaReady($video);
+            });
+            
+            // 如果没有旧媒体，立即显示
+            if ($oldMedia.length === 0) {
+                $video.css({ opacity: 1, position: '' });
+            }
         } else {
             // 图片类型
             const photoHref = API.Common.getMediaPath(photo.custom_url, photo.custom_filepath, true) || '../Common/images/loading.gif';
@@ -327,22 +352,34 @@ $(function() {
             const $img = $('<img>', {
                 src: photoHref,
                 alt: title,
-                css: { opacity: 0 }
+                css: { 
+                    opacity: 0,
+                    position: 'absolute'
+                }
             });
+
+            // 先添加到DOM
+            $content.append($img);
+            
+            // 显示加载中（只在旧媒体存在时）
+            if ($oldMedia.length > 0) {
+                $loading.addClass('show');
+            }
 
             $img.on('load', function() {
-                $loading.removeClass('show');
-                // 移除旧媒体，淡入新媒体
-                $oldMedia.remove();
-                $img.animate({ opacity: 1 }, 150);
+                // 恢复正常定位
+                $img.css('position', '');
+                onMediaReady($img);
             }).on('error', function() {
-                $loading.removeClass('show');
-                $oldMedia.remove();
+                $img.css('position', '');
                 $(this).attr('src', '../Common/images/loading.gif');
-                $img.animate({ opacity: 1 }, 150);
+                onMediaReady($img);
             });
-
-            $content.append($img);
+            
+            // 如果没有旧媒体，立即显示
+            if ($oldMedia.length === 0) {
+                $img.css({ opacity: 1, position: '' });
+            }
         }
 
         // 更新底部信息

@@ -3057,9 +3057,11 @@ blockquote.source {
     justify-content: center;
     align-items: center;
     padding: 24px;
-    overflow: auto;
+    overflow: hidden;
     min-height: 300px;
+    min-width: 400px;
     background: radial-gradient(ellipse at center, #2a2a2a 0%, #1a1a1a 100%);
+    position: relative;
 }
 
 .photo-preview-content img {
@@ -3068,7 +3070,7 @@ blockquote.source {
     object-fit: contain;
     border-radius: 6px;
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
-    transition: all 0.3s ease;
+    transition: opacity 0.15s ease;
 }
 
 .photo-preview-content img:hover {
