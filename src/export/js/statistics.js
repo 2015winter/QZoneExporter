@@ -507,7 +507,7 @@ API.Statistics.getTitle = (mapType, region, count) => {
         left: 'center'
     }, {
         subtext: 'Powered By QQ空间导出助手',
-        sublink: 'https://github.com/ShunCai/QZoneExport',
+        sublink: 'https://github.com/2015winter/QZoneExporter',
         left: 'center',
         bottom: "0"
     }]
