@@ -6,263 +6,167 @@
 
 ## 📖 概述
 
-### 为什么需要离线配置？
+### V3.0 版本：默认支持离线查看 ✅
 
-默认情况下，备份生成的 HTML 文件依赖在线 CDN 资源（如 jsDelivr、staticfile）来加载样式和脚本。
+从 v3.0 版本开始，**备份文件默认支持离线查看**，无需额外配置！
 
-**在线模式的问题：**
-- 断网时无法正常显示
-- CDN 不稳定时页面错乱
-- 某些网络环境下 CDN 被屏蔽
+所有依赖的第三方库（jQuery、Bootstrap、lightGallery、ECharts 等）已打包到扩展本地，备份时会自动复制到备份目录的 `Common/vendor` 文件夹中。
 
-**离线模式的优势：**
-- ✅ 完全断网可用
-- ✅ 不依赖外部服务
-- ✅ 长期保存无忧
+### 离线资源列表
 
----
-
-## 🛠️ 配置步骤
-
-### 前置准备
-
-| 准备项 | 说明 |
-|--------|------|
-| **助手版本** | 建议使用最新版本 |
-| **备份文件** | 已完成至少一次 HTML 格式备份 |
-| **离线资源包** | 需要下载 CDN 离线包 |
-
-### 步骤 1：下载离线资源包
-
-从以下渠道下载 CDN 离线包：
-
-| 渠道 | 链接 |
+| 资源 | 用途 |
 |------|------|
-| GitHub Releases | [下载页面](https://github.com/2015winter/QZoneExporter/releases) |
-| QQ 群文件 | 群号：959828088 |
-
-下载并解压后得到：
-```
-CDN离线包/
-├── vendors/           ← 离线资源文件夹
-│   └── npm/
-│       ├── jquery/
-│       ├── bootstrap/
-│       ├── echarts/
-│       └── ...
-└── 自动替换离线CDN.ps1   ← 自动替换脚本
-```
-
-### 步骤 2：放置离线资源
-
-将解压得到的 `vendors` 文件夹复制到备份目录的 `Common` 文件夹中：
-
-```
-QQ空间备份_123456/
-├── index.html
-├── Common/
-│   ├── css/
-│   ├── js/
-│   └── vendors/        ← 复制到这里
-│       └── npm/
-├── Messages/
-├── Albums/
-└── ...
-```
-
-### 步骤 3：替换 CDN 链接
-
-有两种替换方式可选：
+| jQuery 3.6.0 | DOM 操作 |
+| Bootstrap 4.6.1 | UI 框架 |
+| Bootstrap Table | 表格组件 |
+| lodash 4.17.21 | 工具函数 |
+| Moment.js | 时间处理 |
+| ECharts | 数据可视化 |
+| lightGallery | 图片画廊 |
+| Font Awesome 4.7 | 图标字体 |
 
 ---
 
-## 🤖 方式 A：自动替换（推荐）
+## ✅ 验证离线功能
 
-### 环境要求
-
-- PowerShell 7.0 或更高版本
-- Windows 10/11 系统
-
-### 操作步骤
-
-1. 将 `自动替换离线CDN.ps1` 脚本复制到备份根目录
-   ```
-   QQ空间备份_123456/
-   ├── 自动替换离线CDN.ps1   ← 复制到这里
-   ├── index.html
-   └── ...
-   ```
-
-2. 右键点击脚本，选择「使用 PowerShell 运行」
-
-3. 等待脚本执行完成
-
-### 注意事项
-
-| 限制 | 说明 |
-|------|------|
-| 文件名限制 | HTML 文件名不能包含特殊字符（如 `[]`） |
-| 版本要求 | 需要 PowerShell 7+，系统自带版本可能不够 |
-
----
-
-## ✏️ 方式 B：手动替换
-
-使用文本编辑器（推荐 Notepad++、VS Code）批量替换。
-
-### 操作步骤
-
-1. 打开 Notepad++ 或 VS Code
-
-2. 使用「在文件中查找/替换」功能
-   - **Notepad++:** `Ctrl + Shift + F`
-   - **VS Code:** `Ctrl + Shift + H`
-
-3. 设置参数：
-   - 文件类型：`*.html`
-   - 目录：选择备份文件夹
-   - 勾选「包含子目录」
-
-4. 按下表进行批量替换：
-
-### 替换规则表
-
-| 查找内容 | 替换为 |
-|---------|--------|
-| `https://fastly.jsdelivr.net` | `https://cdn.jsdelivr.net` |
-| `https://cdn.staticfile.org/jquery/3.6.0` | `../Common/vendors/npm/jquery@3.6.0/dist` |
-| `https://cdn.staticfile.net/jquery/3.6.0` | `../Common/vendors/npm/jquery@3.6.0/dist` |
-| `https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist` | `../Common/vendors/npm/jquery@3.6.0/dist` |
-| `https://cdn.staticfile.org/moment.js/2.29.4` | `../Common/vendors/npm/moment@2.29.4` |
-| `https://cdn.staticfile.net/moment.js/2.29.4` | `../Common/vendors/npm/moment@2.29.4` |
-| `https://cdn.jsdelivr.net/npm/moment@2.29.4` | `../Common/vendors/npm/moment@2.29.4` |
-| `https://cdn.staticfile.org/twitter-bootstrap/4.6.1` | `../Common/vendors/npm/bootstrap@4.6.1/dist` |
-| `https://cdn.staticfile.net/twitter-bootstrap/4.6.1` | `../Common/vendors/npm/bootstrap@4.6.1/dist` |
-| `https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist` | `../Common/vendors/npm/bootstrap@4.6.1/dist` |
-| `https://cdn.staticfile.org/echarts/5.4.1` | `../Common/vendors/npm/echarts@5.4.1/dist` |
-| `https://cdn.staticfile.net/echarts/5.4.1` | `../Common/vendors/npm/echarts@5.4.1/dist` |
-| `https://cdn.jsdelivr.net/npm/echarts@5.4.1/dist` | `../Common/vendors/npm/echarts@5.4.1/dist` |
-| `https://cdn.staticfile.org/lodash.js/4.17.21` | `../Common/vendors/npm/lodash@4.17.21` |
-| `https://cdn.staticfile.net/lodash.js/4.17.21` | `../Common/vendors/npm/lodash@4.17.21` |
-| `https://cdn.jsdelivr.net/npm/lodash@4.17.21` | `../Common/vendors/npm/lodash@4.17.21` |
-| `https://cdn.staticfile.org/font-awesome/4.7.0` | `../Common/vendors/npm/font-awesome@4.7.0` |
-| `https://cdn.staticfile.net/font-awesome/4.7.0` | `../Common/vendors/npm/font-awesome@4.7.0` |
-| `https://cdn.jsdelivr.net/npm/font-awesome@4.7.0` | `../Common/vendors/npm/font-awesome@4.7.0` |
-| `https://cdn.staticfile.org/lightgallery/2.7.0` | `../Common/vendors/npm/lightgallery@2.7.0` |
-| `https://cdn.staticfile.net/lightgallery/2.7.0` | `../Common/vendors/npm/lightgallery@2.7.0` |
-| `https://cdn.jsdelivr.net/npm/lightgallery@2.7.0` | `../Common/vendors/npm/lightgallery@2.7.0` |
-
-### 清理完整性属性
-
-最后使用**正则表达式**替换清理多余属性：
-
-| 查找（正则） | 替换为 |
-|-------------|--------|
-| `integrity=".+?" crossorigin="anonymous"` | （空，即删除） |
-| `integrity='.+?' crossorigin='anonymous'` | （空，即删除） |
-
----
-
-## ✅ 验证离线配置
-
-完成替换后，验证是否成功：
+完成备份后，验证离线功能是否正常：
 
 1. **断开网络连接**
 
-2. **打开 index.html**
+2. **打开 `index.html`**
 
-3. **检查以下内容是否正常：**
+3. **检查以下内容：**
    - [ ] 页面样式正常显示
-   - [ ] 图片正常加载（需要图片文件存在）
+   - [ ] 图片正常加载（需要图片文件已下载）
    - [ ] 导航菜单可点击
-   - [ ] 图表（如有）正常显示
+   - [ ] 图表正常显示
+   - [ ] 图片画廊可预览
 
 ---
 
-## ⚠️ 注意事项
+## 📁 备份目录结构
 
-### 仍需网络的内容
+v3.0 版本备份后的目录结构：
+
+```
+QQ空间备份_123456/
+├── index.html                    # 首页
+├── Common/
+│   ├── css/
+│   │   └── common.css            # 公共样式
+│   ├── js/
+│   │   ├── common.js             # 公共脚本
+│   │   └── sidebar.js            # 侧边栏脚本
+│   ├── images/
+│   │   └── ...                   # 公共图片
+│   └── vendor/                   # ⭐ 离线资源目录
+│       ├── css/
+│       │   ├── bootstrap.min.css
+│       │   ├── bootstrap-table.min.css
+│       │   ├── font-awesome.min.css
+│       │   ├── lightgallery.min.css
+│       │   └── lightgallery-bundle.min.css
+│       ├── fonts/
+│       │   └── fontawesome-webfont.woff2
+│       └── js/
+│           ├── jquery.min.js
+│           ├── bootstrap.bundle.min.js
+│           ├── bootstrap-table.min.js
+│           ├── lodash.min.js
+│           ├── moment.min.js
+│           ├── echarts.min.js
+│           ├── lightgallery.min.js
+│           ├── lg-zoom.min.js
+│           ├── lg-thumbnail.min.js
+│           └── ...
+├── Messages/                     # 说说
+├── Albums/                       # 相册
+├── Blogs/                        # 日志
+└── ...
+```
+
+---
+
+## ⚠️ 仍需网络的内容
 
 即使完成离线配置，以下内容仍可能需要网络：
 
-| 内容 | 说明 |
-|------|------|
-| QQ 表情 | QQ 官方在线表情图片 |
-| 外部链接 | 引用的外部网站内容 |
-| 在线视频 | 未下载的视频文件 |
+| 内容 | 说明 | 解决方案 |
+|------|------|---------|
+| QQ 表情 | QQ 官方在线表情图片 | 无法离线化 |
+| 未下载的图片 | 下载失败的图片 | 重新下载 |
+| 未下载的视频 | 下载失败的视频 | 重新下载 |
+| 外部链接 | 分享的外部网站内容 | 无法离线化 |
 
-### 多次备份处理
+---
 
-如果进行了多次备份（如增量备份），每次备份后都需要：
+## 🔄 旧版本备份迁移
 
-1. 确保 `vendors` 文件夹存在
-2. 对新增的 HTML 文件执行替换
+如果您有使用 v2.x 版本创建的备份文件（使用在线 CDN），可以按以下方式升级为离线版本：
 
-### 备份迁移
+### 方法一：重新备份（推荐）
 
-将备份复制到其他电脑时，确保：
+使用 v3.0 版本重新进行备份，会自动生成离线版本。
 
-1. 完整复制整个备份文件夹
-2. 包含 `Common/vendors` 目录
-3. 保持目录结构不变
+### 方法二：手动复制离线资源
+
+1. 从 v3.0 版本的新备份中复制 `Common/vendor` 文件夹
+
+2. 粘贴到旧备份的 `Common` 目录下
+
+3. 修改旧备份的 HTML 文件中的 CDN 链接
+
+### 需要替换的链接
+
+如果选择方法二，使用文本编辑器批量替换以下内容：
+
+| 查找内容 | 替换为 |
+|---------|--------|
+| `https://cdn.staticfile.org/` 或 `https://cdn.jsdelivr.net/npm/` 开头的链接 | `../Common/vendor/` 对应路径 |
+
+并删除 `integrity` 和 `crossorigin` 属性。
+
+> 💡 **建议：** 直接使用方法一重新备份更简单可靠。
 
 ---
 
 ## 🔧 常见问题
 
-### Q: 替换后页面仍然错乱？
+### Q: 离线后页面仍然错乱？
 
 **检查项：**
-1. `vendors` 文件夹是否放在正确位置
-2. 替换是否完整执行
-3. 是否有遗漏的 CDN 链接
+1. 确认使用的是 v3.0 或更高版本
+2. 确认 `Common/vendor` 文件夹存在且完整
+3. 确认 HTML 文件中的资源路径正确
 
-### Q: 脚本执行报错？
+### Q: 图片/视频不显示？
 
 **可能原因：**
-- PowerShell 版本过低
-- 文件名包含特殊字符
-- 权限不足
-
-**解决方案：** 使用方式 B 手动替换
-
-### Q: 离线包下载失败？
+- 多媒体文件下载失败
+- 文件夹未正确合并
 
 **解决方案：**
-- 尝试其他下载渠道
-- 联系 QQ 群获取
+1. 检查下载管理器中的失败任务
+2. 重新下载失败的文件
+3. 确保文案包和多媒体文件在同一目录
+
+### Q: 备份迁移到其他电脑后无法查看？
+
+**确保完整复制：**
+- 整个备份文件夹
+- 包含 `Common/vendor` 目录
+- 保持目录结构不变
 
 ---
 
-## 📁 离线资源包结构
+## 📞 获取帮助
 
-参考离线资源包的完整目录结构：
+如遇问题：
 
-```
-vendors/
-└── npm/
-    ├── jquery@3.6.0/
-    │   └── dist/
-    │       ├── jquery.min.js
-    │       └── jquery.min.map
-    ├── bootstrap@4.6.1/
-    │   └── dist/
-    │       ├── css/
-    │       └── js/
-    ├── moment@2.29.4/
-    │   ├── moment.min.js
-    │   └── locale/
-    ├── echarts@5.4.1/
-    │   └── dist/
-    ├── lodash@4.17.21/
-    │   └── lodash.min.js
-    ├── font-awesome@4.7.0/
-    │   ├── css/
-    │   └── fonts/
-    └── lightgallery@2.7.0/
-        ├── css/
-        └── lightgallery.min.js
-```
+| 渠道 | 链接 |
+|------|------|
+| **GitHub Issues** | [提交问题](https://github.com/2015winter/QZoneExporter/issues) |
+| **QQ 交流群** | 959828088 |
 
 ---
 
@@ -275,4 +179,4 @@ vendors/
 
 ---
 
-*本文档基于原作者芷炫的离线篇优化整理。*
+*本文档适用于 v3.0 版本。v3.0 版本已默认支持离线查看，无需额外配置。*
