@@ -1,6 +1,8 @@
 /**
- * QQ空间相册模块的导出A
- * @author https://lvshuncai.com
+ * QQ空间相册模块的导出API
+ * @original-author https://lvshuncai.com
+ * @modified-by https://laxdu.com
+ * @license Apache-2.0
  */
 
 

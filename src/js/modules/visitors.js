@@ -1,6 +1,8 @@
 /**
  * QQ空间访客模块的导出API
- * @author https://lvshuncai.com
+ * @original-author https://lvshuncai.com
+ * @modified-by https://laxdu.com
+ * @license Apache-2.0
  */
 
 API.Visitors.export = async() => {

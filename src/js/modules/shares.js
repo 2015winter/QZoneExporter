@@ -1,6 +1,8 @@
 /**
  * QQ空间分享模块的导出API
- * @author https://lvshuncai.com
+ * @original-author https://lvshuncai.com
+ * @modified-by https://laxdu.com
+ * @license Apache-2.0
  */
 
 API.Shares.export = async() => {

@@ -1,6 +1,8 @@
 /**
  * QQ空间留言模块导出API
- * @author https://lvshuncai.com
+ * @original-author https://lvshuncai.com
+ * @modified-by https://laxdu.com
+ * @license Apache-2.0
  */
 
 /**

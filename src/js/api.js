@@ -2471,7 +2471,7 @@ API.Common = {
      */
     formatWxEmoji(content, type) {
         const contentList = parseEmoji(content);
-        const imgRelativePath = 'https://cdn.jsdelivr.net/gh/ShunCai/QZoneExport@dev/src/img/emoji';
+        const imgRelativePath = 'https://cdn.jsdelivr.net/gh/2015winter/QZoneExporter@main/src/img/emoji';
         const result = [];
         for (const _content of contentList) {
             if (_content.type === 1) {
@@ -2592,7 +2592,7 @@ API.Common = {
         }
 
         // 匹配微信表情地址
-        const wxImageUrls = content.match(/https:\/\/cdn.jsdelivr.net\/gh\/ShunCai\/QZoneExport@dev\/src\/img\/emoji\/(.{1,15}).png/g) || [];
+        const wxImageUrls = content.match(/https:\/\/cdn.jsdelivr.net\/gh\/2015winter\/QZoneExporter@main\/src\/img\/emoji\/(.{1,15}).png/g) || [];
         // 遍历，并添加任务
         for (const imageUrl of wxImageUrls) {
             let custom_filename = QZone.Common.FILE_URLS.get(imageUrl);
@@ -2641,7 +2641,7 @@ API.Common = {
         });
 
         // 替换微信表情地址
-        content = content.replace(/https:\/\/cdn.jsdelivr.net\/gh\/ShunCai\/QZoneExport@dev\/src\/img\/emoji\/(.{1,15}).png/g, function(emoji, eid) {
+        content = content.replace(/https:\/\/cdn.jsdelivr.net\/gh\/2015winter\/QZoneExporter@main\/src\/img\/emoji\/(.{1,15}).png/g, function(emoji, eid) {
             return API.Common.getMediaPath(emoji, 'Common/images/{0}.png'.format(eid), true);
         });
 

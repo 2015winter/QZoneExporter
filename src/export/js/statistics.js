@@ -1,6 +1,8 @@
 /**
  * QQ空间数据统计分析信息
- * @author https://lvshuncai.com
+ * @original-author https://lvshuncai.com
+ * @modified-by https://laxdu.com
+ * @license Apache-2.0
  */
 "use strict";
 
