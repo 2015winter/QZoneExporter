@@ -56,7 +56,7 @@
 
 ### 使用 | Usage
 
-1. 阅读 [隐私政策](https://www.lvshuncai.com/archives/qzone-export-privacy-policy.html)，安装配置助手
+1. 阅读 [隐私政策](./docs/privacy-policy.md)，安装配置助手
 2. 登录并访问需要备份的QQ空间
 3. 点击扩展图标开始备份（主号建议睡前）
 4. 点击 **打包下载** 获取文案压缩包
@@ -65,11 +65,15 @@
 
 ## 📖 帮助文档 | Documentation
 
-[隐私政策](https://www.lvshuncai.com/archives/qzone-export-privacy-policy.html) · [安装教程](https://www.lvshuncai.com/archives/qzone-export-install.html) · [配置说明](https://www.lvshuncai.com/archives/qzone-export-configuration.html) · [使用指南](https://www.lvshuncai.com/archives/qzone-export-usage.html) · [常见问题](https://www.lvshuncai.com/archives/qzone-export-issue.html) · [离线查看](https://www.lvshuncai.com/archives/switch-qzx-jsdelivr-to-local.html) · [视频教程](https://www.bilibili.com/video/BV16r4y1x7hP?zw)
+**本地文档（推荐）：**
+
+[🔒 隐私政策](./docs/privacy-policy.md) · [📥 安装教程](./docs/install.md) · [⚙️ 配置说明](./docs/configuration.md) · [📖 使用指南](./docs/usage.md) · [❓ 常见问题](./docs/faq.md) · [📴 离线查看](./docs/offline.md)
+
+**视频教程：** [B站视频教程](https://www.bilibili.com/video/BV16r4y1x7hP?zw)
 
 ## 🖼 备份预览 | Preview
 
-[👉 点击查看在线演示](https://demo.lvshuncai.com/qzone-export/index.html)
+[👉 点击查看在线演示](https://2015winter.github.io/QZoneExporter/demo/index.html)
 
 <details open>
 <summary>展开查看截图</summary>
@@ -133,7 +137,7 @@ src/
 - 本助手开源免费，请勿从第三方购买
 - 基于 [QQ空间官方网站](https://qzone.qq.com/index.html) 备份数据，与官方无关
 - 使用即同意收集QQ空间Cookie（仅用于获取数据，不传输至后台）
-- 详情请阅读 [隐私政策](https://www.lvshuncai.com/archives/qzone-export-privacy-policy.html)
+- 详情请阅读 [隐私政策](./docs/privacy-policy.md)
 
 ## 📜 开源协议 | License
 

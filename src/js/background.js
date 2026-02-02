@@ -217,7 +217,7 @@ chrome.runtime.onInstalled.addListener((details) => {
         case 'install':
             // 打开官网说明文档
             chrome.tabs.create({
-                url: 'https://lvshuncai.com/archives/qzone-export.html'
+                url: 'https://github.com/2015winter/QZoneExporter/blob/main/docs/index.md'
             });
             break;
         case 'update':
@@ -240,7 +240,7 @@ chrome.runtime.onInstalled.addListener((details) => {
                 case '1.1.4':
                     // 打开更新日志
                     chrome.tabs.create({
-                        url: 'https://www.lvshuncai.com/archives/qzone-export.html#更新日志'
+                        url: 'https://github.com/2015winter/QZoneExporter/blob/main/docs/index.md#更新日志'
                     });
                     break;
                 case '1.1.5':
