@@ -3,275 +3,181 @@
 
 <head>
 	<link rel="icon" href="../Common/images/favicon.ico"> 
-	<title>QQ空间备份-相册</title>
 	<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<title>QQ空间备份-相册</title>
 	<link rel="stylesheet" href="../Common/vendor/css/font-awesome.min.css">
 	<link rel="stylesheet" href="../Common/vendor/css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="../Common/css/common.css">
 	<script src="../Common/vendor/js/jquery.min.js"></script>
 	<script src="../Common/vendor/js/bootstrap.bundle.min.js"></script>
-	<script src="../Common/vendor/js/index.aio.min.js"></script>
 	<script src="../Common/vendor/js/lodash.min.js"></script>
 	<script src="../Common/vendor/js/clicklove.min.js"></script>
 	
 	<script type="text/javascript" src="../Common/json/config.js"></script>
 	<script type="text/javascript" src="json/albums.js"></script>
 	<script type="text/javascript" src="../Common/js/common.js"></script>
-	<script type="text/javascript" src="../Common/js/sidebar.js"></script>
 	<script type="text/javascript" src="js/albums.js"></script>
+	
 	<style>
-		/* 相册页面专属样式 - 绿色主题 #38ef7d */
 		body {
-			background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+			background: linear-gradient(135deg, #11998e 0%, #38ef7d 50%, #96fbc4 100%);
 			min-height: 100vh;
+			padding-top: 70px;
+			padding-bottom: 80px;
 		}
 		
-		/* 顶部导航 - 绿色渐变 */
-		.albums-navbar {
+		.navbar-albums {
 			background: linear-gradient(135deg, rgba(17, 153, 142, 0.95), rgba(56, 239, 125, 0.95)) !important;
 			backdrop-filter: blur(10px);
 		}
 		
-		/* 主容器 - 用fluid撑满，考虑左侧栏 */
-		.albums-container {
-			padding: 80px 30px 40px 30px;
-			max-width: none !important;
-			transition: margin-left 0.1s ease;
+		.main-card {
+			background: rgba(255, 255, 255, 0.95);
+			backdrop-filter: blur(20px);
+			border-radius: 24px;
+			box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+			padding: 40px;
+			margin-top: 20px;
 		}
 		
-		@media (min-width: 1001px) {
-			.albums-container {
-				margin-left: 220px; /* 左侧栏宽度，会被JS动态调整 */
-			}
+		.page-header {
+			text-align: center;
+			margin-bottom: 40px;
+			padding-bottom: 30px;
+			border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 		}
 		
-		@media (max-width: 1000px) {
-			.albums-container {
-				margin-left: 0 !important;
-				padding: 70px 15px 30px 15px;
-			}
+		.page-header-icon {
+			font-size: 48px;
+			background: linear-gradient(135deg, #11998e, #38ef7d);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			margin-bottom: 16px;
 		}
 		
-		/* 分类标题 - h1用于侧边栏层级 */
-		h1.sidebar-category {
-			margin: 0 0 24px 0;
-			font-size: inherit;
-			font-weight: normal;
-		}
-		
-		.category-header {
-			display: flex;
-			align-items: center;
-			padding: 16px 24px;
-			background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-			border-radius: 16px;
-			box-shadow: 0 8px 24px rgba(17, 153, 142, 0.3);
-		}
-		
-		.category-icon {
-			width: 48px;
-			height: 48px;
-			background: rgba(255, 255, 255, 0.2);
-			border-radius: 12px;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			margin-right: 16px;
-			flex-shrink: 0;
-		}
-		
-		.category-icon i {
-			font-size: 24px;
-			color: #fff;
-		}
-		
-		.category-title-text {
-			color: #fff;
-			font-size: 22px;
+		.page-header-title {
+			font-size: 32px;
 			font-weight: 700;
-			text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-			flex: 1;
+			background: linear-gradient(135deg, #11998e, #38ef7d);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
 		}
 		
-		.category-count {
-			background: rgba(255, 255, 255, 0.25);
-			color: #fff;
-			font-size: 14px;
-			font-weight: 600;
-			padding: 6px 16px;
+		.page-stats {
+			color: #718096;
+			margin-top: 12px;
+		}
+		
+		/* 分类标签 - 显示在卡片内 */
+		.category-badge {
+			display: inline-block;
+			background: linear-gradient(135deg, rgba(17, 153, 142, 0.1), rgba(56, 239, 125, 0.1));
+			color: #11998e;
+			padding: 4px 12px;
 			border-radius: 20px;
-			white-space: nowrap;
-			flex-shrink: 0;
+			font-size: 12px;
+			margin-bottom: 8px;
 		}
 		
 		/* 相册网格 */
 		.albums-grid {
 			display: grid;
-			grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+			grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 			gap: 24px;
-			margin-bottom: 40px;
 		}
 		
-		/* 相册卡片 */
 		.album-card {
 			background: #fff;
-			border-radius: 20px;
+			border-radius: 16px;
 			overflow: hidden;
-			box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-			transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-			position: relative;
+			box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+			cursor: pointer;
+			transition: all 0.3s ease;
+			text-decoration: none;
+			color: inherit;
+			display: block;
 		}
 		
 		.album-card:hover {
 			transform: translateY(-8px);
-			box-shadow: 0 20px 40px rgba(17, 153, 142, 0.25);
+			box-shadow: 0 12px 30px rgba(17, 153, 142, 0.25);
+			text-decoration: none;
+			color: inherit;
 		}
 		
-		/* 封面区域 */
 		.album-cover {
 			position: relative;
 			height: 200px;
 			overflow: hidden;
 		}
 		
-		.album-cover-link {
-			display: block;
-			width: 100%;
-			height: 100%;
-		}
-		
 		.album-cover img {
 			width: 100%;
 			height: 100%;
 			object-fit: cover;
-			transition: transform 0.5s ease;
+			transition: transform 0.3s ease;
 		}
 		
 		.album-card:hover .album-cover img {
-			transform: scale(1.08);
-		}
-		
-		/* 相片数量徽章 */
-		.album-photo-count {
-			position: absolute;
-			top: 12px;
-			right: 12px;
-			background: linear-gradient(135deg, #11998e, #38ef7d);
-			color: #fff;
-			font-size: 13px;
-			font-weight: 600;
-			padding: 6px 12px;
-			border-radius: 20px;
-			box-shadow: 0 4px 12px rgba(17, 153, 142, 0.4);
-			z-index: 2;
-		}
-		
-		.album-photo-count i {
-			margin-right: 4px;
-		}
-		
-		/* 统计信息栏 */
-		.album-stats {
-			position: absolute;
-			bottom: 0;
-			left: 0;
-			right: 0;
-			display: flex;
-			justify-content: space-around;
-			padding: 12px 16px;
-			background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-			z-index: 2;
-		}
-		
-		.album-stat-item {
-			display: flex;
-			align-items: center;
-			color: #fff;
-			font-size: 14px;
-			cursor: pointer;
-			transition: all 0.2s ease;
-		}
-		
-		.album-stat-item:hover {
 			transform: scale(1.1);
 		}
 		
-		.album-stat-item i {
-			margin-right: 6px;
-			font-size: 16px;
+		.album-count {
+			position: absolute;
+			top: 10px;
+			right: 10px;
+			background: linear-gradient(135deg, #11998e, #38ef7d);
+			color: #fff;
+			padding: 4px 12px;
+			border-radius: 20px;
+			font-size: 13px;
+			font-weight: 600;
 		}
 		
-		.album-stat-item.likes i { color: #ff6b6b; }
-		.album-stat-item.comments i { color: #4ecdc4; }
-		.album-stat-item.views i { color: #feca57; }
-		
-		/* 卡片信息区 */
 		.album-info {
-			padding: 16px 20px;
+			padding: 20px;
 		}
 		
 		.album-name {
-			font-size: 16px;
+			font-size: 18px;
 			font-weight: 600;
-			color: #2d3748;
+			color: #333;
 			margin-bottom: 8px;
-			white-space: nowrap;
-			overflow: hidden;
-			text-overflow: ellipsis;
 		}
 		
 		.album-desc {
-			font-size: 13px;
-			color: #718096;
+			font-size: 14px;
+			color: #666;
+			line-height: 1.5;
 			display: -webkit-box;
 			-webkit-line-clamp: 2;
 			-webkit-box-orient: vertical;
 			overflow: hidden;
-			line-height: 1.5;
-			min-height: 39px;
+			min-height: 42px;
 		}
 		
-		/* 查看按钮 - 绿色渐变 */
-		.album-view-btn {
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			margin: 0 20px 16px;
-			padding: 10px;
-			background: linear-gradient(135deg, #11998e, #38ef7d);
-			color: #fff;
-			border-radius: 10px;
-			font-size: 14px;
-			font-weight: 600;
-			text-decoration: none;
-			transition: all 0.3s ease;
+		.album-stats {
+			margin-top: 12px;
+			font-size: 13px;
+			color: #999;
 		}
 		
-		.album-view-btn:hover {
-			background: linear-gradient(135deg, #38ef7d, #11998e);
-			color: #fff;
-			text-decoration: none;
-			transform: scale(1.02);
+		.album-stats span {
+			margin-right: 15px;
 		}
 		
-		.album-view-btn i {
-			margin-right: 8px;
+		.footer-albums {
+			background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.9));
 		}
 		
 		/* 响应式 */
 		@media (max-width: 768px) {
-			.category-header {
-				padding: 12px 16px;
-				border-radius: 12px;
+			.main-card {
+				padding: 20px;
 			}
 			
-			.category-icon {
-				width: 40px;
-				height: 40px;
-			}
-			
-			.category-title-text {
-				font-size: 18px;
+			.page-header-title {
+				font-size: 24px;
 			}
 			
 			.albums-grid {
@@ -280,7 +186,7 @@
 			}
 			
 			.album-cover {
-				height: 140px;
+				height: 150px;
 			}
 			
 			.album-info {
@@ -292,12 +198,6 @@
 			}
 			
 			.album-desc {
-				display: none;
-			}
-			
-			.album-view-btn {
-				margin: 0 12px 12px;
-				padding: 8px;
 				font-size: 12px;
 			}
 		}
@@ -306,82 +206,93 @@
 
 <body>
 	<header>
-		<nav class="navbar navbar-expand-lg navbar-dark fixed-top albums-navbar">
-			<a class="navbar-brand" target="_blank" href="https://github.com/2015winter/QZoneExporter">
+		<nav class="navbar navbar-expand-lg navbar-dark fixed-top navbar-albums">
+			<a class="navbar-brand" href="../index.html">
 				<i class="fa fa-cloud-download mr-2"></i>QQ空间导出助手
 			</a>
-			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
 				<span class="navbar-toggler-icon"></span>
 			</button>
 			<div class="collapse navbar-collapse" id="navbarSupportedContent">
 				<nav aria-label="breadcrumb">
 					<ol class="breadcrumb" style="background: transparent;">
-						<li class="breadcrumb-item"><a href="../index.html" style="color: rgba(255,255,255,0.8);"><i class="fa fa-home mr-1"></i>个人中心</a></li>
-						<li class="breadcrumb-item active" aria-current="page" style="color: rgba(255,255,255,0.95);">相册</li>
+						<li class="breadcrumb-item"><a href="../index.html" style="color: rgba(255,255,255,0.85);"><i class="fa fa-home mr-1"></i>个人中心</a></li>
+						<li class="breadcrumb-item active" style="color: rgba(255,255,255,0.9);"><i class="fa fa-picture-o mr-1"></i>相册</li>
 					</ol>
 				</nav>
 			</div>
 		</nav>
 	</header>
-	<main role="main">
-		<div class="albums-container" id="albums_html">
-			<%/* 遍历分类 */%>
-			<%for (const [className, items] of albumsMapping) {%>
-			<!-- 分类标题 (h1用于侧边栏一级) -->
-			<h1 class="sidebar-category" data-sidebar='<%:=className%><span class="badge badge-primary badge-pill itemSize"><%:=items.length%></span>'>
-				<div class="category-header">
-					<div class="category-icon">
-						<i class="fa fa-folder-open"></i>
+	
+	<main role="main" class="flex-shrink-0">
+		<div class="container">
+			<div class="main-card">
+				<div class="page-header">
+					<i class="fa fa-picture-o page-header-icon"></i>
+					<h1 class="page-header-title">我的相册</h1>
+					<div class="page-stats">
+						共 <span id="totalAlbumsCount"></span> 个相册，<span id="totalPhotosCount"></span> 张照片
 					</div>
-					<span class="category-title-text"><%:=className%></span>
-					<span class="category-count"><%:=items.length%> 个相册</span>
 				</div>
-			</h1>
-			
-			<!-- 相册网格 -->
-			<div class="albums-grid">
-				<%/* 遍历相册 */%>
-				<%for (const album of items) {%>
-				<!-- 相册卡片 (h2用于侧边栏二级) -->
-				<div class="album-card">
-					<span class="sidebar-h2" data-tag="h2" data-sidebar='<%:=album.name%>'></span>
-					
-					<div class="album-cover">
-						<a class="album-cover-link" href="<%:=API.Utils.filenameValidate(album.name)%>.html" onclick="return <%:=album.allowAccess >0 && album.photoList.length >0 %>;">
-							<img src="<%:=(album.custom_filepath || album.custom_url || album.url || album.pre)%>" alt="<%:=album.name%>">
+				
+				<!-- 相册网格 - 所有相册平铺展示 -->
+				<div class="albums-grid" id="albums_container">
+					<%/* 遍历所有相册 */%>
+					<%for (const [className, items] of albumsMapping) {%>
+						<%for (const album of items) {%>
+						<a class="album-card" href="<%:=API.Utils.filenameValidate(album.name)%>.html" <%if (album.allowAccess <= 0 || !album.photoList || album.photoList.length === 0) {%>onclick="return false;" style="opacity: 0.6; cursor: not-allowed;"<%}%>>
+							<div class="album-cover">
+								<img src="<%:=(album.custom_filepath || album.custom_url || album.url || album.pre)%>" alt="<%:=album.name%>" loading="lazy">
+								<span class="album-count"><i class="fa fa-image mr-1"></i><%:=album.total%></span>
+							</div>
+							<div class="album-info" data-toggle="tooltip" data-html="true" title="<%:=API.Photos.getAlbumBasicInfoTooltip(album)%>">
+								<span class="category-badge"><%:=className%></span>
+								<h3 class="album-name"><%:=API.Utils.formatContent(album.name, "HTML", false, false, false, false, true)%></h3>
+								<p class="album-desc"><%:=album.desc || '暂无描述'%></p>
+								<div class="album-stats">
+									<span><i class="fa fa-heart text-danger"></i> <%:=album.likes ? album.likes.length : 0%></span>
+									<span><i class="fa fa-comment text-info"></i> <%:=album.comments ? album.comments.length : 0%></span>
+									<span><i class="fa fa-eye text-warning"></i> <%:=album.custom_visitor ? album.custom_visitor.viewCount : 0%></span>
+								</div>
+							</div>
 						</a>
-						
-						<span class="album-photo-count">
-							<i class="fa fa-image"></i><%:=album.total%>
-						</span>
-						
-						<div class="album-stats">
-							<span class="album-stat-item likes viewlikes" title="查看点赞" data-field="id" data-target="<%:=album.id%>">
-								<i class="fa fa-heart"></i><%:=album.likes ? album.likes.length : 0%>
-							</span>
-							<span class="album-stat-item comments viewcomments" title="查看评论" data-field="id" data-target="<%:=album.id%>">
-								<i class="fa fa-comment"></i><%:=album.comments ? album.comments.length : 0%>
-							</span>
-							<span class="album-stat-item views viewVisitors" title="最近访问" data-field="id" data-target="<%:=album.id%>">
-								<i class="fa fa-eye"></i><%:=album.custom_visitor ? album.custom_visitor.viewCount : 0%>
-							</span>
-						</div>
-					</div>
-					
-					<div class="album-info" data-toggle="tooltip" data-html="true" title="<%:=API.Photos.getAlbumBasicInfoTooltip(album)%>">
-						<div class="album-name"><%:=API.Utils.formatContent(album.name, "HTML", false, false, false, false, true)%></div>
-						<div class="album-desc"><%:=album.desc || '暂无描述'%></div>
-					</div>
-					
-					<a class="album-view-btn" href="<%:=API.Utils.filenameValidate(album.name)%>.html" onclick="return <%:=album.allowAccess >0 && album.photoList.length >0 %>;">
-						<i class="fa fa-images"></i>浏览相册
-					</a>
+						<%}%>
+					<%}%>
 				</div>
-				<%}%>
 			</div>
-			<%}%>
 		</div>
 	</main>
+	
+	<footer class="footer mt-auto py-3 fixed-bottom footer-albums">
+		<div class="container text-center">
+			<span class="text-white">
+				<i class="fa fa-leaf mr-2"></i>落叶随风，青春，稀纵即逝
+			</span>
+		</div>
+	</footer>
+	
+	<script>
+		$(function() {
+			// 计算总相册数和总照片数
+			let totalAlbums = 0;
+			let totalPhotos = 0;
+			if (typeof albums !== 'undefined' && albums) {
+				totalAlbums = albums.length;
+				albums.forEach(album => {
+					totalPhotos += album.photoList?.length || 0;
+				});
+			}
+			$('#totalAlbumsCount').text(totalAlbums);
+			$('#totalPhotosCount').text(totalPhotos);
+			
+			// 初始化提示
+			$('[data-toggle="tooltip"]').tooltip({
+				placement: 'auto',
+				container: 'body',
+				boundary: 'window'
+			});
+		});
+	</script>
 </body>
 
 </html>

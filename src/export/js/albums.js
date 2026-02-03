@@ -13,6 +13,17 @@ $(function() {
         placement: 'auto',
         container: 'body',
         boundary: 'window'
-    })
+    });
 
+    // 计算总相册数和总照片数
+    let totalAlbums = 0;
+    let totalPhotos = 0;
+    if (typeof albums !== 'undefined' && albums) {
+        totalAlbums = albums.length;
+        albums.forEach(album => {
+            totalPhotos += album.photoList?.length || 0;
+        });
+    }
+    $('#totalAlbumsCount').text(totalAlbums);
+    $('#totalPhotosCount').text(totalPhotos);
 });
