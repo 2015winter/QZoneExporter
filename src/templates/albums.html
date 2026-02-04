@@ -68,6 +68,79 @@
 			margin-top: 12px;
 		}
 		
+		/* 工具栏 - 搜索和排序 */
+		.albums-toolbar {
+			display: flex;
+			gap: 16px;
+			margin-bottom: 30px;
+			flex-wrap: wrap;
+			align-items: center;
+		}
+		
+		.albums-search {
+			flex: 1;
+			min-width: 280px;
+			position: relative;
+		}
+		
+		.albums-search input {
+			width: 100%;
+			padding: 12px 16px 12px 44px;
+			border: 2px solid rgba(17, 153, 142, 0.2);
+			border-radius: 30px;
+			font-size: 14px;
+			outline: none;
+			transition: all 0.3s ease;
+			background: #fff;
+		}
+		
+		.albums-search input:focus {
+			border-color: #11998e;
+			box-shadow: 0 0 0 4px rgba(17, 153, 142, 0.1);
+		}
+		
+		.albums-search i {
+			position: absolute;
+			left: 18px;
+			top: 50%;
+			transform: translateY(-50%);
+			color: #718096;
+			pointer-events: none;
+		}
+		
+		/* 排序按钮组 */
+		.albums-sort {
+			display: flex;
+			gap: 8px;
+		}
+		
+		.sort-btn {
+			padding: 10px 16px;
+			border: 2px solid rgba(17, 153, 142, 0.2);
+			border-radius: 20px;
+			background: #fff;
+			font-size: 13px;
+			color: #4a5568;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			white-space: nowrap;
+		}
+		
+		.sort-btn:hover,
+		.sort-btn.active {
+			background: linear-gradient(135deg, #11998e, #38ef7d);
+			color: #fff;
+			border-color: transparent;
+		}
+		
+		.sort-btn i {
+			margin-right: 4px;
+		}
+		
+		.album-card.hidden {
+			display: none;
+		}
+		
 		/* 分类标签 - 显示在卡片内 */
 		.category-badge {
 			display: inline-block;
@@ -185,6 +258,19 @@
 				gap: 12px;
 			}
 			
+			.albums-toolbar {
+				flex-direction: column;
+			}
+			
+			.albums-search {
+				min-width: 100%;
+			}
+			
+			.albums-sort {
+				width: 100%;
+				justify-content: center;
+			}
+			
 			.album-cover {
 				height: 150px;
 			}
@@ -232,6 +318,25 @@
 					<h1 class="page-header-title">我的相册</h1>
 					<div class="page-stats">
 						共 <span id="totalAlbumsCount"></span> 个相册，<span id="totalPhotosCount"></span> 张照片
+					</div>
+				</div>
+				
+				<!-- 工具栏：搜索和排序 -->
+				<div class="albums-toolbar">
+					<div class="albums-search">
+						<i class="fa fa-search"></i>
+						<input type="text" id="albums-search-input" placeholder="搜索相册名称、描述或分类...">
+					</div>
+					<div class="albums-sort">
+						<button class="sort-btn active" data-sort="default">
+							<i class="fa fa-sort-amount-desc"></i>默认
+						</button>
+						<button class="sort-btn" data-sort="name-asc">
+							<i class="fa fa-sort-alpha-asc"></i>名称
+						</button>
+						<button class="sort-btn" data-sort="photos-desc">
+							<i class="fa fa-image"></i>照片数
+						</button>
 					</div>
 				</div>
 				
@@ -290,6 +395,88 @@
 				placement: 'auto',
 				container: 'body',
 				boundary: 'window'
+			});
+			
+			// 搜索和排序功能
+			const albumCards = $('.album-card');
+			let currentSort = 'default';
+			let originalOrder = albumCards.toArray(); // 保存原始顺序
+			
+			// 搜索功能
+			function performSearch() {
+				const searchText = $('#albums-search-input').val().trim().toLowerCase();
+				
+				albumCards.each(function() {
+					const card = $(this);
+					const albumName = card.find('.album-name').text().toLowerCase();
+					const albumDesc = card.find('.album-desc').text().toLowerCase();
+					const categoryBadge = card.find('.category-badge').text().toLowerCase();
+					
+					if (!searchText || 
+						albumName.includes(searchText) || 
+						albumDesc.includes(searchText) || 
+						categoryBadge.includes(searchText)) {
+						card.removeClass('hidden');
+					} else {
+						card.addClass('hidden');
+					}
+				});
+			}
+			
+			// 排序功能
+			function performSort(sortType) {
+				const container = $('#albums_container');
+				const visibleCards = albumCards.not('.hidden').toArray();
+				
+				let sortedCards;
+				switch (sortType) {
+					case 'name-asc':
+						// 按名称排序
+						sortedCards = visibleCards.sort((a, b) => {
+							const nameA = $(a).find('.album-name').text().trim();
+							const nameB = $(b).find('.album-name').text().trim();
+							return nameA.localeCompare(nameB, 'zh-CN');
+						});
+						break;
+					
+					case 'photos-desc':
+						// 按照片数排序
+						sortedCards = visibleCards.sort((a, b) => {
+							const countA = parseInt($(a).find('.album-count').text().replace(/[^0-9]/g, '')) || 0;
+							const countB = parseInt($(b).find('.album-count').text().replace(/[^0-9]/g, '')) || 0;
+							return countB - countA;
+						});
+						break;
+					
+					case 'default':
+					default:
+						// 恢复原始顺序
+						sortedCards = originalOrder.filter(card => !$(card).hasClass('hidden'));
+						break;
+				}
+				
+				// 重新排列DOM
+				sortedCards.forEach(card => {
+					container.append(card);
+				});
+			}
+			
+			// 搜索输入监听（使用防抖）
+			let searchTimer;
+			$('#albums-search-input').on('input', function() {
+				clearTimeout(searchTimer);
+				searchTimer = setTimeout(() => {
+					performSearch();
+					performSort(currentSort); // 搜索后重新排序
+				}, 300);
+			});
+			
+			// 排序按钮点击
+			$('.sort-btn').on('click', function() {
+				$('.sort-btn').removeClass('active');
+				$(this).addClass('active');
+				currentSort = $(this).data('sort');
+				performSort(currentSort);
 			});
 		});
 	</script>
