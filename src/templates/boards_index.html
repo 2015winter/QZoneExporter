@@ -26,85 +26,46 @@
 	<script type="text/javascript" src="../Common/js/common.js"></script>
 	
 	<style>
-		/* 留言板索引页专属样式 */
-		body.boards-index-page {
+		body {
 			background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 50%, #093637 100%);
 			min-height: 100vh;
 			padding-top: 70px;
 			padding-bottom: 80px;
 		}
 		
-		/* 导航栏样式 - 与 boards.html 保持一致 */
-		.boards-navbar {
+		.navbar-boards {
 			background: linear-gradient(135deg, rgba(78, 205, 196, 0.95), rgba(68, 160, 141, 0.95)) !important;
 		}
 		
-		.boards-breadcrumb {
-			background: transparent !important;
-			margin-bottom: 0;
-			padding: 0;
-		}
-		
-		.boards-breadcrumb .breadcrumb-item a {
-			color: rgba(255, 255, 255, 0.8);
-			transition: color 0.3s ease;
-		}
-		
-		.boards-breadcrumb .breadcrumb-item a:hover {
-			color: #fff;
-		}
-		
-		.boards-breadcrumb .breadcrumb-item.active {
-			color: rgba(255, 255, 255, 0.9);
-		}
-		
-		.boards-breadcrumb .breadcrumb-item + .breadcrumb-item::before {
-			color: rgba(255, 255, 255, 0.5);
-		}
-		
-		/* 主卡片 */
-		.boards-index-card {
+		.main-card {
 			background: rgba(255, 255, 255, 0.95);
-			backdrop-filter: blur(20px);
 			border-radius: 24px;
 			box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
 			padding: 40px;
 			margin-top: 20px;
-			animation: fadeInUp 0.6s ease-out;
 		}
 		
-		@keyframes fadeInUp {
-			from {
-				opacity: 0;
-				transform: translateY(30px);
-			}
-			to {
-				opacity: 1;
-				transform: translateY(0);
-			}
-		}
-		
-		/* 页面标题 */
-		.boards-index-header {
+		.page-header {
 			text-align: center;
-			margin-bottom: 32px;
-			padding-bottom: 24px;
+			margin-bottom: 40px;
+			padding-bottom: 30px;
 			border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 		}
 		
-		.boards-index-icon {
+		.page-header-icon {
 			font-size: 48px;
-			background: linear-gradient(135deg, #4ecdc4, #556270);
+			background: linear-gradient(135deg, #4ecdc4, #44a08d);
 			-webkit-background-clip: text;
 			-webkit-text-fill-color: transparent;
-			background-clip: text;
-			margin-bottom: 16px;
-			display: block;
 		}
 		
-		.boards-index-title {
-			font-size: 28px;
+		.page-header-title {
+			font-size: 32px;
 			font-weight: 700;
+			background: linear-gradient(135deg, #4ecdc4, #44a08d);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+		}
 			background: linear-gradient(135deg, #4ecdc4, #556270);
 			-webkit-background-clip: text;
 			-webkit-text-fill-color: transparent;
@@ -433,9 +394,9 @@
 	</style>
 </head>
 
-<body class="boards-index-page">
+<body>
 	<header>
-		<nav class="navbar navbar-expand-lg navbar-dark fixed-top boards-navbar">
+		<nav class="navbar navbar-expand-lg navbar-dark fixed-top navbar-boards">
 			<a class="navbar-brand" href="../index.html">
 				<i class="fa fa-cloud-download mr-2"></i>QQ空间导出助手
 			</a>
@@ -451,13 +412,13 @@
 	</header>
 	
 	<main role="main" class="flex-shrink-0">
-		<div class="container boards">
-			<div class="boards-index-card">
+		<div class="container">
+			<div class="main-card">
 				<!-- 页面标题 -->
-				<div class="boards-index-header">
-					<i class="fa fa-envelope-o boards-index-icon"></i>
-					<h1 class="boards-index-title">留言时光机</h1>
-					<p class="boards-index-subtitle">共 <span class="boards-total-count"><%:=total%></span> 条留言，记录了 <span class="boards-year-count"><%:=yearList.length%></span> 年的友情岁月</p>
+				<div class="page-header">
+					<i class="fa fa-envelope-o page-header-icon"></i>
+					<h1 class="page-header-title">留言时光机</h1>
+					<p style="color: #718096;">共 <span><%:=total%></span> 条留言，记录了 <span><%:=yearList.length%></span> 年的友情岁月</p>
 				</div>
 				
 				<!-- 主人寄语 -->
