@@ -34,12 +34,20 @@
 	<script type="text/javascript" src="json/favorites.js"></script>
 	
 	<script>
+	// 收藏类型映射 - 与demo保持一致
+	var typeMap = {
+		"article": { name: "文章", icon: "📄", color: "#4A90E2" },
+		"music": { name: "音乐", icon: "🎵", color: "#E24A90" },
+		"video": { name: "视频", icon: "🎬", color: "#E2904A" },
+		"photo": { name: "图片", icon: "🖼️", color: "#4AE290" }
+	};
+	
 	// 收藏类型相关辅助函数
 	var FavoritesHelper = {
-		// 获取收藏类型名称
+		// 获取收藏类型名称（根据原始type值）
 		getType: function(type) {
-			var typeMap = { 3: '日志', 5: '说说', 7: '分享' };
-			return typeMap[type] || '其他';
+			var typeNameMap = { 3: '日志', 5: '说说', 7: '分享' };
+			return typeNameMap[type] || '其他';
 		},
 		// 获取收藏类型键值（根据收藏内容判断）
 		// 优先按内容类型判断：音乐 > 视频 > 图片 > 文章
@@ -63,14 +71,9 @@
 			// 默认为文章类型（说说/日志/分享）
 			return 'article';
 		},
-		// 获取收藏类型信息
-		getTypeInfo: function(type) {
-			var typeInfoMap = {
-				3: { name: '日志', icon: '📄', color: '#4A90E2' },
-				5: { name: '说说', icon: '💬', color: '#E24A90' },
-				7: { name: '分享', icon: '🔗', color: '#E2904A' }
-			};
-			return typeInfoMap[type] || { name: '其他', icon: '📌', color: '#999' };
+		// 获取收藏类型信息 - 根据typeKey获取（与demo一致）
+		getTypeInfo: function(typeKey) {
+			return typeMap[typeKey] || { name: '其他', icon: '📌', color: '#999' };
 		},
 		// 获取收藏的原作者信息
 		getFavoriteOwner: function(favorite) {
@@ -273,10 +276,10 @@
 			color: #fff;
 		}
 		
-		/* 收藏卡片网格 */
+		/* 收藏卡片网格 - 与demo保持一致 */
 		.favorites-grid {
 			display: grid;
-			grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+			grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
 			gap: 20px;
 		}
 		
@@ -432,18 +435,12 @@
 			.favorites-header-title { font-size: 24px; }
 			
 			.favorites-grid {
-				grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+				grid-template-columns: 1fr;
 				gap: 16px;
 			}
 			
 			.favorites-filters { gap: 8px; }
 			.filter-tag { padding: 8px 14px; font-size: 13px; }
-		}
-		
-		@media (max-width: 480px) {
-			.favorites-grid {
-				grid-template-columns: 1fr;
-			}
 		}
 		
 		/* 隐藏详情 */
@@ -932,11 +929,11 @@
 				
 				<!-- 筛选标签 -->
 				<div class="favorites-filters" id="favorites-filters">
-					<button class="filter-tag active" data-type="all"><i class="fa fa-star"></i> 全部 <span class="count" id="filter-all">0</span></button>
-					<button class="filter-tag" data-type="article"><i class="fa fa-file-text"></i> 说说日志 <span class="count" id="filter-article">0</span></button>
-					<button class="filter-tag" data-type="music"><i class="fa fa-music"></i> 音乐 <span class="count" id="filter-music">0</span></button>
-					<button class="filter-tag" data-type="video"><i class="fa fa-video-camera"></i> 视频 <span class="count" id="filter-video">0</span></button>
-					<button class="filter-tag" data-type="photo"><i class="fa fa-image"></i> 图片 <span class="count" id="filter-photo">0</span></button>
+					<button class="filter-tag active" data-type="all">全部 <span class="count" id="filter-all">0</span></button>
+					<button class="filter-tag" data-type="article">📄 文章 <span class="count" id="filter-article">0</span></button>
+					<button class="filter-tag" data-type="music">🎵 音乐 <span class="count" id="filter-music">0</span></button>
+					<button class="filter-tag" data-type="video">🎬 视频 <span class="count" id="filter-video">0</span></button>
+					<button class="filter-tag" data-type="photo">🖼️ 图片 <span class="count" id="filter-photo">0</span></button>
 				</div>
 				
 				<!-- 收藏网格 - 通过JavaScript动态渲染 -->
@@ -1057,7 +1054,8 @@
 		emptyState.style.display = 'none';
 		
 		grid.innerHTML = filteredList.map(function(fav, index) {
-			var typeInfo = FavoritesHelper.getTypeInfo(fav.type);
+			// 根据typeKey获取类型信息（与demo一致）
+			var typeInfo = FavoritesHelper.getTypeInfo(fav._typeKey);
 			var owner = FavoritesHelper.getFavoriteOwner(fav);
 			
 			// 封面图片
@@ -1079,21 +1077,24 @@
 			// 摘要
 			var summary = getSummary(fav);
 			
-			// 标签HTML
-			var tagsHtml = '';
-			if (fav.type === 5 || fav.type === 3) {
-				tagsHtml = '<div class="favorite-tags"><span class="tag">#' + FavoritesHelper.getType(fav.type) + '</span>';
-				if (fav.custom_videos && fav.custom_videos.length > 0) {
-					tagsHtml += '<span class="tag">#视频</span>';
-				}
-				if ((fav.custom_origin_images && fav.custom_origin_images.length > 0) || (fav.custom_images && fav.custom_images.length > 0)) {
-					tagsHtml += '<span class="tag">#图片</span>';
-				}
-				if (fav.custom_audios && fav.custom_audios.length > 0) {
-					tagsHtml += '<span class="tag">#音乐</span>';
-				}
-				tagsHtml += '</div>';
+			// 标签HTML - 与demo风格保持一致
+			var tags = [];
+			// 原始类型标签（说说/日志/分享）
+			tags.push(FavoritesHelper.getType(fav.type));
+			// 内容类型标签
+			if (fav.custom_videos && fav.custom_videos.length > 0) {
+				tags.push('视频');
 			}
+			if ((fav.custom_origin_images && fav.custom_origin_images.length > 0) || (fav.custom_images && fav.custom_images.length > 0)) {
+				tags.push('图片');
+			}
+			if (fav.custom_audios && fav.custom_audios.length > 0) {
+				tags.push('音乐');
+			}
+			
+			var tagsHtml = tags.length > 0 ? '<div class="favorite-tags">' + 
+				tags.slice(0, 3).map(function(tag) { return '<span class="tag">#' + tag + '</span>'; }).join('') + 
+				'</div>' : '';
 			
 			return '<div class="favorite-card" data-type="' + fav._typeKey + '" data-index="' + index + '">' +
 				'<img class="favorite-cover lazyload" src="' + FavoritesHelper.escapeHtml(coverImage) + '" alt="' + FavoritesHelper.escapeHtml(shortTitle) + '" onerror="this.src=\'../Common/images/loading.gif\'">' +
@@ -1104,8 +1105,8 @@
 					'<h3 class="favorite-title">' + FavoritesHelper.escapeHtml(shortTitle) + '</h3>' +
 					'<p class="favorite-summary">' + FavoritesHelper.escapeHtml(summary) + '</p>' +
 					'<div class="favorite-meta">' +
-						'<span class="favorite-source"><i class="fa fa-user"></i> ' + FavoritesHelper.escapeHtml(owner.name) + '</span>' +
-						'<span>' + (fav.custom_create_time || '') + '</span>' +
+						'<span class="favorite-source"><span>📍</span> ' + FavoritesHelper.escapeHtml(owner.name) + '</span>' +
+						'<span>' + formatTime(fav.custom_create_time) + '</span>' +
 					'</div>' +
 					tagsHtml +
 				'</div>' +
@@ -1153,6 +1154,18 @@
 			return fav.desp;
 		}
 		return '暂无描述';
+	}
+	
+	// 格式化时间 - 与demo保持一致
+	function formatTime(timeStr) {
+		if (!timeStr) return '';
+		// 尝试解析时间字符串
+		var date = new Date(timeStr);
+		if (isNaN(date.getTime())) {
+			// 如果无法解析，直接返回原字符串
+			return timeStr;
+		}
+		return (date.getMonth() + 1) + '月' + date.getDate() + '日';
 	}
 	
 	// 打开侧边面板
@@ -1212,7 +1225,8 @@
 		var fav = filteredList[index];
 		if (!fav) return;
 		
-		var typeInfo = FavoritesHelper.getTypeInfo(fav.type);
+		// 根据typeKey获取类型信息（与demo一致）
+		var typeInfo = FavoritesHelper.getTypeInfo(fav._typeKey);
 		var owner = FavoritesHelper.getFavoriteOwner(fav);
 		var title = getTitle(fav);
 		var reason = FavoritesHelper.getReason(fav);
@@ -1249,8 +1263,8 @@
 			'</span>' +
 			'<h2 class="detail-title">' + FavoritesHelper.escapeHtml(title) + '</h2>' +
 			'<div class="detail-meta">' +
-				'<span class="detail-meta-item"><i class="fa fa-user"></i> ' + FavoritesHelper.escapeHtml(owner.name) + '</span>' +
-				'<span class="detail-meta-item"><i class="fa fa-clock-o"></i> ' + (fav.custom_create_time || '未知时间') + '</span>' +
+				'<span class="detail-meta-item"><span>📍</span> ' + FavoritesHelper.escapeHtml(owner.name) + '</span>' +
+				'<span class="detail-meta-item">收藏于 ' + (fav.custom_create_time || '未知时间') + '</span>' +
 			'</div>' +
 		'</div>';
 		
@@ -1314,13 +1328,18 @@
 			html += '</div>';
 		}
 		
-		// 底部标签
+		// 底部标签 - 与demo风格保持一致
+		var tags = [];
+		// 原始类型标签（说说/日志/分享）
+		tags.push(FavoritesHelper.getType(fav.type));
+		// 内容类型标签
+		if (videos.length > 0) tags.push('视频');
+		if (images.length > 0) tags.push('图片' + images.length + '张');
+		if (audios.length > 0) tags.push('音乐');
+		
 		html += '<div class="detail-tags">' +
-			'<span class="detail-tag">#' + FavoritesHelper.getType(fav.type) + '</span>';
-		if (videos.length > 0) html += '<span class="detail-tag">#视频</span>';
-		if (images.length > 0) html += '<span class="detail-tag">#图片' + images.length + '张</span>';
-		if (audios.length > 0) html += '<span class="detail-tag">#音乐</span>';
-		html += '</div>';
+			tags.map(function(tag) { return '<span class="detail-tag">#' + tag + '</span>'; }).join('') +
+		'</div>';
 		
 		html += '</div>'; // 结束 detail-main
 		
