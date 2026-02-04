@@ -39,17 +39,11 @@
 			min-height: 100vh;
 		}
 		
-		/* 主容器 - 与albums-container完全一致，增加左边距避免被遮挡 */
+		/* 主容器 - 移除侧边栏相关样式 */
 		.photos-container {
 			padding: 80px 30px 40px 30px;
 			max-width: none !important;
-			transition: margin-left 0.1s ease;
-		}
-		
-		@media (min-width: 1001px) {
-			.photos-container {
-				margin-left: 220px; /* 会被JS动态调整 */
-			}
+			margin-left: 0 !important;
 		}
 		
 		/* 移除tz-gallery所有默认边距 */
@@ -64,61 +58,15 @@
 		
 		@media (max-width: 1000px) {
 			.photos-container {
-				margin-left: 0 !important;
 				padding: 70px 15px 30px 15px;
 			}
 		}
 		
-		/* 相册标题样式 - h2用于侧边栏 */
-		h2.photos-title {
-			margin: 0 0 24px 0;
-			font-size: inherit;
-			font-weight: normal;
-		}
-		
+		/* 隐藏相册标题区域 */
+		h1.sidebar-h1,
+		h2.photos-title,
 		.photos-header {
-			display: flex;
-			align-items: center;
-			padding: 16px 24px;
-			background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-			border-radius: 16px;
-			box-shadow: 0 8px 24px rgba(17, 153, 142, 0.3);
-		}
-		
-		.photos-icon {
-			width: 48px;
-			height: 48px;
-			background: rgba(255, 255, 255, 0.2);
-			border-radius: 12px;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			margin-right: 16px;
-			flex-shrink: 0;
-		}
-		
-		.photos-icon i {
-			font-size: 24px;
-			color: #fff;
-		}
-		
-		.photos-title-text {
-			color: #fff;
-			font-size: 22px;
-			font-weight: 700;
-			text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-			flex: 1;
-		}
-		
-		.photos-count {
-			background: rgba(255, 255, 255, 0.25);
-			color: #fff;
-			font-size: 14px;
-			font-weight: 600;
-			padding: 6px 16px;
-			border-radius: 20px;
-			white-space: nowrap;
-			flex-shrink: 0;
+			display: none !important;
 		}
 		
 		/* 照片网格 */
@@ -314,20 +262,6 @@
 	</header>
 	<main role="main">
 		<div class="photos-container" id="photos_html">
-			<!-- 分类标题 - h1用于侧边栏一级 -->
-			<h1 class="sidebar-h1" data-sidebar='<%:=album.className || "相册"%><span class="badge badge-primary badge-pill itemSize">1</span>' style="display:none;"></h1>
-			
-			<!-- 相册标题 - h2用于侧边栏二级（不带数量，与index.html一致） -->
-			<h2 class="photos-title sidebar-h2" data-sidebar='<%:=album.name%>'>
-				<div class="photos-header">
-					<div class="photos-icon">
-						<i class="fa fa-folder-open"></i>
-					</div>
-					<span class="photos-title-text"><%:=album.name%></span>
-					<span class="photos-count"><%:=album.photoList ? album.photoList.length : 0%> 张相片</span>
-				</div>
-			</h2>
-			
 			<div class="tz-gallery">
 				<!-- 相册工具栏 -->
 				<div class="photos-toolbar mb-4">
@@ -490,7 +424,6 @@
 		window.albumId ='<%:=(albumId)%>';
 	</script>
 	<script type="text/javascript" src="../Common/js/common.js"></script>
-	<script type="text/javascript" src="../Common/js/sidebar.js"></script>
 	<script type="text/javascript" src="js/photos.js"></script>
 </body>
 
