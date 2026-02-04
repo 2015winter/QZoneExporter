@@ -1634,19 +1634,31 @@ API.Utils = {
     downloadByAria2(task) {
         const Aria2Setting = QZone_Config.Common.Aria2;
         const token = "token:" + Aria2Setting.token;
+        
+        // 构建Aria2选项 - 统一优化所有下载任务的配置
+        const options = {
+            "referer": 'https://user.qzone.qq.com/',
+            'header': ['Cookie: ' + document.cookie],
+            "out": API.Common.getRootFolderName() + '/' + task.dir + "/" + task.name,
+            // 优化下载参数，提高所有资源的下载成功率
+            "max-tries": "8",                    // 最大重试次数（应对网络波动）
+            "retry-wait": "5",                   // 重试等待时间（秒）
+            "connect-timeout": "60",             // 连接超时（秒）- 给予充足时间建立连接
+            "timeout": "120",                    // 下载超时（秒）- 适应慢速服务器
+            "max-connection-per-server": "1",    // 每服务器最大连接数（避免触发限流）
+            "split": "1",                        // 单文件连接数（图片不需要分段下载）
+            "min-split-size": "20M",             // 最小分段大小
+            "lowest-speed-limit": "0"            // 取消最低速度限制（避免慢速时中断）
+        };
+        
         const data = {
             "jsonrpc": "2.0",
             "method": "aria2.addUri",
             "id": Date.now(),
             "params": [
-                token, [
-                    task.url
-                ],
-                {
-                    "referer": 'https://user.qzone.qq.com/',
-                    'header': ['Cookie: ' + document.cookie],
-                    "out": API.Common.getRootFolderName() + '/' + task.dir + "/" + task.name
-                }
+                token, 
+                [task.url],
+                options
             ]
         };
         // 添加下载任务到Aria2
@@ -1834,10 +1846,13 @@ API.Utils = {
             const completedLength = parseInt(task.completedLength) || 0;
             const totalLength = parseInt(task.totalLength) || 0;
             
-            // 判断是否卡住：下载速度为0，且已经运行了一段时间
-            // 或者：没有连接数，且文件大小未知或为0
-            const isStuck = (downloadSpeed === 0 && connections === 0) || 
-                           (totalLength === 0 && downloadSpeed === 0);
+            // 优化判定逻辑：
+            // 1. 如果有任何下载进度（completedLength > 0），说明任务正在正常进行，不应移除
+            // 2. 如果totalLength为0但有连接数，说明正在建立连接或服务器未返回Content-Length，给予时间
+            // 3. 只有当速度为0、无连接、且无进度时，才判定为真正卡住
+            const hasProgress = completedLength > 0;
+            const isConnecting = connections > 0;
+            const isStuck = !hasProgress && !isConnecting && downloadSpeed === 0;
             
             if (isStuck) {
                 console.warn(`检测到卡住的任务: ${task.gid}，尝试移除...`, {
