@@ -324,140 +324,88 @@
 			gap: 20px;
 		}
 		
-		/* 好友卡片 */
+		/* 好友卡片 - 采用demo简洁风格 */
 		.friend-card {
-			background: linear-gradient(145deg, #f8fafc, #fff);
+			background: #fff;
 			border-radius: 16px;
-			padding: 24px 16px;
+			padding: 24px;
 			text-align: center;
+			box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+			transition: all 0.3s ease;
+			position: relative;
+			display: flex;
+			flex-direction: column;
+			height: 100%;
 			text-decoration: none;
 			color: inherit;
-			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-			border: 1px solid rgba(0, 0, 0, 0.05);
-			position: relative;
-			overflow: hidden;
 		}
 		
-		.friend-card::before {
-			content: '';
-			position: absolute;
-			inset: 0;
-			background: linear-gradient(135deg, #00cec9, #0984e3);
-			opacity: 0;
-			transition: opacity 0.3s ease;
+		.friend-content {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+		}
+		
+		.friend-info {
+			flex: 1;
 		}
 		
 		.friend-card:hover {
-			transform: translateY(-8px);
-			box-shadow: 0 15px 40px rgba(0, 206, 201, 0.25);
+			transform: translateY(-5px);
+			box-shadow: 0 10px 30px rgba(0, 206, 201, 0.2);
 			text-decoration: none;
-		}
-		
-		.friend-card:hover::before {
-			opacity: 1;
-		}
-		
-		.friend-card:hover .friend-avatar,
-		.friend-card:hover .friend-name,
-		.friend-card:hover .friend-qq,
-		.friend-card:hover .friend-group,
-		.friend-card:hover .friend-meta {
-			position: relative;
-			z-index: 1;
-		}
-		
-		.friend-card:hover .friend-name,
-		.friend-card:hover .friend-qq {
-			color: #fff;
-		}
-		
-		.friend-card:hover .friend-group {
-			background: rgba(255, 255, 255, 0.2);
-			color: #fff;
-		}
-		
-		.friend-card:hover .friend-meta span {
-			color: rgba(255, 255, 255, 0.9);
 		}
 		
 		.friend-avatar {
 			width: 80px;
 			height: 80px;
 			border-radius: 50%;
-			margin: 0 auto 16px;
-			border: 4px solid #fff;
-			box-shadow: 0 8px 24px rgba(0, 206, 201, 0.3);
-			transition: transform 0.3s ease;
-			position: relative;
-			z-index: 1;
-		}
-		
-		.friend-card:hover .friend-avatar {
-			transform: scale(1.1);
+			margin-bottom: 15px;
+			border: 4px solid #00cec9;
 		}
 		
 		.friend-name {
 			font-size: 16px;
 			font-weight: 600;
-			color: #2d3748;
-			margin-bottom: 6px;
-			white-space: nowrap;
-			overflow: hidden;
-			text-overflow: ellipsis;
-			transition: color 0.3s ease;
+			color: #333;
+			margin-bottom: 5px;
+		}
+		
+		.friend-remark {
+			font-size: 13px;
+			color: #999;
+			margin-bottom: 8px;
 		}
 		
 		.friend-qq {
 			font-size: 13px;
-			color: #718096;
-			margin-bottom: 12px;
-			transition: color 0.3s ease;
+			color: #999;
+			margin-bottom: 8px;
+			opacity: 0;
+			transition: opacity 0.3s ease;
+		}
+		
+		.friend-card:hover .friend-qq {
+			opacity: 1;
 		}
 		
 		.friend-group {
 			display: inline-block;
-			padding: 4px 12px;
+			padding: 3px 10px;
 			background: linear-gradient(135deg, rgba(0, 206, 201, 0.1), rgba(9, 132, 227, 0.1));
-			border-radius: 20px;
-			font-size: 12px;
-			font-weight: 500;
 			color: #0984e3;
-			margin-bottom: 12px;
-			transition: all 0.3s ease;
-		}
-		
-		.friend-meta {
-			display: flex;
-			justify-content: center;
-			gap: 12px;
+			border-radius: 10px;
 			font-size: 12px;
+			margin-top: auto;
 		}
 		
-		.friend-meta span {
-			display: flex;
-			align-items: center;
-			gap: 4px;
-			color: #718096;
-			transition: color 0.3s ease;
-		}
-		
-		.friend-meta .fa-heart { color: #ff6b6b; }
-		.friend-meta .fa-clock-o { color: #feca57; }
-		
-		/* 特别关心标记 */
-		.friend-care-badge {
+		/* 特别关心标记 - demo风格 */
+		.friend-care {
 			position: absolute;
-			top: 12px;
-			right: 12px;
+			top: 10px;
+			right: 10px;
 			color: #ff6b6b;
-			font-size: 16px;
-			z-index: 2;
-			animation: heartbeat 1.5s ease-in-out infinite;
-		}
-		
-		@keyframes heartbeat {
-			0%, 100% { transform: scale(1); }
-			50% { transform: scale(1.2); }
+			font-size: 18px;
 		}
 		
 		/* 空状态 */
@@ -711,8 +659,8 @@
 		// 更新统计
 		function updateStats() {
 			const total = allFriends.length;
-			const careCount = _.filter(allFriends, ['care', true]).length;
-			const groupNames = _.uniq(_.map(allFriends, 'groupName')).filter(g => g).length;
+			const careCount = allFriends.filter(f => f.care === true).length;
+			const groupNames = [...new Set(allFriends.map(f => f.groupName).filter(g => g))].length;
 			
 			$('#friends-count').text(total);
 			$('#stat-total').text(total);
@@ -724,7 +672,7 @@
 		function renderGroups() {
 			const groupMaps = {};
 			allFriends.forEach(f => {
-				const group = f.groupName || '未分组';
+				const group = String(f.groupName || '未分组');
 				if (!groupMaps[group]) groupMaps[group] = 0;
 				groupMaps[group]++;
 			});
@@ -732,7 +680,7 @@
 			let html = '<a class="group-tag active" data-group="all"><i class="fa fa-users"></i>全部<span class="count">' + allFriends.length + '</span></a>';
 			
 			// 特别关心
-			const careCount = _.filter(allFriends, ['care', true]).length;
+			const careCount = allFriends.filter(f => f.care === true).length;
 			if (careCount > 0) {
 				html += '<a class="group-tag" data-group="care"><i class="fa fa-heart"></i>特别关心<span class="count">' + careCount + '</span></a>';
 			}
@@ -756,7 +704,7 @@
 			return y + '-' + m;
 		}
 		
-		// 渲染好友卡片
+		// 渲染好友卡片 - 采用demo简洁风格
 		function renderFriendsGrid() {
 			if (filteredFriends.length === 0) {
 				$('#friends-grid').html('<div class="friends-empty"><i class="fa fa-users"></i><p>暂无好友</p></div>');
@@ -767,34 +715,39 @@
 			filteredFriends.forEach(friend => {
 				const uin = friend.uin;
 				const name = friend.remark || friend.name || 'QQ用户';
-				const groupName = friend.groupName || '未分组';
+				const groupName = String(friend.groupName || '未分组');
 				const isCare = friend.care;
-				const friendTime = formatFriendTime(friend);
 				const avatarUrl = API.Common.getUserLogoLocalUrl(uin, true);
 				const userUrl = API.Common.getUserUrl(uin);
 				
-				html += '<a href="' + userUrl + '" target="_blank" class="friend-card">';
+				html += '<a href="' + userUrl + '" target="_blank" class="friend-card" data-group="' + groupName + '">';
 				
-				// 特别关心标记
-				if (isCare) {
-					html += '<i class="fa fa-heart friend-care-badge"></i>';
+				// 特别关心标记 - 使用demo风格
+				if (isCare === true || isCare === 1) {
+					html += '<i class="fa fa-heart friend-care"></i>';
 				}
+				
+				html += '<div class="friend-content">';
+				html += '<div class="friend-info">';
 				
 				html += '<img src="' + avatarUrl + '" class="friend-avatar" onerror="this.src=\'../Common/images/avatar.png\'">';
-				html += '<div class="friend-name" title="' + name + '">' + name + '</div>';
+				html += '<div class="friend-name">' + name + '</div>';
+				
+				// 如果有备注且不同于昵称，显示备注信息
+				if (friend.remark && friend.remark !== friend.name) {
+					html += '<div class="friend-remark">备注: ' + friend.remark + '</div>';
+				}
+				
+				// QQ号始终渲染，通过CSS控制悬浮显示
 				html += '<div class="friend-qq">QQ: ' + uin + '</div>';
+				
+				html += '</div>'; // friend-info
+				
+				// 分组标签放在底部，确保对齐
 				html += '<div class="friend-group">' + groupName + '</div>';
 				
-				html += '<div class="friend-meta">';
-				if (isCare) {
-					html += '<span><i class="fa fa-heart"></i>关心</span>';
-				}
-				if (friendTime) {
-					html += '<span><i class="fa fa-clock-o"></i>' + friendTime + '</span>';
-				}
-				html += '</div>';
-				
-				html += '</a>';
+				html += '</div>'; // friend-content
+				html += '</a>'; // friend-card
 			});
 			
 			$('#friends-grid').html(html);
@@ -806,9 +759,9 @@
 			if (currentGroup === 'all') {
 				filteredFriends = [...allFriends];
 			} else if (currentGroup === 'care') {
-				filteredFriends = allFriends.filter(f => f.care);
+				filteredFriends = allFriends.filter(f => f.care === true || f.care === 1);
 			} else {
-				filteredFriends = allFriends.filter(f => (f.groupName || '未分组') === currentGroup);
+				filteredFriends = allFriends.filter(f => String(f.groupName || '未分组') === String(currentGroup));
 			}
 			
 			// 搜索
@@ -838,7 +791,7 @@
 			renderFriendsGrid();
 		}
 		
-		// 分组点击
+		// 分组点击 - 适配demo卡片结构
 		$(document).on('click', '.group-tag', function() {
 			$('.group-tag').removeClass('active');
 			$(this).addClass('active');
@@ -921,7 +874,12 @@
 				align: 'center',
 				sortable: true,
 				formatter: (value, row) => formatFriendTime(row)
-			}], allFriends);
+			}], allFriends, {
+				search: false,
+				showRefresh: false,
+				showToggle: false,
+				showColumns: false
+			});
 		}
 		
 		// 初始化

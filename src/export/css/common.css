@@ -3910,3 +3910,13 @@ body.blogs-page {
         justify-content: center;
     }
 }
+
+/* ==================== 好友页面美化样式 - 青绿色主题 ==================== */
+
+/* 好友页面背景 */
+body.friends-page {
+    background: linear-gradient(135deg, #00cec9 0%, #0984e3 50%, #6c5ce7 100%);
+    min-height: 100vh;
+    padding-top: 70px;
+    padding-bottom: 80px;
+}
