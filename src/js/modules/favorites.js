@@ -495,3 +495,53 @@ API.Favorites.addDownloadEmoticonTasks = (favorite) => {
     API.Common.formatContent(favorite.abstract || favorite.desp, 'HTML', false, true, false, true, false);
 
 }
+
+/**
+ * 获取收藏类型名称
+ * @param {number} type 收藏类型
+ */
+API.Favorites.getType = (type) => {
+    const typeMap = {
+        3: '日志',
+        5: '说说',
+        7: '分享'
+    };
+    return typeMap[type] || '其他';
+}
+
+/**
+ * 获取收藏类型键值（根据收藏内容判断）
+ * @param {object} favorite 收藏对象
+ */
+API.Favorites.getTypeKey = (favorite) => {
+    // 如果传入的是数字（兼容旧调用），返回article
+    if (typeof favorite === 'number') {
+        return 'article';
+    }
+    // 优先判断多媒体内容
+    if (favorite.custom_audios && favorite.custom_audios.length > 0) {
+        return 'music';
+    }
+    if (favorite.custom_videos && favorite.custom_videos.length > 0) {
+        return 'video';
+    }
+    if ((favorite.custom_origin_images && favorite.custom_origin_images.length > 0) || 
+        (favorite.custom_images && favorite.custom_images.length > 0)) {
+        return 'photo';
+    }
+    // 默认返回article
+    return 'article';
+}
+
+/**
+ * 获取收藏类型信息
+ * @param {number} type 收藏类型
+ */
+API.Favorites.getTypeInfo = (type) => {
+    const typeInfoMap = {
+        3: { name: '日志', icon: '📄', color: '#4A90E2' },
+        5: { name: '说说', icon: '💬', color: '#E24A90' },
+        7: { name: '分享', icon: '🔗', color: '#E2904A' }
+    };
+    return typeInfoMap[type] || { name: '其他', icon: '📌', color: '#999' };
+}

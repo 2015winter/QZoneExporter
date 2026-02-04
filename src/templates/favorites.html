@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 
 <head>
 	<link rel="icon" href="../Common/images/favicon.ico">
@@ -31,17 +31,127 @@
 	
 	<script type="text/javascript" src="../Common/json/config.js"></script>
 	<script type="text/javascript" src="../Common/js/common.js"></script>
-	<script type="text/javascript" src="../Common/js/sidebar.js"></script>
 	<script type="text/javascript" src="json/favorites.js"></script>
-	<script type="text/javascript" src="js/favorites.js"></script>
+	
+	<script>
+	// 收藏类型相关辅助函数
+	var FavoritesHelper = {
+		// 获取收藏类型名称
+		getType: function(type) {
+			var typeMap = { 3: '日志', 5: '说说', 7: '分享' };
+			return typeMap[type] || '其他';
+		},
+		// 获取收藏类型键值（根据收藏内容判断）
+		// 优先按内容类型判断：音乐 > 视频 > 图片 > 文章
+		getTypeKey: function(favorite) {
+			if (typeof favorite === 'number') return 'article';
+			// 优先判断是否有音乐
+			if (favorite.custom_audios && favorite.custom_audios.length > 0) return 'music';
+			// 然后判断是否有视频
+			if (favorite.custom_videos && favorite.custom_videos.length > 0) return 'video';
+			// 判断是否纯图片内容（有图片但没有文字内容或标题很短）
+			var hasImages = (favorite.custom_origin_images && favorite.custom_origin_images.length > 0) || 
+				(favorite.custom_images && favorite.custom_images.length > 0);
+			if (hasImages) {
+				// 检查是否有实质文字内容
+				var hasText = (favorite.title && favorite.title.trim().length > 10) ||
+					(favorite.abstract && favorite.abstract.trim().length > 20) ||
+					(favorite.desp && favorite.desp.trim().length > 20);
+				// 如果没有实质文字，归类为图片
+				if (!hasText) return 'photo';
+			}
+			// 默认为文章类型（说说/日志/分享）
+			return 'article';
+		},
+		// 获取收藏类型信息
+		getTypeInfo: function(type) {
+			var typeInfoMap = {
+				3: { name: '日志', icon: '📄', color: '#4A90E2' },
+				5: { name: '说说', icon: '💬', color: '#E24A90' },
+				7: { name: '分享', icon: '🔗', color: '#E2904A' }
+			};
+			return typeInfoMap[type] || { name: '其他', icon: '📌', color: '#999' };
+		},
+		// 获取收藏的原作者信息
+		getFavoriteOwner: function(favorite) {
+			if (favorite.shuoshuo_info) {
+				return { name: favorite.shuoshuo_info.owner_name || '未知', uin: favorite.shuoshuo_info.owner_uin };
+			} else if (favorite.share_info) {
+				return { name: favorite.share_info.owner_name || '未知', uin: favorite.share_info.owner_uin };
+			} else if (favorite.blog_info) {
+				return { name: favorite.blog_info.owner_name || '未知', uin: favorite.blog_info.owner_uin };
+			}
+			return { name: favorite.custom_name || '未知', uin: favorite.custom_uin || '' };
+		},
+		// HTML转义
+		escapeHtml: function(text) {
+			if (!text) return '';
+			var div = document.createElement('div');
+			div.textContent = text;
+			return div.innerHTML;
+		},
+		// 获取完整内容文本
+		getFullContent: function(favorite) {
+			var content = '';
+			// 优先使用说说内容
+			if (favorite.shuoshuo_info && favorite.shuoshuo_info.detail_shuoshuo_info && favorite.shuoshuo_info.detail_shuoshuo_info.content) {
+				content = favorite.shuoshuo_info.detail_shuoshuo_info.content;
+			} else if (favorite.abstract) {
+				content = favorite.abstract;
+			} else if (favorite.desp) {
+				content = favorite.desp;
+			}
+			return content || '暂无内容';
+		},
+		// 获取收藏理由
+		getReason: function(favorite) {
+			if (favorite.shuoshuo_info && favorite.shuoshuo_info.reason) {
+				return favorite.shuoshuo_info.reason;
+			} else if (favorite.share_info && favorite.share_info.reason) {
+				return favorite.share_info.reason;
+			} else if (favorite.blog_info && favorite.blog_info.reason) {
+				return favorite.blog_info.reason;
+			}
+			return '';
+		}
+	};
+	</script>
 	
 	<style>
-		/* 页面专属样式 */
+		/* 收藏页面专属样式 - 保留黄橙色主题 */
 		body.favorites-page {
 			background: linear-gradient(135deg, #feca57 0%, #ff9f43 50%, #f093fb 100%);
 			min-height: 100vh;
 			padding-top: 70px;
 			padding-bottom: 80px;
+		}
+		
+		/* 导航栏样式 */
+		.favorites-navbar {
+			background: linear-gradient(135deg, rgba(254, 202, 87, 0.95), rgba(255, 159, 67, 0.95)) !important;
+			backdrop-filter: blur(10px);
+		}
+		
+		.favorites-breadcrumb {
+			background: transparent !important;
+		}
+		
+		.favorites-breadcrumb .breadcrumb-item a {
+			color: rgba(255, 255, 255, 0.85);
+			transition: color 0.3s ease;
+		}
+		
+		.favorites-breadcrumb .breadcrumb-item a:hover {
+			color: #fff;
+			text-decoration: none;
+		}
+		
+		.favorites-breadcrumb .breadcrumb-item.active {
+			color: rgba(255, 255, 255, 0.9);
+		}
+		
+		.favorites-breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+			color: rgba(255, 255, 255, 0.5);
 		}
 		
 		/* 主卡片容器 */
@@ -52,294 +162,287 @@
 			box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
 			padding: 40px;
 			margin-top: 20px;
+			margin-left: auto;
+			margin-right: auto;
+			max-width: 1200px;
 			animation: fadeInUp 0.6s ease-out;
 		}
 		
 		@keyframes fadeInUp {
-			from {
-				opacity: 0;
-				transform: translateY(30px);
-			}
-			to {
-				opacity: 1;
-				transform: translateY(0);
-			}
+			from { opacity: 0; transform: translateY(30px); }
+			to { opacity: 1; transform: translateY(0); }
 		}
 		
 		/* 页面标题区域 */
-		.page-header {
+		.favorites-header {
 			text-align: center;
-			margin-bottom: 32px;
-			padding-bottom: 24px;
+			margin-bottom: 40px;
+			padding-bottom: 30px;
 			border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 		}
 		
-		.page-title {
-			font-size: 28px;
+		.favorites-header-icon {
+			font-size: 48px;
+			background: linear-gradient(135deg, #feca57, #ff9f43);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			margin-bottom: 16px;
+			display: block;
+		}
+		
+		.favorites-header-title {
+			font-size: 32px;
 			font-weight: 700;
 			background: linear-gradient(135deg, #feca57, #ff9f43);
 			-webkit-background-clip: text;
 			-webkit-text-fill-color: transparent;
 			background-clip: text;
-			margin-bottom: 8px;
+			margin-bottom: 12px;
 		}
 		
-		.page-subtitle {
+		.favorites-header-subtitle {
 			color: #718096;
-			font-size: 15px;
-		}
-		
-		/* 统计信息 */
-		.favorites-stats {
-			display: flex;
-			align-items: center;
-			gap: 16px;
-			margin-bottom: 24px;
-		}
-		
-		.stats-badge {
-			display: inline-flex;
-			align-items: center;
-			gap: 8px;
-			background: linear-gradient(135deg, #feca57, #ff9f43);
-			color: #fff;
-			padding: 8px 20px;
-			border-radius: 25px;
-			font-weight: 600;
-			font-size: 14px;
-		}
-		
-		/* 年份分组标题 */
-		.year-group {
-			margin-top: 32px;
-			margin-bottom: 16px;
-		}
-		
-		.year-title {
-			display: inline-flex;
-			align-items: center;
-			gap: 10px;
-			background: linear-gradient(135deg, #feca57, #ff9f43);
-			color: #fff;
-			padding: 10px 24px;
-			border-radius: 25px;
-			font-weight: 600;
 			font-size: 16px;
 		}
 		
-		.month-title {
+		.favorites-total-count {
+			font-weight: 600;
+			color: #ff9f43;
+		}
+		
+		/* 筛选标签区域 */
+		.favorites-filters {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 12px;
+			justify-content: center;
+			margin-bottom: 32px;
+			padding-bottom: 24px;
+			border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+		}
+		
+		.filter-tag {
 			display: inline-flex;
 			align-items: center;
 			gap: 8px;
-			background: rgba(254, 202, 87, 0.2);
-			color: #ff9f43;
-			padding: 6px 16px;
-			border-radius: 20px;
-			font-weight: 500;
+			padding: 10px 20px;
+			background: linear-gradient(145deg, #f8fafc, #fff);
+			border: 1px solid rgba(254, 202, 87, 0.15);
+			border-radius: 30px;
 			font-size: 14px;
-			margin: 16px 0 12px;
+			color: #4a5568;
+			cursor: pointer;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			text-decoration: none;
 		}
 		
-		/* 收藏卡片 */
+		.filter-tag:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 6px 20px rgba(254, 202, 87, 0.2);
+			background: linear-gradient(135deg, #feca57, #ff9f43);
+			color: #fff;
+			text-decoration: none;
+		}
+		
+		.filter-tag.active {
+			background: linear-gradient(135deg, #feca57, #ff9f43);
+			color: #fff;
+			border-color: transparent;
+			box-shadow: 0 6px 20px rgba(254, 202, 87, 0.3);
+		}
+		
+		.filter-tag .count {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			min-width: 24px;
+			height: 24px;
+			padding: 0 8px;
+			background: rgba(254, 202, 87, 0.1);
+			border-radius: 12px;
+			font-size: 12px;
+			font-weight: 600;
+			color: #ff9f43;
+			transition: all 0.3s ease;
+		}
+		
+		.filter-tag:hover .count,
+		.filter-tag.active .count {
+			background: rgba(255, 255, 255, 0.25);
+			color: #fff;
+		}
+		
+		/* 收藏卡片网格 */
+		.favorites-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+			gap: 20px;
+		}
+		
+		/* 收藏卡片 - 参考demo风格 */
 		.favorite-card {
 			background: #fff;
 			border-radius: 16px;
-			padding: 24px;
-			margin-bottom: 20px;
-			border: 1px solid rgba(0, 0, 0, 0.05);
+			overflow: hidden;
+			box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 			transition: all 0.3s ease;
-			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+			cursor: pointer;
+			display: flex;
+			flex-direction: column;
+			height: 100%;
 		}
 		
 		.favorite-card:hover {
-			transform: translateY(-4px);
-			box-shadow: 0 12px 32px rgba(254, 202, 87, 0.25);
+			transform: translateY(-5px);
+			box-shadow: 0 10px 30px rgba(254, 202, 87, 0.2);
 		}
 		
-		/* 用户信息 */
-		.favorite-user {
-			display: flex;
-			align-items: flex-start;
-			gap: 16px;
-			margin-bottom: 16px;
+		.favorite-card.clicked {
+			transform: scale(0.98);
+			transition: transform 0.1s ease;
 		}
 		
-		.favorite-avatar {
-			width: 50px;
-			height: 50px;
-			border-radius: 50%;
-			border: 3px solid #fff;
-			box-shadow: 0 4px 12px rgba(254, 202, 87, 0.3);
+		.favorite-cover {
+			width: 100%;
+			height: 180px;
+			object-fit: cover;
 			transition: transform 0.3s ease;
 		}
 		
-		.favorite-avatar:hover {
-			transform: scale(1.1);
+		.favorite-card:hover .favorite-cover {
+			transform: scale(1.05);
 		}
 		
-		.favorite-user-info {
+		.favorite-content {
+			padding: 20px;
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+		}
+		
+		.favorite-type {
+			display: inline-flex;
+			align-items: center;
+			gap: 5px;
+			padding: 4px 12px;
+			border-radius: 12px;
+			font-size: 12px;
+			font-weight: 600;
+			margin-bottom: 10px;
+			align-self: flex-start;
+		}
+		
+		.favorite-title {
+			font-size: 16px;
+			font-weight: 600;
+			color: #333;
+			margin-bottom: 8px;
+			line-height: 1.4;
+			display: -webkit-box;
+			-webkit-line-clamp: 2;
+			-webkit-box-orient: vertical;
+			overflow: hidden;
+		}
+		
+		.favorite-summary {
+			font-size: 14px;
+			color: #666;
+			line-height: 1.6;
+			display: -webkit-box;
+			-webkit-line-clamp: 3;
+			-webkit-box-orient: vertical;
+			overflow: hidden;
+			margin-bottom: 12px;
 			flex: 1;
 		}
 		
-		.favorite-username {
-			font-weight: 600;
-			color: #2d3748;
-			margin-bottom: 4px;
+		.favorite-meta {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			font-size: 12px;
+			color: #999;
+			margin-top: auto;
+		}
+		
+		.favorite-source {
 			display: flex;
 			align-items: center;
-			gap: 10px;
-			flex-wrap: wrap;
+			gap: 5px;
 		}
 		
-		.favorite-username a {
-			color: inherit;
-			text-decoration: none;
-		}
-		
-		.favorite-username a:hover {
-			color: #ff9f43;
-		}
-		
-		.type-badge {
-			background: linear-gradient(135deg, #feca57, #ff9f43);
-			color: #fff;
-			padding: 3px 12px;
-			border-radius: 12px;
-			font-size: 12px;
-			font-weight: 600;
-		}
-		
-		.floor-badge {
-			background: linear-gradient(135deg, #667eea, #764ba2);
-			color: #fff;
-			padding: 2px 10px;
-			border-radius: 12px;
-			font-size: 12px;
-			font-weight: 600;
-		}
-		
-		.favorite-time {
-			color: #a0aec0;
-			font-size: 13px;
-		}
-		
-		/* 收藏内容 */
-		.favorite-content {
-			color: #4a5568;
-			font-size: 15px;
-			line-height: 1.8;
-			margin-top: 16px;
-		}
-		
-		.favorite-content pre {
-			white-space: pre-wrap;
-			word-wrap: break-word;
-			font-family: inherit;
-			margin: 0 0 12px;
-			padding: 16px;
-			background: rgba(254, 202, 87, 0.1);
-			border-radius: 12px;
-			border-left: 4px solid #feca57;
-		}
-		
-		.favorite-content hr {
-			border: none;
-			border-top: 1px dashed rgba(0, 0, 0, 0.1);
-			margin: 16px 0;
-		}
-		
-		.favorite-content a {
-			color: #ff9f43;
-			text-decoration: none;
-		}
-		
-		.favorite-content a:hover {
-			text-decoration: underline;
-		}
-		
-		/* 媒体内容区域 */
-		.favorite-media {
-			margin-top: 16px;
-		}
-		
-		.medias {
+		.favorite-tags {
 			display: flex;
-			flex-wrap: wrap;
-			gap: 8px;
-		}
-		
-		.medias-item {
-			border-radius: 12px;
-			overflow: hidden;
-			transition: transform 0.3s ease;
-		}
-		
-		.medias-item:hover {
-			transform: scale(1.02);
-		}
-		
-		.medias-item img {
-			border-radius: 12px;
-		}
-		
-		/* 音乐内容 */
-		.music-list {
-			background: rgba(254, 202, 87, 0.1);
-			border-radius: 12px;
-			padding: 16px;
+			gap: 5px;
 			margin-top: 12px;
+			flex-wrap: wrap;
 		}
 		
-		.music-list ul {
-			margin: 0;
-			padding: 0;
+		.tag {
+			padding: 3px 8px;
+			background: rgba(254, 202, 87, 0.1);
+			border-radius: 10px;
+			font-size: 11px;
+			color: #ff9f43;
 		}
 		
-		.music-list li {
-			list-style: none;
-			padding: 8px 0;
+		/* 空状态 */
+		.favorites-empty {
+			text-align: center;
+			padding: 60px 20px;
+			color: #718096;
 		}
 		
-		/* 卡片底部 */
-		.favorite-footer {
-			margin-top: 16px;
-			padding-top: 16px;
-			border-top: 1px solid rgba(0, 0, 0, 0.05);
-			text-align: right;
+		.favorites-empty i {
+			font-size: 64px;
+			margin-bottom: 20px;
+			opacity: 0.3;
 		}
 		
-		/* 导航栏样式 */
-		.navbar-favorites {
-			background: linear-gradient(135deg, rgba(254, 202, 87, 0.95), rgba(255, 159, 67, 0.95)) !important;
-			backdrop-filter: blur(10px);
+		.favorites-empty p {
+			font-size: 16px;
 		}
 		
-		/* 底部样式 */
+		/* 底部 */
 		.favorites-footer {
 			background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.9));
 			backdrop-filter: blur(10px);
+			position: fixed;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			z-index: 1000;
+		}
+		
+		.footer-text {
+			font-size: 14px;
+			letter-spacing: 1px;
 		}
 		
 		/* 响应式 */
 		@media (max-width: 768px) {
 			.favorites-main-card {
-				padding: 20px 16px;
+				padding: 24px 16px;
 				margin: 10px;
 				border-radius: 20px;
 			}
 			
-			.page-title {
-				font-size: 22px;
+			.favorites-header-icon { font-size: 36px; }
+			.favorites-header-title { font-size: 24px; }
+			
+			.favorites-grid {
+				grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+				gap: 16px;
 			}
 			
-			.favorite-user {
-				flex-wrap: wrap;
-			}
-			
-			.favorite-username {
-				flex-direction: column;
-				align-items: flex-start;
-				gap: 6px;
+			.favorites-filters { gap: 8px; }
+			.filter-tag { padding: 8px 14px; font-size: 13px; }
+		}
+		
+		@media (max-width: 480px) {
+			.favorites-grid {
+				grid-template-columns: 1fr;
 			}
 		}
 		
@@ -347,12 +450,459 @@
 		.photo-detail {
 			display: none !important;
 		}
+		
+		/* ========== 侧边滑出面板样式 ========== */
+		
+		/* 选中状态的卡片 */
+		.favorite-card.active {
+			box-shadow: 0 0 0 3px #ff9f43, 0 10px 30px rgba(254, 202, 87, 0.3);
+			transform: translateY(-5px);
+		}
+		
+		/* 遮罩层 */
+		.detail-overlay {
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: rgba(0, 0, 0, 0.5);
+			z-index: 1999;
+			opacity: 0;
+			visibility: hidden;
+			transition: all 0.3s ease;
+			backdrop-filter: blur(4px);
+		}
+		
+		.detail-overlay.show {
+			opacity: 1;
+			visibility: visible;
+		}
+		
+		/* 侧边面板 */
+		.detail-panel {
+			position: fixed;
+			top: 0;
+			right: 0;
+			width: 580px;
+			max-width: 100%;
+			height: 100vh;
+			background: #fff;
+			z-index: 2000;
+			transform: translateX(100%);
+			transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+			display: flex;
+			flex-direction: column;
+			box-shadow: -10px 0 40px rgba(0, 0, 0, 0.15);
+		}
+		
+		.detail-panel.show {
+			transform: translateX(0);
+		}
+		
+		/* 面板头部 */
+		.panel-header {
+			padding: 20px 24px;
+			background: linear-gradient(135deg, #feca57, #ff9f43);
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			flex-shrink: 0;
+		}
+		
+		.panel-nav {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+		}
+		
+		.panel-nav-btn {
+			width: 38px;
+			height: 38px;
+			border-radius: 10px;
+			background: rgba(255, 255, 255, 0.2);
+			border: none;
+			cursor: pointer;
+			color: #fff;
+			font-size: 16px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			transition: all 0.2s ease;
+		}
+		
+		.panel-nav-btn:hover:not(:disabled) {
+			background: rgba(255, 255, 255, 0.35);
+			transform: scale(1.05);
+		}
+		
+		.panel-nav-btn:disabled {
+			opacity: 0.4;
+			cursor: not-allowed;
+		}
+		
+		.panel-counter {
+			color: #fff;
+			font-size: 14px;
+			font-weight: 500;
+			padding: 0 12px;
+		}
+		
+		.panel-close {
+			width: 40px;
+			height: 40px;
+			border-radius: 50%;
+			background: rgba(255, 255, 255, 0.2);
+			border: none;
+			cursor: pointer;
+			color: #fff;
+			font-size: 20px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			transition: all 0.25s ease;
+		}
+		
+		.panel-close:hover {
+			background: rgba(255, 255, 255, 0.35);
+			transform: rotate(90deg);
+		}
+		
+		/* 面板内容 */
+		.panel-body {
+			flex: 1;
+			overflow-y: auto;
+			overflow-x: hidden;
+			padding: 0;
+		}
+		
+		/* 详情封面 */
+		.detail-cover-wrap {
+			position: relative;
+			width: 100%;
+			background: #f8fafc;
+		}
+		
+		.detail-cover {
+			width: 100%;
+			max-height: 320px;
+			object-fit: contain;
+			display: block;
+			background: #f1f5f9;
+		}
+		
+		.detail-cover-overlay {
+			position: absolute;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			height: 80px;
+			background: linear-gradient(to top, #fff, transparent);
+		}
+		
+		/* 详情主体 */
+		.detail-main {
+			padding: 24px;
+		}
+		
+		/* 详情头部 */
+		.detail-header {
+			margin-bottom: 20px;
+		}
+		
+		.detail-type {
+			display: inline-flex;
+			align-items: center;
+			gap: 6px;
+			padding: 6px 14px;
+			border-radius: 20px;
+			font-size: 13px;
+			font-weight: 600;
+			margin-bottom: 12px;
+		}
+		
+		.detail-title {
+			font-size: 20px;
+			font-weight: 700;
+			color: #1a202c;
+			line-height: 1.5;
+			margin: 0 0 12px 0;
+		}
+		
+		.detail-meta {
+			display: flex;
+			align-items: center;
+			gap: 16px;
+			font-size: 13px;
+			color: #718096;
+			flex-wrap: wrap;
+		}
+		
+		.detail-meta-item {
+			display: flex;
+			align-items: center;
+			gap: 5px;
+		}
+		
+		.detail-meta-item i {
+			color: #a0aec0;
+		}
+		
+		/* 收藏理由 */
+		.detail-reason {
+			background: linear-gradient(135deg, #fffbeb, #fef3c7);
+			border-left: 4px solid #f59e0b;
+			border-radius: 0 12px 12px 0;
+			padding: 16px 20px;
+			margin-bottom: 20px;
+		}
+		
+		.detail-reason-label {
+			font-size: 13px;
+			font-weight: 600;
+			color: #d97706;
+			margin-bottom: 6px;
+			display: flex;
+			align-items: center;
+			gap: 6px;
+		}
+		
+		.detail-reason-text {
+			font-size: 15px;
+			color: #92400e;
+			line-height: 1.7;
+		}
+		
+		/* 正文内容 */
+		.detail-content {
+			font-size: 15px;
+			color: #4a5568;
+			line-height: 1.9;
+			white-space: pre-wrap;
+			word-break: break-word;
+			margin-bottom: 24px;
+			padding: 20px;
+			background: #f8fafc;
+			border-radius: 12px;
+		}
+		
+		/* 分隔区域标题 */
+		.detail-section-title {
+			font-size: 14px;
+			font-weight: 600;
+			color: #4a5568;
+			margin-bottom: 14px;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			padding-bottom: 8px;
+			border-bottom: 2px solid #edf2f7;
+		}
+		
+		.detail-section-title i {
+			color: #ff9f43;
+		}
+		
+		/* 图片画廊 */
+		.detail-gallery {
+			margin-bottom: 24px;
+		}
+		
+		.detail-images {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 10px;
+		}
+		
+		.detail-image-item {
+			position: relative;
+			border-radius: 10px;
+			overflow: hidden;
+			aspect-ratio: 1;
+			cursor: pointer;
+			box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+			transition: all 0.25s ease;
+		}
+		
+		.detail-image-item:hover {
+			transform: translateY(-3px);
+			box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+		}
+		
+		.detail-image-item img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			transition: transform 0.3s ease;
+		}
+		
+		.detail-image-item:hover img {
+			transform: scale(1.08);
+		}
+		
+		.detail-image-item .image-overlay {
+			position: absolute;
+			inset: 0;
+			background: linear-gradient(to top, rgba(0,0,0,0.6), transparent 60%);
+			opacity: 0;
+			transition: opacity 0.25s ease;
+			display: flex;
+			align-items: flex-end;
+			justify-content: center;
+			padding-bottom: 8px;
+		}
+		
+		.detail-image-item:hover .image-overlay {
+			opacity: 1;
+		}
+		
+		.detail-image-item .image-overlay span {
+			color: #fff;
+			font-size: 11px;
+		}
+		
+		/* 视频区域 */
+		.detail-videos {
+			margin-bottom: 24px;
+		}
+		
+		.detail-video-item {
+			background: #000;
+			border-radius: 12px;
+			overflow: hidden;
+		}
+		
+		.detail-video-item video {
+			width: 100%;
+			display: block;
+			max-height: 300px;
+		}
+		
+		/* 音频区域 */
+		.detail-audios {
+			margin-bottom: 24px;
+		}
+		
+		.detail-audio-item {
+			background: linear-gradient(135deg, #667eea, #764ba2);
+			border-radius: 12px;
+			padding: 16px 20px;
+			display: flex;
+			align-items: center;
+			gap: 14px;
+			margin-bottom: 10px;
+		}
+		
+		.detail-audio-icon {
+			width: 44px;
+			height: 44px;
+			background: rgba(255,255,255,0.2);
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 18px;
+			color: #fff;
+			flex-shrink: 0;
+		}
+		
+		.detail-audio-info {
+			flex: 1;
+			color: #fff;
+			min-width: 0;
+		}
+		
+		.detail-audio-title {
+			font-weight: 600;
+			margin-bottom: 3px;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+		
+		.detail-audio-artist {
+			font-size: 13px;
+			opacity: 0.8;
+		}
+		
+		/* 标签 */
+		.detail-tags {
+			display: flex;
+			gap: 8px;
+			flex-wrap: wrap;
+			padding-top: 16px;
+			border-top: 1px solid #e2e8f0;
+		}
+		
+		.detail-tag {
+			padding: 6px 14px;
+			background: linear-gradient(135deg, #fef3c7, #fde68a);
+			border-radius: 20px;
+			font-size: 12px;
+			font-weight: 500;
+			color: #d97706;
+		}
+		
+		/* 键盘提示 */
+		.panel-tips {
+			padding: 12px 24px;
+			background: #f8fafc;
+			border-top: 1px solid #edf2f7;
+			font-size: 12px;
+			color: #a0aec0;
+			text-align: center;
+			flex-shrink: 0;
+		}
+		
+		.panel-tips kbd {
+			display: inline-block;
+			padding: 2px 6px;
+			background: #e2e8f0;
+			border-radius: 4px;
+			font-family: inherit;
+			font-size: 11px;
+			color: #4a5568;
+			margin: 0 2px;
+		}
+		
+		/* 响应式调整 */
+		@media (max-width: 640px) {
+			.detail-panel {
+				width: 100%;
+			}
+			
+			.panel-header {
+				padding: 16px 20px;
+			}
+			
+			.detail-main {
+				padding: 20px;
+			}
+			
+			.detail-title {
+				font-size: 18px;
+			}
+			
+			.detail-content {
+				font-size: 14px;
+				padding: 16px;
+			}
+			
+			.detail-images {
+				grid-template-columns: repeat(2, 1fr);
+				gap: 8px;
+			}
+			
+			.panel-tips {
+				display: none;
+			}
+		}
 	</style>
 </head>
 
 <body class="favorites-page">
 	<header>
-		<nav class="navbar navbar-expand-lg navbar-dark fixed-top navbar-favorites">
+		<nav class="navbar navbar-expand-lg navbar-dark fixed-top favorites-navbar">
 			<a class="navbar-brand" target="_blank" href="https://github.com/2015winter/QZoneExporter">
 				<i class="fa fa-cloud-download mr-2"></i>QQ空间导出助手
 			</a>
@@ -361,9 +911,9 @@
 			</button>
 			<div class="collapse navbar-collapse" id="navbarSupportedContent">
 				<nav aria-label="breadcrumb">
-					<ol class="breadcrumb" style="background: transparent;">
-						<li class="breadcrumb-item"><a href="../index.html" style="color: rgba(255,255,255,0.8);"><i class="fa fa-home mr-1"></i>个人中心</a></li>
-						<li class="breadcrumb-item active" aria-current="page" style="color: rgba(255,255,255,0.9);">收藏</li>
+					<ol class="breadcrumb favorites-breadcrumb">
+						<li class="breadcrumb-item"><a href="../index.html"><i class="fa fa-home mr-1"></i>个人中心</a></li>
+						<li class="breadcrumb-item active" aria-current="page"><i class="fa fa-star mr-1"></i>收藏</li>
 					</ol>
 				</nav>
 			</div>
@@ -374,200 +924,519 @@
 		<div class="container">
 			<div class="favorites-main-card">
 				<!-- 页面标题 -->
-				<div class="page-header">
-					<h1 class="page-title"><i class="fa fa-star mr-2"></i>我的收藏</h1>
-					<p class="page-subtitle">收藏的每一份内容，都是曾经打动你的瞬间</p>
+				<div class="favorites-header">
+					<i class="fa fa-star favorites-header-icon"></i>
+					<h1 class="favorites-header-title">我的收藏</h1>
+					<p class="favorites-header-subtitle">共 <span class="favorites-total-count" id="favorites-count">0</span> 条收藏，记录了那些打动你的瞬间</p>
 				</div>
 				
-				<!-- 收藏列表 -->
-				<div id="favorites_html" class="favorites-list">
-					<%for (const [year, yearMap] of dataMaps) {%>
-						<div class="year-group">
-							<span class="year-title sidebar-h1" data-tag="h1" data-sidebar='<%:=year%>年<span class="badge badge-primary badge-pill itemSize"><%:=API.Utils.sumYearItemSize(yearMap)%><span>'>
-								<i class="fa fa-calendar"></i><%:=year%>年
-							</span>
-						</div>
-						<%for (const [month, monthItems] of yearMap) {%>
-							<span class="month-title sidebar-h2" data-tag="h2" data-sidebar='<%:=month%>月<span class="badge badge-secondary badge-pill itemSize"><%:=monthItems.length%><span>'>
-								<i class="fa fa-clock-o"></i><%:=month%>月
-							</span>
-							<%for (let index = 0; index < monthItems.length; index++) {%>
-								<%const favorite = monthItems[index]%>
-								<%favorite.uid = 'QZFAV-' + API.Utils.newSimpleUid(16)%>
-								<%total = total -1%>
-								<div class="favorite-card">
-									<div class="favorite-user">
-										<a target="_blank" href="<%:=API.Common.getUserUrl(API.Favorites.getFavoriteOwner(favorite).uin)%>">
-											<img class="favorite-avatar lazyload loading" src="<%:=API.Common.getUserLogoLocalUrl(API.Favorites.getFavoriteOwner(favorite).uin, true)%>">
-										</a>
-										<div class="favorite-user-info">
-											<div class="favorite-username">
-												<a target="_blank" href="<%:=API.Common.getUserUrl(API.Favorites.getFavoriteOwner(favorite).uin)%>">
-													<%:=API.Common.formatContent(API.Favorites.getFavoriteOwner(favorite).name, 'HTML', false, false, false, false, true)%>
-												</a>
-												<span class="type-badge"><%:=API.Favorites.getType(favorite.type)%></span>
-												<span class="floor-badge">#<%:=total + 1 %></span>
-											</div>
-											<div class="favorite-time">
-												<i class="fa fa-clock-o mr-1"></i><%:=API.Common.formatContent(favorite.custom_create_time)%>
-											</div>
-										</div>
-									</div>
-									
-									<div class="favorite-content">
-										<%if(favorite.shuoshuo_info && favorite.shuoshuo_info.reason  && favorite.shuoshuo_info.reason.trim() !== ''){%>
-											<pre><%:=API.Common.formatContent(favorite.shuoshuo_info.reason,'HTML', false, true, false, false, true)%></pre>
-											<hr>
-										<%}%>
-										<%if(favorite.share_info && favorite.share_info.reason  && favorite.share_info.reason.trim() !== ''){%>
-											<pre><%:=API.Common.formatContent(favorite.share_info.reason,'HTML', false, true, false, false, true)%></pre>
-											<hr>
-										<%}%>
-										<%if(favorite.type === 5){%>
-											<%/* 说说 */%>
-											<%if(favorite.shuoshuo_info && favorite.shuoshuo_info.detail_shuoshuo_info && favorite.shuoshuo_info.detail_shuoshuo_info.content){%>
-												<pre><%:=API.Common.formatContent(favorite.shuoshuo_info.detail_shuoshuo_info.content,'HTML', false, false, false, false, true)%></pre>
-											<%}else{%>
-												<pre><%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, false, false, false, true)%></pre>
-											<%}%>
-										<%}else if(favorite.type === 7){%>
-											<%/* 分享 */%>
-											<%if(favorite.title && favorite.title.trim() !== ''){%>
-												<pre><a target="_blank" href="<%:=API.Favorites.getShareUrl(favorite.share_info)%>"><%:=favorite.title%></a></pre>
-											<%}%>
-											<%if(favorite.abstract && favorite.abstract.trim() !== ''){%>
-												<pre><%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, true, false, false, true)%></pre>
-											<%}%>
-										<%}else if(favorite.type === 3){%>
-											<%/* 日志 */%>
-											<%if(favorite.title && favorite.title.trim() !== ''){%>
-												<pre><a target="_blank" href="http://user.qzone.qq.com/<%:=favorite.blog_info.owner_uin%>/blog/<%:=favorite.blog_info.id%>"><%:=favorite.title%></a></pre>
-											<%}%>
-											<%if(favorite.abstract && favorite.abstract.trim() !== ''){%>
-												<pre><%:=API.Common.formatContent(favorite.abstract,'HTML', false, true, false, false, true)%></pre>
-											<%}%>
-										<%}else{%>
-											<pre><%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, true, false, false, true)%></pre>
-										<%}%>
-									</div>
-									
-									<div id="<%:=favorite.uid%>" class='photo-detail' style="display:none">
-										<div class="container">
-											<div class="row">
-												<div class="col text-white-50 text-left">
-													<p>
-														<i title="收藏时间" class="fa fa-clock-o text-primary"><%:=favorite.custom_create_time%></i>
-													</p>
-												</div>
-												<div class="col text-white text-truncate">
-													<%if(favorite.shuoshuo_info && favorite.shuoshuo_info.reason && favorite.shuoshuo_info.reason.trim() !== ''){%>
-														<pre class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.shuoshuo_info.reason,'HTML', false, true, false, false, true)%>"><%:=API.Common.formatContent(favorite.shuoshuo_info.reason,'HTML', false, true, false, false, true)%></pre>
-													<%}%>
-													<%if(favorite.share_info && favorite.share_info.reason && favorite.share_info.reason.trim() !== ''){%>
-														<pre class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.share_info.reason,'HTML', false, true, false, false, true)%>"><%:=API.Common.formatContent(favorite.share_info.reason,'HTML', false, true, false, false, true)%></pre>
-													<%}%>
-													<%if(favorite.type === 5){%>
-														<%/* 说说 */%>
-														<%if(favorite.shuoshuo_info && favorite.shuoshuo_info.detail_shuoshuo_info && favorite.shuoshuo_info.detail_shuoshuo_info.content){%>
-															<pre class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.shuoshuo_info.detail_shuoshuo_info.content,'HTML', false, false, false, false, true)%>"><%:=API.Common.formatContent(favorite.shuoshuo_info.detail_shuoshuo_info.content,'HTML', false, false, false, false, true)%></pre>
-														<%}else{%>
-															<pre class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, false, false, false, true)%>"><%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, false, false, false, true)%></pre>
-														<%}%>
-													<%}else if(favorite.type === 7){%>
-														<%/* 分享 */%>
-														<%if(favorite.title && favorite.title.trim() !== ''){%>
-															<pre class="text-white" data-toggle="tooltip" data-html="true"><a target="_blank" href="<%:=API.Favorites.getShareUrl(favorite.share_info)%>"><%:=favorite.title%></a></pre>
-														<%}%>
-														<%if(favorite.abstract && favorite.abstract.trim() !== ''){%>
-															<pre class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, true, false, false, true)%>"><%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, true, false, false, true)%></pre>
-														<%}%>
-													<%}else if(favorite.type === 3){%>
-														<%/* 日志 */%>
-														<%if(favorite.title){%>
-															<pre class="text-white" data-toggle="tooltip" data-html="true" title="<%:=favorite.title%>"><a target="_blank" href="http://user.qzone.qq.com/<%:=favorite.blog_info.owner_uin%>/blog/<%:=favorite.blog_info.id%>"><%:=favorite.title%></a></pre>
-														<%}%>
-														<%if(favorite.abstract && favorite.abstract.trim() !== ''){%>
-															<pre class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.abstract,'HTML', false, true, false, false, true)%>"><%:=API.Common.formatContent(favorite.abstract,'HTML', false, true, false, false, true)%></pre>
-														<%}%>
-													<%}else{%>
-														<pre class="text-white" data-toggle="tooltip" data-html="true" title="<%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, true, false, false, true)%>"><%:=API.Common.formatContent(favorite.abstract || favorite.desp,'HTML', false, true, false, false, true)%></pre>
-													<%}%>
-												</div>
-												<div class="col"></div>
-											</div>
-										</div>
-									</div>
-									
-									<%/* 多媒体内容 */%>
-									<div class="favorite-media">
-										<div class="medias row p-3 lightgallery <%:=API.Common.getImgClassType(favorite)%>">
-										<%/* 视频内容 */%>
-										<%if(favorite.custom_videos){%>
-											<%let imgIdex = 0%>
-											<%for(let video of favorite.custom_videos){%>
-												<% video.vid = 'QZ-' + API.Utils.newSimpleUid(16); %>
-											<%if(video.play_url){%>
-												<a class="medias-item border message-lightbox-external" target="_blank" href="<%:=video.play_url%>">
-													<span class="message-video"></span>
-													<img class="lazyload loading w-100 h-100" src="<%:=video.custom_pre_filepath ? video.custom_pre_filepath : (video.preview_img || '../Common/images/loading.gif')%>" data-src="<%:=video.custom_pre_filepath ? video.custom_pre_filepath : video.preview_img%>">
-												</a>
-											<%}else{%>
-												<a class="medias-item border message-lightbox"  data-video='{"source": [{"src":"<%:=video.custom_filepath ? video.custom_filepath : video.url%>", "type":"video/mp4"}],"attributes": {"preload": false, "controls": true}}' 
-													data-poster="<%:=video.custom_pre_filepath ? video.custom_pre_filepath : video.preview_img%>" data-sub-html="#<%:=favorite.uid%>">
-													<span class="message-video"></span>
-													<img class="lazyload loading w-100 h-100" data-idx="<%:=imgIdex%>" src="<%:=video.custom_pre_filepath ? video.custom_pre_filepath : (video.preview_img || '../Common/images/loading.gif')%>" data-src="<%:=video.custom_pre_filepath ? video.custom_pre_filepath : video.preview_img%>" />
-												</a>
-												<%imgIdex++%>
-											<%}%>
-											<%}%>
-										<%}%>
-										<%/* 图片内容 */%>
-										<%if(favorite.custom_origin_images || favorite.custom_images){%>
-											<%let imgIdex = 0%>
-											<%let favImages = favorite.custom_origin_images || favorite.custom_images%>
-											<%for(let image of favImages){%>
-												<a class="medias-item border message-lightbox" target="_blank" href="<%:=image.custom_filepath ? image.custom_filepath : image.custom_url%>" data-src="<%:=image.custom_filepath ? image.custom_filepath : image.custom_url%>" data-sub-html="#<%:=favorite.uid%>">
-													<img class="lazyload loading w-100 h-100" data-idx="<%:=imgIdex%>" src="<%:=image.custom_filepath ? image.custom_filepath : (image.custom_url || '../Common/images/loading.gif')%>" data-src="<%:=image.custom_filepath ? image.custom_filepath : image.custom_url%>">
-												</a>
-												<%imgIdex++%>
-											<%}%>
-										<%}%>
-										</div>
-									</div>
-									
-									<%/* 音乐内容（目前PC端已无法正常播放，直接显示专辑图片与歌曲信息） */%>
-									<%if(favorite.custom_audios && favorite.custom_audios.length > 0){%>
-										<div class="music-list">
-											<ul class="list-unstyled">
-												<%let imgIdex = 0%>
-												<%for(let music of favorite.custom_audios){%>
-													<li>
-														<a class="medias-item text-center message-lightbox" href="<%:=music.playurl || music.play_url%>" data-src="<%:=music.custom_filepath ? music.custom_filepath : music.custom_url%>" data-sub-html="#<%:=favorite.uid%>">
-															<img class="lazyload loading" style="width: 60px; height: 60px; border-radius: 8px;" data-idx="<%:=imgIdex%>" src="<%:=music.custom_filepath ? music.custom_filepath : (music.custom_url || '../Common/images/loading.gif')%>" data-src="<%:=music.custom_filepath ? music.custom_filepath : music.custom_url%>">
-															<span class="ml-2"><%:=music.song_name%></span>
-														</a>
-													</li>
-													<%imgIdex++%>
-												<%}%>
-											</ul>
-										</div>
-									<%}%>
-								</div>
-							<%}%>
-						<%}%>
-					<%}%>
+				<!-- 筛选标签 -->
+				<div class="favorites-filters" id="favorites-filters">
+					<button class="filter-tag active" data-type="all"><i class="fa fa-star"></i> 全部 <span class="count" id="filter-all">0</span></button>
+					<button class="filter-tag" data-type="article"><i class="fa fa-file-text"></i> 说说日志 <span class="count" id="filter-article">0</span></button>
+					<button class="filter-tag" data-type="music"><i class="fa fa-music"></i> 音乐 <span class="count" id="filter-music">0</span></button>
+					<button class="filter-tag" data-type="video"><i class="fa fa-video-camera"></i> 视频 <span class="count" id="filter-video">0</span></button>
+					<button class="filter-tag" data-type="photo"><i class="fa fa-image"></i> 图片 <span class="count" id="filter-photo">0</span></button>
+				</div>
+				
+				<!-- 收藏网格 - 通过JavaScript动态渲染 -->
+				<div class="favorites-grid" id="favorites-grid"></div>
+				
+				<!-- 空状态 -->
+				<div class="favorites-empty" id="favorites-empty" style="display: none;">
+					<i class="fa fa-star"></i>
+					<p>暂无收藏内容</p>
 				</div>
 			</div>
 		</div>
 	</main>
 	
-	<footer class="footer mt-auto py-3 fixed-bottom favorites-footer">
+	<footer class="footer mt-auto py-3 favorites-footer">
 		<div class="container text-center">
-			<span class="text-white" style="font-size: 14px; letter-spacing: 1px;">
+			<span class="text-white footer-text">
 				<i class="fa fa-star mr-2"></i>收藏美好，珍藏回忆
 			</span>
 		</div>
 	</footer>
+	
+	<!-- 侧边详情面板 -->
+	<div class="detail-overlay" id="detail-overlay"></div>
+	<div class="detail-panel" id="detail-panel">
+		<div class="panel-header">
+			<div class="panel-nav">
+				<button class="panel-nav-btn" id="btn-prev" title="上一条 (←)"><i class="fa fa-chevron-left"></i></button>
+				<span class="panel-counter"><span id="current-index">1</span> / <span id="total-count">0</span></span>
+				<button class="panel-nav-btn" id="btn-next" title="下一条 (→)"><i class="fa fa-chevron-right"></i></button>
+			</div>
+			<button class="panel-close" id="btn-close" title="关闭 (Esc)"><i class="fa fa-times"></i></button>
+		</div>
+		<div class="panel-body" id="panel-body">
+			<!-- 动态内容 -->
+		</div>
+		<div class="panel-tips">
+			<kbd>←</kbd> 上一条 &nbsp;&nbsp; <kbd>→</kbd> 下一条 &nbsp;&nbsp; <kbd>Esc</kbd> 关闭
+		</div>
+	</div>
+	
+	<script>
+	// 当前筛选类型
+	var currentFilter = 'all';
+	// 当前选中的卡片索引
+	var currentIndex = -1;
+	// 面板是否打开
+	var isPanelOpen = false;
+	// lightgallery实例
+	var lgInstance = null;
+	
+	// 收藏数据 - 从json/favorites.js加载的全局变量favorites
+	// 模板渲染时将数据转换为数组
+	var allFavorites = [];
+	<%if(typeof dataMaps !== 'undefined' && dataMaps) {%>
+		<%for (const [year, yearMap] of dataMaps) {%>
+			<%for (const [month, monthItems] of yearMap) {%>
+				<%for (let index = 0; index < monthItems.length; index++) {%>
+					<%const favorite = monthItems[index]%>
+	allFavorites.push(<%:=JSON.stringify(favorite)%>);
+				<%}%>
+			<%}%>
+		<%}%>
+	<%}%>
+	
+	// 如果模板数据为空，尝试从全局变量favorites获取
+	if (allFavorites.length === 0 && typeof favorites !== 'undefined' && Array.isArray(favorites)) {
+		allFavorites = favorites;
+	}
+	
+	// 初始化页面
+	function init() {
+		console.log('初始化收藏页面，数据量:', allFavorites.length);
+		
+		// 为每个收藏计算类型键值
+		allFavorites.forEach(function(fav) {
+			fav._typeKey = FavoritesHelper.getTypeKey(fav);
+		});
+		
+		updateStats();
+		renderFavorites();
+		bindEvents();
+	}
+	
+	// 更新统计
+	function updateStats() {
+		var total = allFavorites.length;
+		var articleCount = allFavorites.filter(function(f) { return f._typeKey === 'article'; }).length;
+		var musicCount = allFavorites.filter(function(f) { return f._typeKey === 'music'; }).length;
+		var videoCount = allFavorites.filter(function(f) { return f._typeKey === 'video'; }).length;
+		var photoCount = allFavorites.filter(function(f) { return f._typeKey === 'photo'; }).length;
+		
+		// 更新标题统计数字
+		$('#favorites-count').text(total);
+		
+		// 更新筛选标签数字
+		$('#filter-all').text(total);
+		$('#filter-article').text(articleCount);
+		$('#filter-music').text(musicCount);
+		$('#filter-video').text(videoCount);
+		$('#filter-photo').text(photoCount);
+	}
+	
+	// 渲染收藏列表
+	function renderFavorites() {
+		var grid = document.getElementById('favorites-grid');
+		var emptyState = document.getElementById('favorites-empty');
+		
+		var filteredList = getFilteredList();
+		
+		if (filteredList.length === 0) {
+			grid.style.display = 'none';
+			emptyState.style.display = 'block';
+			return;
+		}
+		
+		grid.style.display = 'grid';
+		emptyState.style.display = 'none';
+		
+		grid.innerHTML = filteredList.map(function(fav, index) {
+			var typeInfo = FavoritesHelper.getTypeInfo(fav.type);
+			var owner = FavoritesHelper.getFavoriteOwner(fav);
+			
+			// 封面图片
+			var coverImage = '../Common/images/loading.gif';
+			if (fav.custom_origin_images && fav.custom_origin_images.length > 0) {
+				coverImage = fav.custom_origin_images[0].custom_filepath || fav.custom_origin_images[0].custom_url || coverImage;
+			} else if (fav.custom_images && fav.custom_images.length > 0) {
+				coverImage = fav.custom_images[0].custom_filepath || fav.custom_images[0].custom_url || coverImage;
+			} else if (fav.custom_videos && fav.custom_videos.length > 0) {
+				coverImage = fav.custom_videos[0].custom_pre_filepath || fav.custom_videos[0].preview_img || '../Common/images/video-play.png';
+			} else if (fav.custom_audios && fav.custom_audios.length > 0) {
+				coverImage = fav.custom_audios[0].custom_pre_filepath || fav.custom_audios[0].preview_img || '../Common/images/loading.gif';
+			}
+			
+			// 标题
+			var title = getTitle(fav);
+			var shortTitle = title.length > 50 ? title.substring(0, 50) + '...' : title;
+			
+			// 摘要
+			var summary = getSummary(fav);
+			
+			// 标签HTML
+			var tagsHtml = '';
+			if (fav.type === 5 || fav.type === 3) {
+				tagsHtml = '<div class="favorite-tags"><span class="tag">#' + FavoritesHelper.getType(fav.type) + '</span>';
+				if (fav.custom_videos && fav.custom_videos.length > 0) {
+					tagsHtml += '<span class="tag">#视频</span>';
+				}
+				if ((fav.custom_origin_images && fav.custom_origin_images.length > 0) || (fav.custom_images && fav.custom_images.length > 0)) {
+					tagsHtml += '<span class="tag">#图片</span>';
+				}
+				if (fav.custom_audios && fav.custom_audios.length > 0) {
+					tagsHtml += '<span class="tag">#音乐</span>';
+				}
+				tagsHtml += '</div>';
+			}
+			
+			return '<div class="favorite-card" data-type="' + fav._typeKey + '" data-index="' + index + '">' +
+				'<img class="favorite-cover lazyload" src="' + FavoritesHelper.escapeHtml(coverImage) + '" alt="' + FavoritesHelper.escapeHtml(shortTitle) + '" onerror="this.src=\'../Common/images/loading.gif\'">' +
+				'<div class="favorite-content">' +
+					'<span class="favorite-type" style="background: ' + typeInfo.color + '20; color: ' + typeInfo.color + '">' +
+						typeInfo.icon + ' ' + typeInfo.name +
+					'</span>' +
+					'<h3 class="favorite-title">' + FavoritesHelper.escapeHtml(shortTitle) + '</h3>' +
+					'<p class="favorite-summary">' + FavoritesHelper.escapeHtml(summary) + '</p>' +
+					'<div class="favorite-meta">' +
+						'<span class="favorite-source"><i class="fa fa-user"></i> ' + FavoritesHelper.escapeHtml(owner.name) + '</span>' +
+						'<span>' + (fav.custom_create_time || '') + '</span>' +
+					'</div>' +
+					tagsHtml +
+				'</div>' +
+			'</div>';
+		}).join('');
+		
+		// 重新初始化懒加载
+		if (typeof LazyLoad !== 'undefined') {
+			new LazyLoad({ elements_selector: ".lazyload" });
+		}
+		
+		// 关闭面板并重置状态
+		closePanel();
+	}
+	
+	// 获取筛选后的列表
+	function getFilteredList() {
+		if (currentFilter === 'all') {
+			return allFavorites;
+		}
+		return allFavorites.filter(function(f) { return f._typeKey === currentFilter; });
+	}
+	
+	// 获取标题
+	function getTitle(fav) {
+		if (fav.title && fav.title.trim() !== '') {
+			return fav.title;
+		} else if (fav.type === 5 && fav.shuoshuo_info && fav.shuoshuo_info.detail_shuoshuo_info && fav.shuoshuo_info.detail_shuoshuo_info.content) {
+			return fav.shuoshuo_info.detail_shuoshuo_info.content;
+		} else if (fav.abstract || fav.desp) {
+			return fav.abstract || fav.desp;
+		}
+		return '收藏内容';
+	}
+	
+	// 获取摘要
+	function getSummary(fav) {
+		if (fav.shuoshuo_info && fav.shuoshuo_info.reason && fav.shuoshuo_info.reason.trim() !== '') {
+			return fav.shuoshuo_info.reason;
+		} else if (fav.share_info && fav.share_info.reason && fav.share_info.reason.trim() !== '') {
+			return fav.share_info.reason;
+		} else if (fav.abstract && fav.abstract.trim() !== '') {
+			return fav.abstract;
+		} else if (fav.desp && fav.desp.trim() !== '') {
+			return fav.desp;
+		}
+		return '暂无描述';
+	}
+	
+	// 打开侧边面板
+	function openPanel(index) {
+		var filteredList = getFilteredList();
+		if (index < 0 || index >= filteredList.length) return;
+		
+		currentIndex = index;
+		isPanelOpen = true;
+		
+		// 更新卡片选中状态
+		$('.favorite-card').removeClass('active');
+		$('.favorite-card[data-index="' + index + '"]').addClass('active');
+		
+		// 显示遮罩和面板
+		$('#detail-overlay').addClass('show');
+		$('#detail-panel').addClass('show');
+		
+		// 禁止body滚动
+		$('body').css('overflow', 'hidden');
+		
+		// 渲染详情内容
+		renderPanelContent(index);
+		
+		// 更新导航状态
+		updateNavState();
+	}
+	
+	// 关闭侧边面板
+	function closePanel() {
+		isPanelOpen = false;
+		currentIndex = -1;
+		
+		// 移除卡片选中状态
+		$('.favorite-card').removeClass('active');
+		
+		// 隐藏遮罩和面板
+		$('#detail-overlay').removeClass('show');
+		$('#detail-panel').removeClass('show');
+		
+		// 恢复body滚动
+		$('body').css('overflow', '');
+		
+		// 销毁lightgallery实例
+		if (lgInstance) {
+			lgInstance.destroy();
+			lgInstance = null;
+		}
+		
+		// 清空面板内容
+		$('#panel-body').html('');
+	}
+	
+	// 渲染面板内容
+	function renderPanelContent(index) {
+		var filteredList = getFilteredList();
+		var fav = filteredList[index];
+		if (!fav) return;
+		
+		var typeInfo = FavoritesHelper.getTypeInfo(fav.type);
+		var owner = FavoritesHelper.getFavoriteOwner(fav);
+		var title = getTitle(fav);
+		var reason = FavoritesHelper.getReason(fav);
+		var content = FavoritesHelper.getFullContent(fav);
+		var images = fav.custom_origin_images || fav.custom_images || [];
+		var videos = fav.custom_videos || [];
+		var audios = fav.custom_audios || [];
+		
+		// 封面图片
+		var coverImage = '';
+		if (images.length > 0) {
+			coverImage = images[0].custom_filepath || images[0].custom_url || '';
+		} else if (videos.length > 0) {
+			coverImage = videos[0].custom_pre_filepath || videos[0].preview_img || '';
+		}
+		
+		var html = '';
+		
+		// 封面图（如果有）
+		if (coverImage) {
+			html += '<div class="detail-cover-wrap">' +
+				'<img class="detail-cover" src="' + FavoritesHelper.escapeHtml(coverImage) + '" alt="封面" onerror="this.parentNode.style.display=\'none\'">' +
+				'<div class="detail-cover-overlay"></div>' +
+			'</div>';
+		}
+		
+		// 详情主体
+		html += '<div class="detail-main">';
+		
+		// 头部信息
+		html += '<div class="detail-header">' +
+			'<span class="detail-type" style="background: ' + typeInfo.color + '20; color: ' + typeInfo.color + '">' +
+				typeInfo.icon + ' ' + typeInfo.name +
+			'</span>' +
+			'<h2 class="detail-title">' + FavoritesHelper.escapeHtml(title) + '</h2>' +
+			'<div class="detail-meta">' +
+				'<span class="detail-meta-item"><i class="fa fa-user"></i> ' + FavoritesHelper.escapeHtml(owner.name) + '</span>' +
+				'<span class="detail-meta-item"><i class="fa fa-clock-o"></i> ' + (fav.custom_create_time || '未知时间') + '</span>' +
+			'</div>' +
+		'</div>';
+		
+		// 收藏理由
+		if (reason && reason.trim() !== '') {
+			html += '<div class="detail-reason">' +
+				'<div class="detail-reason-label"><i class="fa fa-quote-left"></i> 收藏理由</div>' +
+				'<div class="detail-reason-text">' + FavoritesHelper.escapeHtml(reason) + '</div>' +
+			'</div>';
+		}
+		
+		// 正文内容
+		if (content && content.trim() !== '' && content !== '暂无内容') {
+			html += '<div class="detail-content">' + FavoritesHelper.escapeHtml(content) + '</div>';
+		}
+		
+		// 视频
+		if (videos.length > 0) {
+			html += '<div class="detail-videos">' +
+				'<div class="detail-section-title"><i class="fa fa-video-camera"></i> 视频 (' + videos.length + '个)</div>';
+			videos.forEach(function(video) {
+				var videoSrc = video.custom_filepath || video.custom_url || video.video_url || '';
+				if (videoSrc) {
+					html += '<div class="detail-video-item"><video controls preload="metadata" src="' + FavoritesHelper.escapeHtml(videoSrc) + '"></video></div>';
+				}
+			});
+			html += '</div>';
+		}
+		
+		// 图片画廊
+		if (images.length > 0) {
+			html += '<div class="detail-gallery">' +
+				'<div class="detail-section-title"><i class="fa fa-image"></i> 图片 (' + images.length + '张) - 点击查看原图</div>' +
+				'<div class="detail-images" id="gallery-container">';
+			images.forEach(function(img, imgIndex) {
+				var src = img.custom_filepath || img.custom_url || '../Common/images/loading.gif';
+				var thumbSrc = img.custom_pre_filepath || src;
+				html += '<a class="detail-image-item lightbox" href="' + FavoritesHelper.escapeHtml(src) + '">' +
+					'<img src="' + FavoritesHelper.escapeHtml(thumbSrc) + '" alt="图片' + (imgIndex + 1) + '">' +
+					'<div class="image-overlay"><span><i class="fa fa-search-plus"></i> 查看</span></div>' +
+				'</a>';
+			});
+			html += '</div></div>';
+		}
+		
+		// 音频
+		if (audios.length > 0) {
+			html += '<div class="detail-audios">' +
+				'<div class="detail-section-title"><i class="fa fa-music"></i> 音乐 (' + audios.length + '首)</div>';
+			audios.forEach(function(audio) {
+				var audioTitle = audio.name || audio.title || '未知歌曲';
+				var audioArtist = audio.singer || audio.artist || '未知歌手';
+				html += '<div class="detail-audio-item">' +
+					'<div class="detail-audio-icon"><i class="fa fa-music"></i></div>' +
+					'<div class="detail-audio-info">' +
+						'<div class="detail-audio-title">' + FavoritesHelper.escapeHtml(audioTitle) + '</div>' +
+						'<div class="detail-audio-artist">' + FavoritesHelper.escapeHtml(audioArtist) + '</div>' +
+					'</div>' +
+				'</div>';
+			});
+			html += '</div>';
+		}
+		
+		// 底部标签
+		html += '<div class="detail-tags">' +
+			'<span class="detail-tag">#' + FavoritesHelper.getType(fav.type) + '</span>';
+		if (videos.length > 0) html += '<span class="detail-tag">#视频</span>';
+		if (images.length > 0) html += '<span class="detail-tag">#图片' + images.length + '张</span>';
+		if (audios.length > 0) html += '<span class="detail-tag">#音乐</span>';
+		html += '</div>';
+		
+		html += '</div>'; // 结束 detail-main
+		
+		// 填充面板内容
+		$('#panel-body').html(html);
+		
+		// 滚动到顶部
+		$('#panel-body').scrollTop(0);
+		
+		// 初始化lightgallery
+		setTimeout(function() {
+			var galleryEl = document.getElementById('gallery-container');
+			if (galleryEl && typeof lightGallery !== 'undefined') {
+				if (lgInstance) {
+					lgInstance.destroy();
+				}
+				lgInstance = lightGallery(galleryEl, {
+					selector: '.lightbox',
+					download: true,
+					zoom: true,
+					rotate: true,
+					fullScreen: true,
+					thumbnail: true,
+					animateThumb: true,
+					showThumbByDefault: false
+				});
+			}
+		}, 100);
+	}
+	
+	// 更新导航状态
+	function updateNavState() {
+		var filteredList = getFilteredList();
+		var total = filteredList.length;
+		
+		$('#current-index').text(currentIndex + 1);
+		$('#total-count').text(total);
+		
+		// 更新按钮状态
+		$('#btn-prev').prop('disabled', currentIndex <= 0);
+		$('#btn-next').prop('disabled', currentIndex >= total - 1);
+	}
+	
+	// 上一条
+	function goPrev() {
+		if (currentIndex > 0) {
+			openPanel(currentIndex - 1);
+		}
+	}
+	
+	// 下一条
+	function goNext() {
+		var filteredList = getFilteredList();
+		if (currentIndex < filteredList.length - 1) {
+			openPanel(currentIndex + 1);
+		}
+	}
+	
+	// 绑定事件
+	function bindEvents() {
+		// 筛选标签点击
+		$('.filter-tag').on('click', function() {
+			$('.filter-tag').removeClass('active');
+			$(this).addClass('active');
+			currentFilter = $(this).data('type');
+			renderFavorites();
+		});
+		
+		// 卡片点击 - 打开侧边面板
+		$('#favorites-grid').on('click', '.favorite-card', function(e) {
+			var index = parseInt($(this).data('index'));
+			openPanel(index);
+		});
+		
+		// 关闭按钮点击
+		$('#btn-close').on('click', closePanel);
+		
+		// 遮罩点击关闭
+		$('#detail-overlay').on('click', closePanel);
+		
+		// 上一条/下一条按钮
+		$('#btn-prev').on('click', goPrev);
+		$('#btn-next').on('click', goNext);
+		
+		// 键盘事件
+		$(document).on('keydown', function(e) {
+			if (!isPanelOpen) return;
+			
+			// ESC 关闭面板
+			if (e.keyCode === 27) {
+				closePanel();
+				e.preventDefault();
+			}
+			// 左箭头 - 上一条
+			else if (e.keyCode === 37) {
+				goPrev();
+				e.preventDefault();
+			}
+			// 右箭头 - 下一条
+			else if (e.keyCode === 39) {
+				goNext();
+				e.preventDefault();
+			}
+		});
+		
+		// 阻止面板内点击事件冒泡到遮罩
+		$('#detail-panel').on('click', function(e) {
+			e.stopPropagation();
+		});
+	}
+	
+	// 页面加载完成后初始化
+	$(function() {
+		init();
+	});
+	</script>
 </body>
 
 </html>
