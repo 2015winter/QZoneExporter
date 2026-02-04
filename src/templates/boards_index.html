@@ -28,16 +28,15 @@
 	<style>
 		/* 留言板索引页专属样式 */
 		body.boards-index-page {
-			background: linear-gradient(135deg, #4ecdc4 0%, #556270 50%, #36d1dc 100%);
+			background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 50%, #093637 100%);
 			min-height: 100vh;
 			padding-top: 70px;
 			padding-bottom: 80px;
 		}
 		
-		/* 导航栏样式 */
+		/* 导航栏样式 - 与 boards.html 保持一致 */
 		.boards-navbar {
-			background: linear-gradient(135deg, rgba(78, 205, 196, 0.95), rgba(85, 98, 112, 0.95)) !important;
-			backdrop-filter: blur(10px);
+			background: linear-gradient(135deg, rgba(78, 205, 196, 0.95), rgba(68, 160, 141, 0.95)) !important;
 		}
 		
 		.boards-breadcrumb {
@@ -437,17 +436,14 @@
 <body class="boards-index-page">
 	<header>
 		<nav class="navbar navbar-expand-lg navbar-dark fixed-top boards-navbar">
-			<a class="navbar-brand" target="_blank" href="https://github.com/2015winter/QZoneExporter">
+			<a class="navbar-brand" href="../index.html">
 				<i class="fa fa-cloud-download mr-2"></i>QQ空间导出助手
 			</a>
-			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-				<span class="navbar-toggler-icon"></span>
-			</button>
-			<div class="collapse navbar-collapse" id="navbarSupportedContent">
+			<div class="collapse navbar-collapse">
 				<nav aria-label="breadcrumb">
-					<ol class="breadcrumb boards-breadcrumb">
-						<li class="breadcrumb-item"><a href="../index.html"><i class="fa fa-home mr-1"></i>个人中心</a></li>
-						<li class="breadcrumb-item active" aria-current="page"><i class="fa fa-envelope-o mr-1"></i>留言</li>
+					<ol class="breadcrumb" style="background: transparent;">
+						<li class="breadcrumb-item"><a href="../index.html" style="color: rgba(255,255,255,0.85);"><i class="fa fa-home mr-1"></i>个人中心</a></li>
+						<li class="breadcrumb-item active" style="color: rgba(255,255,255,0.9);"><i class="fa fa-envelope-o mr-1"></i>留言板</li>
 					</ol>
 				</nav>
 			</div>
