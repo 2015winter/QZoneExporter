@@ -84,7 +84,7 @@
 
 | 日志 | 相册 |
 |:----:|:----:|
-| <img src="https://media.githubusercontent.com/media/2015winter/ImageHosting/refs/heads/main/Q/QZone/日志.png" width="400"> | <img src="https://media.githubusercontent.com/media/2015winter/ImageHosting/refs/heads/main/Q/QZone/相册1.png" width="400"> |
+| <img src="https://media.githubusercontent.com/media/2015winter/ImageHosting/refs/heads/main/Q/QZone/日志.png" width="400"> | <img src="https://media.githubusercontent.com/media/2015winter/ImageHosting/refs/heads/main/Q/QZone/相册.png" width="400"> |
 
 | 留言 | 好友 |
 |:----:|:----:|
