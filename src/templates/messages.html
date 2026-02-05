@@ -31,8 +31,52 @@
 	<script type="text/javascript" src="../Common/json/config.js"></script>
 	<script type="text/javascript" src="json/messages.js"></script>
 	<script type="text/javascript" src="../Common/js/common.js"></script>
-	<script type="text/javascript" src="../Common/js/sidebar.js"></script>
 	<script type="text/javascript" src="js/messages.js"></script>
+	
+	<style>
+		/* 九宫格样式修正 */
+		.medias {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px;
+			margin-top: 15px;
+		}
+		
+		.medias-item {
+			cursor: pointer;
+			border-radius: 12px;
+			overflow: hidden;
+			transition: all 0.3s ease;
+		}
+		
+		.medias-item:hover {
+			transform: scale(1.02);
+			box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+		}
+		
+		.medias-item img {
+			width: 150px;
+			height: 150px;
+			object-fit: cover;
+		}
+		
+		/* 单图样式 */
+		.medias-item:only-child img {
+			width: 300px;
+			height: auto;
+			max-height: 400px;
+		}
+		
+		/* 转发内容样式 */
+		.source {
+			background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+			border-left: 4px solid;
+			border-image: linear-gradient(135deg, #f093fb, #f5576c) 1;
+			padding: 15px;
+			margin: 15px 0;
+			border-radius: 0 12px 12px 0;
+		}
+	</style>
 </head>
 
 <body class="messages-page">
@@ -57,10 +101,9 @@
 	</header>
 	<main role="main" class="flex-shrink-0">
 		<div id="messages_html" class="container messages">
-			<%for (const [year, yearMap] of messageMaps) {%>
-				<span class="sidebar-h1" data-tag="h1" data-sidebar='<%:=year%>年<span class="badge badge-primary badge-pill itemSize"><%:=API.Utils.sumYearItemSize(yearMap)%><span>'></span>
-				<%for (const [month, monthItems] of yearMap) {%>
-					<span class="sidebar-h2" data-tag="h2" data-sidebar='<%:=month%>月<span class="badge badge-secondary badge-pill itemSize"><%:=monthItems.length%><span>'></span>
+		<%for (const [year, yearMap] of messageMaps) {%>
+			<%for (const [month, monthItems] of yearMap) {%>
+				<h3 class="sidebar-h2"><%:=month%>月 <span class="badge"><%:=monthItems.length%>条</span></h3>
 					<%for (let index = 0; index < monthItems.length; index++) {%>
 						<%const message = monthItems[index]%>
 						<%total = total -1%>

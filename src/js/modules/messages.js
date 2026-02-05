@@ -401,6 +401,7 @@ API.Messages.exportToHtml = async(messages) => {
         let yearList = [];
         let maxCount = 0;
         let maxYear = '';
+        let totalLikes = 0;
         for (const [year, yearItems] of yearMaps) {
             const count = yearItems.length;
             yearList.push({ year: year, count: count });
@@ -408,6 +409,10 @@ API.Messages.exportToHtml = async(messages) => {
                 maxCount = count;
                 maxYear = year;
             }
+        }
+        // 计算总获赞数
+        for (const msg of messages) {
+            totalLikes += (msg.likeTotal || 0);
         }
         // 按年份倒序排列（最新年份在前）
         yearList.sort((a, b) => b.year - a.year);
@@ -418,6 +423,7 @@ API.Messages.exportToHtml = async(messages) => {
             total: messages.length,
             maxCount: maxCount,
             maxYear: maxYear,
+            totalLikes: totalLikes,
             config: QZone_Config
         }
         await API.Common.writeHtmlofTpl('messages_index', indexParams, moduleFolder + "/index.html");

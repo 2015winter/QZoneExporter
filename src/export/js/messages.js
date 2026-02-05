@@ -6,17 +6,8 @@ $(function() {
 
     // 那年今日功能已移至导航页(index.html)，年份页面不再显示
 
-    // 动态为卡片添加id（用于锚点定位）
-    addCardIds();
-    
-    // 处理锚点跳转（因为id是动态添加的，需要手动滚动）
+    // 处理锚点跳转
     scrollToAnchor();
-
-    // 动态插入年份标题和月份分割栏
-    insertYearAndMonthHeaders();
-
-    // 重新渲染左侧目录
-    initSidebar();
 
     // 图片懒加载
     lazyload();
@@ -329,7 +320,7 @@ $(function() {
 });
 
 /**
- * 处理锚点跳转（因为id是动态添加的，浏览器自动锚点已错过）
+ * 处理锚点跳转
  */
 function scrollToAnchor() {
     const hash = window.location.hash;
@@ -352,76 +343,4 @@ function scrollToAnchor() {
             }
         }, 100);
     }
-}
-
-/**
- * 动态为每个说说卡片添加id（用于锚点定位）
- */
-function addCardIds() {
-    // 查找所有包含 data-target 的点赞按钮，获取tid
-    $('.card .viewlikes[data-target]').each(function() {
-        const tid = $(this).attr('data-target');
-        const $card = $(this).closest('.card');
-        if (tid && !$card.attr('id')) {
-            $card.attr('id', 'msg-' + tid);
-        }
-    });
-}
-
-/**
- * 动态插入年份标题和月份分割栏
- */
-function insertYearAndMonthHeaders() {
-    // 处理年份标题
-    $('.sidebar-h1').each(function() {
-        const $yearHeader = $(this);
-        const sidebarText = $yearHeader.attr('data-sidebar');
-        
-        // 提取年份和数量，如 "2017年<span class='badge...'>10<span>"
-        const yearMatch = sidebarText.match(/^(\d+)年/);
-        const countMatch = sidebarText.match(/>(\d+)</);
-        
-        if (yearMatch) {
-            const year = yearMatch[1];
-            const count = countMatch ? countMatch[1] : '';
-            
-            // 检查是否已存在年份标题
-            if (!$yearHeader.next('.content-year-header').length) {
-                const yearHeaderHtml = `
-                    <div class="content-year-header">
-                        <span class="content-year-badge">${year}年</span>
-                        <span class="content-year-count">共 ${count} 条说说</span>
-                    </div>
-                `;
-                $yearHeader.after(yearHeaderHtml);
-            }
-        }
-    });
-    
-    // 处理月份分割栏
-    $('.sidebar-h2').each(function() {
-        const $monthHeader = $(this);
-        const sidebarText = $monthHeader.attr('data-sidebar');
-        
-        // 提取月份和数量，如 "12月<span class='badge...'>1<span>"
-        const monthMatch = sidebarText.match(/^(\d+)月/);
-        const countMatch = sidebarText.match(/>(\d+)</);
-        
-        if (monthMatch) {
-            const month = monthMatch[1];
-            const count = countMatch ? countMatch[1] : '';
-            
-            // 检查是否已存在月份分割栏
-            if (!$monthHeader.next('.content-month-divider').length) {
-                const monthDividerHtml = `
-                    <div class="content-month-divider">
-                        <span class="content-month-badge">${month}月</span>
-                        <span class="content-month-count">${count} 条</span>
-                        <span class="content-month-line"></span>
-                    </div>
-                `;
-                $monthHeader.after(monthDividerHtml);
-            }
-        }
-    });
 }
