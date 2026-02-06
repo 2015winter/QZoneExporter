@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+	<link rel="icon" href="../Common/images/favicon.ico"> 
+	<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<title>QQ空间备份-相册 Demo</title>
+	<link rel="stylesheet" href="../Common/vendor/css/font-awesome.min.css">
+	<link rel="stylesheet" href="../Common/vendor/css/bootstrap.min.css">
+	<link rel="stylesheet" href="../Common/vendor/css/lightgallery.min.css">
+	<link rel="stylesheet" href="../Common/vendor/css/lightgallery-bundle.min.css">
+	<link rel="stylesheet" type="text/css" href="../Common/css/common.css">
+	<script src="../Common/vendor/js/jquery.min.js"></script>
+	<script src="../Common/vendor/js/bootstrap.bundle.min.js"></script>
+	<script src="../Common/vendor/js/lodash.min.js"></script>
+	<script src="../Common/vendor/js/lightgallery.min.js"></script>
+	<script src="../Common/vendor/js/lg-zoom.min.js"></script>
+	<script src="../Common/vendor/js/lg-thumbnail.min.js"></script>
+	<script src="../Common/vendor/js/lg-fullscreen.min.js"></script>
+	
+	<script type="text/javascript" src="../Common/json/config.js"></script>
+	<script type="text/javascript" src="json/albums.js"></script>
+	
+	<style>
+		body {
+			background: linear-gradient(135deg, #11998e 0%, #38ef7d 50%, #96fbc4 100%);
+			min-height: 100vh;
+			padding-top: 70px;
+			padding-bottom: 80px;
+		}
+		
+		.navbar-albums {
+			background: linear-gradient(135deg, rgba(17, 153, 142, 0.95), rgba(56, 239, 125, 0.95)) !important;
+			backdrop-filter: blur(10px);
+		}
+		
+		.main-card {
+			background: rgba(255, 255, 255, 0.95);
+			backdrop-filter: blur(20px);
+			border-radius: 24px;
+			box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+			padding: 40px;
+			margin-top: 20px;
+		}
+		
+		.page-header {
+			text-align: center;
+			margin-bottom: 40px;
+			padding-bottom: 30px;
+			border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+		}
+		
+		.page-header-icon {
+			font-size: 48px;
+			background: linear-gradient(135deg, #11998e, #38ef7d);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			margin-bottom: 16px;
+		}
+		
+		.page-header-title {
+			font-size: 32px;
+			font-weight: 700;
+			background: linear-gradient(135deg, #11998e, #38ef7d);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+		}
+		
+		/* 工具栏 - 搜索和排序 */
+		.albums-toolbar {
+			display: flex;
+			gap: 16px;
+			margin-bottom: 30px;
+			flex-wrap: wrap;
+			align-items: center;
+		}
+		
+		.albums-search {
+			flex: 1;
+			min-width: 280px;
+			position: relative;
+		}
+		
+		.albums-search input {
+			width: 100%;
+			padding: 12px 16px 12px 44px;
+			border: 2px solid rgba(17, 153, 142, 0.2);
+			border-radius: 30px;
+			font-size: 14px;
+			outline: none;
+			transition: all 0.3s ease;
+			background: #fff;
+		}
+		
+		.albums-search input:focus {
+			border-color: #11998e;
+			box-shadow: 0 0 0 4px rgba(17, 153, 142, 0.1);
+		}
+		
+		.albums-search i {
+			position: absolute;
+			left: 18px;
+			top: 50%;
+			transform: translateY(-50%);
+			color: #718096;
+			pointer-events: none;
+		}
+		
+		/* 排序按钮组 */
+		.albums-sort {
+			display: flex;
+			gap: 8px;
+		}
+		
+		.sort-btn {
+			padding: 10px 16px;
+			border: 2px solid rgba(17, 153, 142, 0.2);
+			border-radius: 20px;
+			background: #fff;
+			font-size: 13px;
+			color: #4a5568;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			white-space: nowrap;
+		}
+		
+		.sort-btn:hover,
+		.sort-btn.active {
+			background: linear-gradient(135deg, #11998e, #38ef7d);
+			color: #fff;
+			border-color: transparent;
+		}
+		
+		.sort-btn i {
+			margin-right: 4px;
+		}
+		
+		.album-card.hidden {
+			display: none;
+		}
+		
+		/* 相册网格 */
+		.albums-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+			gap: 24px;
+		}
+		
+		.album-card {
+			background: #fff;
+			border-radius: 16px;
+			overflow: hidden;
+			box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+			cursor: pointer;
+			transition: all 0.3s ease;
+		}
+		
+		.album-card:hover {
+			transform: translateY(-8px);
+			box-shadow: 0 12px 30px rgba(17, 153, 142, 0.25);
+		}
+		
+		.album-cover {
+			position: relative;
+			height: 200px;
+			overflow: hidden;
+		}
+		
+		.album-cover img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			transition: transform 0.3s ease;
+		}
+		
+		.album-card:hover .album-cover img {
+			transform: scale(1.1);
+		}
+		
+		.album-count {
+			position: absolute;
+			top: 10px;
+			right: 10px;
+			background: linear-gradient(135deg, #11998e, #38ef7d);
+			color: #fff;
+			padding: 4px 12px;
+			border-radius: 20px;
+			font-size: 13px;
+			font-weight: 600;
+		}
+		
+		.album-info {
+			padding: 20px;
+		}
+		
+		.album-name {
+			font-size: 18px;
+			font-weight: 600;
+			color: #333;
+			margin-bottom: 8px;
+		}
+		
+		.album-desc {
+			font-size: 14px;
+			color: #666;
+			line-height: 1.5;
+			display: -webkit-box;
+			-webkit-line-clamp: 2;
+			-webkit-box-orient: vertical;
+			overflow: hidden;
+		}
+		
+		.album-stats {
+			margin-top: 12px;
+			font-size: 13px;
+			color: #999;
+		}
+		
+		.album-stats span {
+			margin-right: 15px;
+		}
+		
+		/* 分类标签 */
+		.category-badge {
+			display: inline-block;
+			background: linear-gradient(135deg, rgba(17, 153, 142, 0.1), rgba(56, 239, 125, 0.1));
+			color: #11998e;
+			padding: 4px 12px;
+			border-radius: 20px;
+			font-size: 12px;
+			margin-bottom: 8px;
+		}
+		
+		/* Demo 标记 */
+		.demo-badge {
+			position: fixed;
+			top: 80px;
+			right: 20px;
+			background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+			color: #fff;
+			padding: 8px 16px;
+			border-radius: 20px;
+			font-weight: 600;
+			font-size: 14px;
+			box-shadow: 0 4px 15px rgba(238, 90, 36, 0.4);
+			z-index: 1000;
+		}
+		
+		.footer-albums {
+			background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.9));
+		}
+		
+		/* 相片弹窗 */
+		.photos-modal {
+			display: none;
+			position: fixed;
+			inset: 0;
+			background: rgba(0, 0, 0, 0.9);
+			z-index: 2000;
+			overflow-y: auto;
+		}
+		
+		.photos-modal.show {
+			display: block;
+		}
+		
+		.photos-modal-header {
+			position: sticky;
+			top: 0;
+			background: linear-gradient(135deg, #11998e, #38ef7d);
+			padding: 15px 20px;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			z-index: 10;
+		}
+		
+		.photos-modal-title {
+			color: #fff;
+			font-size: 18px;
+			font-weight: 600;
+		}
+		
+		.photos-modal-close {
+			background: rgba(255, 255, 255, 0.2);
+			border: none;
+			color: #fff;
+			width: 36px;
+			height: 36px;
+			border-radius: 50%;
+			cursor: pointer;
+			font-size: 16px;
+		}
+		
+		.photos-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+			gap: 15px;
+			padding: 20px;
+		}
+		
+		.photo-item {
+			position: relative;
+			aspect-ratio: 1;
+			overflow: hidden;
+			border-radius: 12px;
+			cursor: pointer;
+			transition: transform 0.3s ease;
+		}
+		
+		.photo-item:hover {
+			transform: scale(1.05);
+		}
+		
+		.photo-item img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+		
+		/* 图片预览弹窗 */
+		.photo-preview-overlay {
+			display: none;
+			position: fixed;
+			inset: 0;
+			background: rgba(0, 0, 0, 0.95);
+			z-index: 3000;
+			justify-content: center;
+			align-items: center;
+		}
+		
+		.photo-preview-overlay.show {
+			display: flex;
+		}
+		
+		.photo-preview-container {
+			position: relative;
+			max-width: 90vw;
+			max-height: 90vh;
+		}
+		
+		.photo-preview-container img {
+			max-width: 100%;
+			max-height: 85vh;
+			object-fit: contain;
+			border-radius: 8px;
+		}
+		
+		.photo-preview-close {
+			position: absolute;
+			top: -40px;
+			right: 0;
+			background: rgba(255, 255, 255, 0.2);
+			border: none;
+			color: #fff;
+			width: 36px;
+			height: 36px;
+			border-radius: 50%;
+			cursor: pointer;
+		}
+		
+		.photo-preview-nav {
+			position: absolute;
+			top: 50%;
+			transform: translateY(-50%);
+			background: linear-gradient(135deg, rgba(17, 153, 142, 0.8), rgba(56, 239, 125, 0.8));
+			border: none;
+			color: #fff;
+			width: 50px;
+			height: 80px;
+			cursor: pointer;
+			font-size: 20px;
+		}
+		
+		.photo-preview-nav.prev {
+			left: 20px;
+			border-radius: 0 12px 12px 0;
+		}
+		
+		.photo-preview-nav.next {
+			right: 20px;
+			border-radius: 12px 0 0 12px;
+		}
+		
+		.photo-preview-info {
+			position: absolute;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			background: linear-gradient(transparent, rgba(0,0,0,0.8));
+			color: #fff;
+			padding: 40px 20px 20px;
+			text-align: center;
+		}
+		
+		/* 响应式 */
+		@media (max-width: 768px) {
+			.albums-toolbar {
+				flex-direction: column;
+			}
+			
+			.albums-search {
+				min-width: 100%;
+			}
+			
+			.albums-sort {
+				width: 100%;
+				justify-content: center;
+			}
+			
+			.albums-grid {
+				grid-template-columns: repeat(2, 1fr);
+				gap: 12px;
+			}
+		}
+	</style>
+</head>
+
+<body>
+	<!-- Demo 标记 -->
+	<div class="demo-badge">
+		<i class="fa fa-star mr-1"></i>Demo 演示
+	</div>
+	
+	<header>
+		<nav class="navbar navbar-expand-lg navbar-dark fixed-top navbar-albums">
+			<a class="navbar-brand" href="../index.html">
+				<i class="fa fa-cloud-download mr-2"></i>QQ空间导出助手
+			</a>
+			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarSupportedContent">
+				<nav aria-label="breadcrumb">
+					<ol class="breadcrumb" style="background: transparent;">
+						<li class="breadcrumb-item"><a href="../index.html" style="color: rgba(255,255,255,0.85);"><i class="fa fa-home mr-1"></i>个人中心</a></li>
+						<li class="breadcrumb-item active" style="color: rgba(255,255,255,0.9);"><i class="fa fa-picture-o mr-1"></i>相册</li>
+					</ol>
+				</nav>
+			</div>
+		</nav>
+	</header>
+	
+	<main role="main" class="flex-shrink-0">
+		<div class="container">
+			<div class="main-card">
+				<div class="page-header">
+					<i class="fa fa-picture-o page-header-icon"></i>
+					<h1 class="page-header-title">我的相册</h1>
+					<p style="color: #718096;">共 <span id="totalAlbums">0</span> 个相册，<span id="totalPhotos">0</span> 张照片</p>
+				</div>
+				
+				<!-- 工具栏：搜索和排序 -->
+				<div class="albums-toolbar">
+					<div class="albums-search">
+						<i class="fa fa-search"></i>
+						<input type="text" id="albums-search-input" placeholder="搜索相册名称、描述或分类...">
+					</div>
+					<div class="albums-sort">
+						<button class="sort-btn active" data-sort="default">
+							<i class="fa fa-sort-amount-desc"></i>默认
+						</button>
+						<button class="sort-btn" data-sort="name-asc">
+							<i class="fa fa-sort-alpha-asc"></i>名称
+						</button>
+						<button class="sort-btn" data-sort="photos-desc">
+							<i class="fa fa-image"></i>照片数
+						</button>
+					</div>
+				</div>
+				
+				<div class="albums-grid" id="albumsList">
+					<!-- 由JS动态生成 -->
+				</div>
+			</div>
+		</div>
+	</main>
+	
+	<!-- 相片列表弹窗 -->
+	<div class="photos-modal" id="photosModal">
+		<div class="photos-modal-header">
+			<span class="photos-modal-title" id="photosModalTitle">相册名称</span>
+			<button class="photos-modal-close" onclick="closePhotosModal()">
+				<i class="fa fa-times"></i>
+			</button>
+		</div>
+		<div class="photos-grid" id="photosGrid">
+			<!-- 由JS动态生成 -->
+		</div>
+	</div>
+	
+	<!-- 图片预览弹窗 -->
+	<div class="photo-preview-overlay" id="photoPreview">
+		<button class="photo-preview-nav prev" onclick="navigatePreview(-1)">
+			<i class="fa fa-chevron-left"></i>
+		</button>
+		<div class="photo-preview-container">
+			<button class="photo-preview-close" onclick="closePhotoPreview()">
+				<i class="fa fa-times"></i>
+			</button>
+			<img id="previewImg" src="" alt="预览">
+			<div class="photo-preview-info">
+				<div id="previewName" style="font-size: 16px; font-weight: 600;"></div>
+				<div id="previewDesc" style="font-size: 14px; color: #ccc; margin-top: 5px;"></div>
+				<div id="previewIndex" style="font-size: 13px; color: #999; margin-top: 5px;"></div>
+			</div>
+		</div>
+		<button class="photo-preview-nav next" onclick="navigatePreview(1)">
+			<i class="fa fa-chevron-right"></i>
+		</button>
+	</div>
+	
+	<footer class="footer mt-auto py-3 fixed-bottom footer-albums">
+		<div class="container text-center">
+			<span class="text-white">
+				<i class="fa fa-leaf mr-2"></i>落叶随风，青春，稀纵即逝
+			</span>
+		</div>
+	</footer>
+	
+	<script>
+		let currentAlbum = null;
+		let currentPhotoIndex = 0;
+		let currentSort = 'default';
+		let allAlbumCards = [];
+		
+		function renderAlbums() {
+			const container = document.getElementById('albumsList');
+			let html = '';
+			let totalPhotos = 0;
+			
+			albums.forEach(album => {
+				totalPhotos += album.photoList?.length || 0;
+				html += `
+					<div class="album-card" data-album-id="${album.id}" onclick="openAlbum('${album.id}')">
+						<div class="album-cover">
+							<img src="${album.custom_url}" alt="${album.name}" loading="lazy">
+							<span class="album-count"><i class="fa fa-image mr-1"></i>${album.photoList?.length || 0}</span>
+						</div>
+						<div class="album-info">
+							<span class="category-badge">${album.className}</span>
+							<h3 class="album-name">${album.name}</h3>
+							<p class="album-desc">${album.desc}</p>
+							<div class="album-stats">
+								<span><i class="fa fa-heart text-danger"></i> ${album.likes?.length || 0}</span>
+								<span><i class="fa fa-comment text-info"></i> ${album.comments?.length || 0}</span>
+							</div>
+						</div>
+					</div>
+				`;
+			});
+			
+			container.innerHTML = html;
+			document.getElementById('totalAlbums').textContent = albums.length;
+			document.getElementById('totalPhotos').textContent = totalPhotos;
+			
+			// 保存所有卡片引用
+			allAlbumCards = Array.from(container.querySelectorAll('.album-card'));
+		}
+		
+		// 搜索功能
+		function performSearch() {
+			const searchText = document.getElementById('albums-search-input').value.trim().toLowerCase();
+			
+			allAlbumCards.forEach(card => {
+				const albumName = card.querySelector('.album-name').textContent.toLowerCase();
+				const albumDesc = card.querySelector('.album-desc').textContent.toLowerCase();
+				const categoryBadge = card.querySelector('.category-badge').textContent.toLowerCase();
+				
+				if (!searchText || 
+					albumName.includes(searchText) || 
+					albumDesc.includes(searchText) || 
+					categoryBadge.includes(searchText)) {
+					card.classList.remove('hidden');
+				} else {
+					card.classList.add('hidden');
+				}
+			});
+			
+			// 搜索后重新应用排序
+			performSort(currentSort);
+		}
+		
+		// 排序功能
+		function performSort(sortType) {
+			const container = document.getElementById('albumsList');
+			const visibleCards = allAlbumCards.filter(card => !card.classList.contains('hidden'));
+			
+			let sortedCards;
+			switch (sortType) {
+				case 'name-asc':
+					// 按名称排序
+					sortedCards = visibleCards.sort((a, b) => {
+						const nameA = a.querySelector('.album-name').textContent.trim();
+						const nameB = b.querySelector('.album-name').textContent.trim();
+						return nameA.localeCompare(nameB, 'zh-CN');
+					});
+					break;
+				
+				case 'photos-desc':
+					// 按照片数排序
+					sortedCards = visibleCards.sort((a, b) => {
+						const countA = parseInt(a.querySelector('.album-count').textContent.replace(/[^0-9]/g, '')) || 0;
+						const countB = parseInt(b.querySelector('.album-count').textContent.replace(/[^0-9]/g, '')) || 0;
+						return countB - countA;
+					});
+					break;
+				
+				case 'default':
+				default:
+					// 恢复原始顺序（按albums数组顺序）
+					sortedCards = visibleCards.sort((a, b) => {
+						const idA = a.getAttribute('data-album-id');
+						const idB = b.getAttribute('data-album-id');
+						const indexA = albums.findIndex(album => album.id === idA);
+						const indexB = albums.findIndex(album => album.id === idB);
+						return indexA - indexB;
+					});
+					break;
+			}
+			
+			// 重新排列DOM
+			sortedCards.forEach(card => {
+				container.appendChild(card);
+			});
+		}
+		
+		function openAlbum(albumId) {
+			currentAlbum = albums.find(a => a.id === albumId);
+			if (!currentAlbum) return;
+			
+			document.getElementById('photosModalTitle').textContent = `${currentAlbum.name} (${currentAlbum.photoList?.length || 0}张)`;
+			
+			const grid = document.getElementById('photosGrid');
+			let html = '';
+			
+			(currentAlbum.photoList || []).forEach((photo, idx) => {
+				html += `
+					<div class="photo-item" onclick="openPhotoPreview(${idx})">
+						<img src="${photo.custom_url}" alt="${photo.name}" loading="lazy">
+					</div>
+				`;
+			});
+			
+			grid.innerHTML = html;
+			document.getElementById('photosModal').classList.add('show');
+			document.body.style.overflow = 'hidden';
+		}
+		
+		function closePhotosModal() {
+			document.getElementById('photosModal').classList.remove('show');
+			document.body.style.overflow = '';
+		}
+		
+		function openPhotoPreview(index) {
+			currentPhotoIndex = index;
+			showCurrentPhoto();
+			document.getElementById('photoPreview').classList.add('show');
+		}
+		
+		function closePhotoPreview() {
+			document.getElementById('photoPreview').classList.remove('show');
+		}
+		
+		function showCurrentPhoto() {
+			if (!currentAlbum || !currentAlbum.photoList) return;
+			const photo = currentAlbum.photoList[currentPhotoIndex];
+			
+			document.getElementById('previewImg').src = photo.custom_url;
+			document.getElementById('previewName').textContent = photo.name || '未命名';
+			document.getElementById('previewDesc').textContent = photo.desc || '';
+			document.getElementById('previewIndex').textContent = `${currentPhotoIndex + 1} / ${currentAlbum.photoList.length}`;
+		}
+		
+		function navigatePreview(direction) {
+			if (!currentAlbum || !currentAlbum.photoList) return;
+			currentPhotoIndex += direction;
+			if (currentPhotoIndex < 0) currentPhotoIndex = currentAlbum.photoList.length - 1;
+			if (currentPhotoIndex >= currentAlbum.photoList.length) currentPhotoIndex = 0;
+			showCurrentPhoto();
+		}
+		
+		// 键盘导航
+		document.addEventListener('keydown', function(e) {
+			if (!document.getElementById('photoPreview').classList.contains('show')) return;
+			if (e.key === 'Escape') closePhotoPreview();
+			if (e.key === 'ArrowLeft') navigatePreview(-1);
+			if (e.key === 'ArrowRight') navigatePreview(1);
+		});
+		
+		// 点击背景关闭
+		document.getElementById('photoPreview').addEventListener('click', function(e) {
+			if (e.target === this) closePhotoPreview();
+		});
+		
+		// 搜索输入监听（防抖）
+		let searchTimer;
+		document.getElementById('albums-search-input').addEventListener('input', function() {
+			clearTimeout(searchTimer);
+			searchTimer = setTimeout(performSearch, 300);
+		});
+		
+		// 排序按钮点击
+		document.querySelectorAll('.sort-btn').forEach(btn => {
+			btn.addEventListener('click', function() {
+				document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+				this.classList.add('active');
+				currentSort = this.getAttribute('data-sort');
+				performSort(currentSort);
+			});
+		});
+		
+		document.addEventListener('DOMContentLoaded', renderAlbums);
+	</script>
+</body>
+
+</html>

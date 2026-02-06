@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+	<link rel="icon" href="../Common/images/favicon.ico">
+	<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<title>QQ空间备份-好友 Demo</title>
+	<link rel="stylesheet" href="../Common/vendor/css/font-awesome.min.css">
+	<link rel="stylesheet" href="../Common/vendor/css/bootstrap.min.css">
+	<link rel="stylesheet" href="../Common/vendor/css/bootstrap-table.min.css">
+	<link rel="stylesheet" type="text/css" href="../Common/css/common.css">
+	<script src="../Common/vendor/js/moment.min.js"></script>
+	<script src="../Common/vendor/js/zh-cn.min.js"></script>
+	<script src="../Common/vendor/js/jquery.min.js"></script>
+	<script src="../Common/vendor/js/bootstrap.bundle.min.js"></script>
+	<script src="../Common/vendor/js/bootstrap-table.min.js"></script>
+	<script src="../Common/vendor/js/bootstrap-table-zh-CN.min.js"></script>
+	<script src="../Common/vendor/js/index.aio.min.js"></script>
+	<script src="../Common/vendor/js/lodash.min.js"></script>
+	<script src="../Common/vendor/js/clicklove.min.js"></script>
+	
+	<script src="../Common/json/config.js"></script>
+	<script src="json/friends.js"></script>
+	<script src="../Common/js/common.js"></script>
+	
+	<style>
+		/* 好友页面专属样式 - 青绿色主题 */
+		body.friends-page {
+			background: linear-gradient(135deg, #00cec9 0%, #0984e3 50%, #6c5ce7 100%);
+			min-height: 100vh;
+			padding-top: 70px;
+			padding-bottom: 80px;
+		}
+		
+		/* 导航栏样式 */
+		.friends-navbar {
+			background: linear-gradient(135deg, rgba(0, 206, 201, 0.95), rgba(9, 132, 227, 0.95)) !important;
+			backdrop-filter: blur(10px);
+		}
+		
+		.friends-breadcrumb {
+			background: transparent !important;
+		}
+		
+		.friends-breadcrumb .breadcrumb-item a {
+			color: rgba(255, 255, 255, 0.85);
+			transition: color 0.3s ease;
+		}
+		
+		.friends-breadcrumb .breadcrumb-item a:hover {
+			color: #fff;
+			text-decoration: none;
+		}
+		
+		.friends-breadcrumb .breadcrumb-item.active {
+			color: rgba(255, 255, 255, 0.9);
+		}
+		
+		.friends-breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+			color: rgba(255, 255, 255, 0.5);
+		}
+		
+		/* 主卡片容器 */
+		.friends-main-card {
+			background: rgba(255, 255, 255, 0.95);
+			backdrop-filter: blur(20px);
+			border-radius: 24px;
+			box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+			padding: 40px;
+			margin-top: 20px;
+			animation: fadeInUp 0.6s ease-out;
+		}
+		
+		@keyframes fadeInUp {
+			from { opacity: 0; transform: translateY(30px); }
+			to { opacity: 1; transform: translateY(0); }
+		}
+		
+		/* 页面标题区域 */
+		.friends-header {
+			text-align: center;
+			margin-bottom: 40px;
+			padding-bottom: 30px;
+			border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+		}
+		
+		.friends-header-icon {
+			font-size: 48px;
+			background: linear-gradient(135deg, #00cec9, #0984e3);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			margin-bottom: 16px;
+			display: block;
+		}
+		
+		.friends-header-title {
+			font-size: 32px;
+			font-weight: 700;
+			background: linear-gradient(135deg, #00cec9, #0984e3);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			margin-bottom: 12px;
+		}
+		
+		.friends-header-subtitle {
+			color: #718096;
+			font-size: 16px;
+		}
+		
+		.friends-total-count {
+			font-weight: 600;
+			color: #00cec9;
+		}
+		
+		/* 统计卡片区域 */
+		.friends-stats {
+			display: flex;
+			justify-content: center;
+			gap: 24px;
+			margin-bottom: 32px;
+			padding-bottom: 24px;
+			border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+			flex-wrap: wrap;
+		}
+		
+		.stat-card {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			padding: 16px 24px;
+			background: linear-gradient(145deg, #f8fafc, #fff);
+			border: 1px solid rgba(0, 206, 201, 0.15);
+			border-radius: 16px;
+			transition: all 0.3s ease;
+		}
+		
+		.stat-card:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 6px 20px rgba(0, 206, 201, 0.15);
+		}
+		
+		.stat-card .stat-icon {
+			width: 48px;
+			height: 48px;
+			border-radius: 12px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 20px;
+			color: #fff;
+		}
+		
+		.stat-card .stat-icon.total { background: linear-gradient(135deg, #00cec9, #0984e3); }
+		.stat-card .stat-icon.care { background: linear-gradient(135deg, #ff6b6b, #ee5a5a); }
+		.stat-card .stat-icon.groups { background: linear-gradient(135deg, #4ecdc4, #44a08d); }
+		
+		.stat-card .stat-info { text-align: left; }
+		.stat-card .stat-number {
+			font-size: 24px;
+			font-weight: 700;
+			color: #2d3748;
+		}
+		.stat-card .stat-label {
+			font-size: 13px;
+			color: #718096;
+		}
+		
+		/* 分组标签区域 */
+		.friends-groups {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 12px;
+			justify-content: center;
+			margin-bottom: 32px;
+			padding-bottom: 24px;
+			border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+		}
+		
+		.group-tag {
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+			padding: 10px 20px;
+			background: linear-gradient(145deg, #f8fafc, #fff);
+			border: 1px solid rgba(0, 206, 201, 0.15);
+			border-radius: 30px;
+			font-size: 14px;
+			color: #4a5568;
+			cursor: pointer;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			text-decoration: none;
+		}
+		
+		.group-tag:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 6px 20px rgba(0, 206, 201, 0.2);
+			background: linear-gradient(135deg, #00cec9, #0984e3);
+			color: #fff;
+			text-decoration: none;
+		}
+		
+		.group-tag.active {
+			background: linear-gradient(135deg, #00cec9, #0984e3);
+			color: #fff;
+			border-color: transparent;
+			box-shadow: 0 6px 20px rgba(0, 206, 201, 0.3);
+		}
+		
+		.group-tag .count {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			min-width: 24px;
+			height: 24px;
+			padding: 0 8px;
+			background: rgba(0, 206, 201, 0.1);
+			border-radius: 12px;
+			font-size: 12px;
+			font-weight: 600;
+			color: #00cec9;
+			transition: all 0.3s ease;
+		}
+		
+		.group-tag:hover .count,
+		.group-tag.active .count {
+			background: rgba(255, 255, 255, 0.25);
+			color: #fff;
+		}
+		
+		/* 工具栏 */
+		.friends-toolbar {
+			display: flex;
+			gap: 16px;
+			margin-bottom: 24px;
+			flex-wrap: wrap;
+		}
+		
+		.friends-search {
+			flex: 1;
+			min-width: 200px;
+			position: relative;
+		}
+		
+		.friends-search input {
+			width: 100%;
+			padding: 12px 16px 12px 44px;
+			border: 2px solid rgba(0, 206, 201, 0.2);
+			border-radius: 30px;
+			font-size: 14px;
+			outline: none;
+			transition: all 0.3s ease;
+			background: #fff;
+		}
+		
+		.friends-search input:focus {
+			border-color: #00cec9;
+			box-shadow: 0 0 0 4px rgba(0, 206, 201, 0.1);
+		}
+		
+		.friends-search i {
+			position: absolute;
+			left: 18px;
+			top: 50%;
+			transform: translateY(-50%);
+			color: #718096;
+		}
+		
+		.friends-sort {
+			display: flex;
+			gap: 8px;
+		}
+		
+		.sort-btn {
+			padding: 10px 16px;
+			border: 2px solid rgba(0, 206, 201, 0.2);
+			border-radius: 20px;
+			background: #fff;
+			font-size: 13px;
+			color: #4a5568;
+			cursor: pointer;
+			transition: all 0.3s ease;
+		}
+		
+		.sort-btn:hover,
+		.sort-btn.active {
+			background: linear-gradient(135deg, #00cec9, #0984e3);
+			color: #fff;
+			border-color: transparent;
+		}
+		
+		/* 视图切换 */
+		.view-toggle {
+			display: flex;
+			gap: 8px;
+		}
+		
+		.view-btn {
+			width: 40px;
+			height: 40px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			border: 2px solid rgba(0, 206, 201, 0.2);
+			border-radius: 10px;
+			background: #fff;
+			color: #718096;
+			cursor: pointer;
+			transition: all 0.3s ease;
+		}
+		
+		.view-btn:hover,
+		.view-btn.active {
+			background: linear-gradient(135deg, #00cec9, #0984e3);
+			color: #fff;
+			border-color: transparent;
+		}
+		
+		/* 好友卡片网格 */
+		.friends-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+			gap: 20px;
+		}
+		
+		/* 好友卡片 - 保留原demo风格 */
+		.friend-card {
+			background: #fff;
+			border-radius: 16px;
+			padding: 24px;
+			text-align: center;
+			box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+			transition: all 0.3s ease;
+			position: relative;
+			display: flex;
+			flex-direction: column;
+			height: 100%;
+		}
+		
+		.friend-content {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+		}
+		
+		.friend-info {
+			flex: 1;
+		}
+		
+		.friend-card:hover {
+			transform: translateY(-5px);
+			box-shadow: 0 10px 30px rgba(0, 206, 201, 0.2);
+		}
+		
+		.friend-avatar {
+			width: 80px;
+			height: 80px;
+			border-radius: 50%;
+			margin-bottom: 15px;
+			border: 4px solid #00cec9;
+		}
+		
+		.friend-name {
+			font-size: 16px;
+			font-weight: 600;
+			color: #333;
+			margin-bottom: 5px;
+		}
+		
+		.friend-remark {
+			font-size: 13px;
+			color: #999;
+			margin-bottom: 8px;
+		}
+		
+		.friend-qq {
+			font-size: 13px;
+			color: #999;
+			margin-bottom: 8px;
+			opacity: 0;
+			transition: opacity 0.3s ease;
+		}
+		
+		.friend-card:hover .friend-qq {
+			opacity: 1;
+		}
+		
+		.friend-group {
+			display: inline-block;
+			padding: 3px 10px;
+			background: linear-gradient(135deg, rgba(0, 206, 201, 0.1), rgba(9, 132, 227, 0.1));
+			color: #0984e3;
+			border-radius: 10px;
+			font-size: 12px;
+			margin-top: auto;
+		}
+		
+		/* 特别关心标记 - 保留原demo风格 */
+		.friend-care {
+			position: absolute;
+			top: 10px;
+			right: 10px;
+			color: #ff6b6b;
+			font-size: 18px;
+		}
+		
+		/* 空状态 */
+		.friends-empty {
+			text-align: center;
+			padding: 60px 20px;
+			color: #718096;
+		}
+		
+		.friends-empty i {
+			font-size: 64px;
+			margin-bottom: 20px;
+			opacity: 0.3;
+		}
+		
+		.friends-empty p {
+			font-size: 16px;
+		}
+		
+		/* 表格视图样式 */
+		#friends-table-container {
+			border-radius: 16px;
+			overflow: hidden;
+		}
+		
+		.bootstrap-table .fixed-table-container {
+			border-radius: 16px;
+			border: none;
+		}
+		
+		.bootstrap-table .table {
+			margin-bottom: 0;
+		}
+		
+		.bootstrap-table .table thead th {
+			background: linear-gradient(135deg, #00cec9, #0984e3);
+			color: #fff;
+			border: none;
+			padding: 16px 12px;
+			font-weight: 600;
+		}
+		
+		.bootstrap-table .table tbody td {
+			padding: 14px 12px;
+			vertical-align: middle;
+		}
+		
+		.bootstrap-table .table tbody tr:hover {
+			background: rgba(0, 206, 201, 0.05);
+		}
+		
+		.bootstrap-table .table tbody td img {
+			width: 42px;
+			height: 42px;
+			border-radius: 50%;
+			border: 2px solid #fff;
+			box-shadow: 0 3px 10px rgba(0, 206, 201, 0.2);
+		}
+		
+		/* 分页美化 */
+		.bootstrap-table .fixed-table-pagination { padding: 16px; }
+		.bootstrap-table .fixed-table-pagination .pagination { margin: 0; }
+		
+		.bootstrap-table .fixed-table-pagination .page-link {
+			border-radius: 8px;
+			margin: 0 3px;
+			color: #00cec9;
+			border-color: rgba(0, 206, 201, 0.3);
+		}
+		
+		.bootstrap-table .fixed-table-pagination .page-item.active .page-link {
+			background: linear-gradient(135deg, #00cec9, #0984e3);
+			border-color: transparent;
+		}
+		
+		/* 底部 */
+		.friends-footer {
+			background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.9));
+			backdrop-filter: blur(10px);
+			position: fixed;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			z-index: 1000;
+		}
+		
+		.footer-text {
+			font-size: 14px;
+			letter-spacing: 1px;
+		}
+		
+		/* Demo标记 */
+		.demo-badge {
+			position: fixed;
+			top: 80px;
+			right: 20px;
+			background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+			color: #fff;
+			padding: 8px 16px;
+			border-radius: 20px;
+			font-weight: 600;
+			z-index: 1000;
+			box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+		}
+		
+		/* 响应式 */
+		@media (max-width: 768px) {
+			.friends-main-card {
+				padding: 24px 16px;
+				margin: 10px;
+				border-radius: 20px;
+			}
+			
+			.friends-header-icon { font-size: 36px; }
+			.friends-header-title { font-size: 24px; }
+			
+			.friends-stats { gap: 12px; }
+			.stat-card { padding: 12px 16px; }
+			.stat-card .stat-icon { width: 40px; height: 40px; font-size: 16px; }
+			.stat-card .stat-number { font-size: 20px; }
+			
+			.friends-grid {
+				grid-template-columns: repeat(2, 1fr);
+				gap: 12px;
+			}
+			
+			.friend-card { padding: 16px 12px; }
+			.friend-avatar { width: 60px; height: 60px; }
+			.friend-name { font-size: 14px; }
+			
+			.friends-groups { gap: 8px; }
+			.group-tag { padding: 8px 14px; font-size: 13px; }
+			
+			.friends-toolbar { flex-direction: column; }
+			.friends-sort { justify-content: center; }
+		}
+		
+		@media (max-width: 480px) {
+			.friends-stats { flex-direction: column; align-items: center; }
+			.stat-card { width: 100%; max-width: 280px; }
+		}
+	</style>
+</head>
+
+<body class="friends-page">
+	<div class="demo-badge"><i class="fa fa-star mr-1"></i>Demo 演示</div>
+	
+	<header>
+		<nav class="navbar navbar-expand-lg navbar-dark fixed-top friends-navbar">
+			<a class="navbar-brand" target="_blank" href="https://github.com/2015winter/QZoneExporter">
+				<i class="fa fa-cloud-download mr-2"></i>QQ空间导出助手
+			</a>
+			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarSupportedContent">
+				<nav aria-label="breadcrumb">
+					<ol class="breadcrumb friends-breadcrumb">
+						<li class="breadcrumb-item"><a href="../index.html"><i class="fa fa-home mr-1"></i>个人中心</a></li>
+						<li class="breadcrumb-item active" aria-current="page"><i class="fa fa-users mr-1"></i>好友</li>
+					</ol>
+				</nav>
+			</div>
+		</nav>
+	</header>
+	
+	<main role="main" class="flex-shrink-0">
+		<div class="container">
+			<div class="friends-main-card">
+				<!-- 页面标题 -->
+				<div class="friends-header">
+					<i class="fa fa-users friends-header-icon"></i>
+					<h1 class="friends-header-title">好友通讯录</h1>
+					<p class="friends-header-subtitle">共 <span class="friends-total-count" id="friends-count">0</span> 位好友，记录了那些年一起走过的伙伴</p>
+				</div>
+				
+				<!-- 统计卡片 -->
+				<div class="friends-stats">
+					<div class="stat-card">
+						<div class="stat-icon total"><i class="fa fa-users"></i></div>
+						<div class="stat-info">
+							<div class="stat-number" id="stat-total">0</div>
+							<div class="stat-label">全部好友</div>
+						</div>
+					</div>
+					<div class="stat-card">
+						<div class="stat-icon care"><i class="fa fa-heart"></i></div>
+						<div class="stat-info">
+							<div class="stat-number" id="stat-care">0</div>
+							<div class="stat-label">特别关心</div>
+						</div>
+					</div>
+					<div class="stat-card">
+						<div class="stat-icon groups"><i class="fa fa-folder"></i></div>
+						<div class="stat-info">
+							<div class="stat-number" id="stat-groups">0</div>
+							<div class="stat-label">好友分组</div>
+						</div>
+					</div>
+				</div>
+				
+				<!-- 分组标签 -->
+				<div class="friends-groups" id="friends-groups">
+					<!-- 由JS动态渲染 -->
+				</div>
+				
+				<!-- 工具栏 -->
+				<div class="friends-toolbar">
+					<div class="friends-search">
+						<i class="fa fa-search"></i>
+						<input type="text" id="friends-search-input" placeholder="搜索好友昵称或QQ号...">
+					</div>
+					<div class="friends-sort">
+						<button class="sort-btn active" data-sort="name-asc">
+							<i class="fa fa-sort-alpha-asc mr-1"></i>昵称
+						</button>
+						<button class="sort-btn" data-sort="qq-asc">
+							<i class="fa fa-sort-numeric-asc mr-1"></i>QQ号
+						</button>
+						<button class="sort-btn" data-sort="time-desc">
+							<i class="fa fa-clock-o mr-1"></i>相识
+						</button>
+					</div>
+					<div class="view-toggle">
+						<button class="view-btn active" data-view="card" title="卡片视图">
+							<i class="fa fa-th-large"></i>
+						</button>
+						<button class="view-btn" data-view="table" title="表格视图">
+							<i class="fa fa-list"></i>
+						</button>
+					</div>
+				</div>
+				
+				<!-- 好友列表 - 卡片视图 -->
+				<div class="friends-grid" id="friends-grid">
+					<!-- 由JS动态渲染 -->
+				</div>
+				
+				<!-- 好友列表 - 表格视图 -->
+				<div id="friends-table-container" style="display: none;">
+					<table id="friends-table"></table>
+				</div>
+				
+				<!-- 旧版列表（隐藏，保留兼容） -->
+				<div id="friends-list" style="display: none;"></div>
+			</div>
+		</div>
+	</main>
+	
+	<footer class="footer mt-auto py-3 friends-footer">
+		<div class="container text-center">
+			<span class="text-white footer-text">
+				<i class="fa fa-users mr-2"></i>友谊万岁，青春不散
+			</span>
+		</div>
+	</footer>
+	
+	<script>
+	$(function() {
+		// 好友数据
+		const allFriends = typeof friends !== 'undefined' ? friends : [];
+		let filteredFriends = [...allFriends];
+		let currentGroup = 'all';
+		let currentSort = 'name-asc';
+		let currentView = 'card';
+		
+		// 更新统计
+		function updateStats() {
+			const total = allFriends.length;
+			const careCount = allFriends.filter(f => f.care === true || f.care === 1).length;
+			const groupNames = [...new Set(allFriends.map(f => f.groupName).filter(g => g))].length;
+			
+			$('#friends-count').text(total);
+			$('#stat-total').text(total);
+			$('#stat-care').text(careCount);
+			$('#stat-groups').text(groupNames);
+		}
+		
+		// 渲染分组标签
+		function renderGroups() {
+			const groupMaps = {};
+			allFriends.forEach(f => {
+				const group = String(f.groupName || '未分组');
+				if (!groupMaps[group]) groupMaps[group] = 0;
+				groupMaps[group]++;
+			});
+			
+			let html = '<a class="group-tag active" data-group="all"><i class="fa fa-users"></i>全部<span class="count">' + allFriends.length + '</span></a>';
+			
+			// 特别关心
+			const careCount = allFriends.filter(f => f.care === true || f.care === 1).length;
+			if (careCount > 0) {
+				html += '<a class="group-tag" data-group="care"><i class="fa fa-heart"></i>特别关心<span class="count">' + careCount + '</span></a>';
+			}
+			
+			// 分组
+			for (const [group, count] of Object.entries(groupMaps).sort((a, b) => b[1] - a[1])) {
+				html += '<a class="group-tag" data-group="' + group + '"><i class="fa fa-folder-o"></i>' + group + '<span class="count">' + count + '</span></a>';
+			}
+			$('#friends-groups').html(html);
+		}
+		
+		// 格式化相识时间
+		function formatFriendTime(friend) {
+			const time = friend.addFriendTime;
+			if (!time) return '';
+			const timestamp = time < 10000000000 ? time * 1000 : time;
+			const date = new Date(timestamp);
+			if (isNaN(date.getTime())) return '';
+			const y = date.getFullYear();
+			const m = String(date.getMonth() + 1).padStart(2, '0');
+			return y + '-' + m;
+		}
+		
+		// 渲染好友卡片 - 保留原demo风格，QQ号悬浮显示，分组标签对齐
+		function renderFriendsGrid() {
+			if (filteredFriends.length === 0) {
+				$('#friends-grid').html('<div class="friends-empty"><i class="fa fa-users"></i><p>暂无好友</p></div>');
+				return;
+			}
+			
+			let html = '';
+			filteredFriends.forEach(friend => {
+				const uin = friend.uin;
+				const name = friend.remark || friend.name || 'QQ用户';
+				const groupName = String(friend.groupName || '未分组');
+				const isCare = friend.care;
+				const avatarUrl = 'https://q.qlogo.cn/headimg_dl?dst_uin=' + uin + '&spec=100';
+				
+				html += '<div class="friend-card" data-group="' + groupName + '">';
+				
+				// 特别关心标记 - 使用原来的样式
+				if (isCare === true || isCare === 1) {
+					html += '<i class="fa fa-heart friend-care"></i>';
+				}
+				
+				html += '<div class="friend-content">';
+				html += '<div class="friend-info">';
+				
+				html += '<img src="' + avatarUrl + '" class="friend-avatar" onerror="this.src=\'../Common/images/loading.gif\'">';
+				html += '<div class="friend-name">' + name + '</div>';
+				
+				// 如果有备注且不同于昵称，显示备注信息，否则显示QQ号（悬浮时可见）
+				if (friend.remark && friend.remark !== friend.name) {
+					html += '<div class="friend-remark">备注: ' + friend.remark + '</div>';
+				}
+				
+				// QQ号始终渲染，通过CSS控制悬浮显示
+				html += '<div class="friend-qq">QQ: ' + uin + '</div>';
+				
+				html += '</div>'; // friend-info
+				
+				// 分组标签放在底部，确保对齐
+				html += '<div class="friend-group">' + groupName + '</div>';
+				
+				html += '</div>'; // friend-content
+				html += '</div>'; // friend-card
+			});
+			
+			$('#friends-grid').html(html);
+		}
+		
+		// 筛选和排序
+		function filterAndSort() {
+			// 筛选分组
+			if (currentGroup === 'all') {
+				filteredFriends = [...allFriends];
+			} else if (currentGroup === 'care') {
+				filteredFriends = allFriends.filter(f => f.care === true || f.care === 1);
+			} else {
+				filteredFriends = allFriends.filter(f => String(f.groupName || '未分组') === String(currentGroup));
+			}
+			
+			// 搜索
+			const searchText = $('#friends-search-input').val().trim().toLowerCase();
+			if (searchText) {
+				filteredFriends = filteredFriends.filter(f => {
+					const name = (f.remark || f.name || '').toLowerCase();
+					const qq = String(f.uin || '');
+					return name.includes(searchText) || qq.includes(searchText);
+				});
+			}
+			
+			// 排序
+			filteredFriends.sort((a, b) => {
+				switch (currentSort) {
+					case 'name-asc':
+						return (a.remark || a.name || '').localeCompare(b.remark || b.name || '', 'zh');
+					case 'qq-asc':
+						return (a.uin || 0) - (b.uin || 0);
+					case 'time-desc':
+						return (b.addFriendTime || 0) - (a.addFriendTime || 0);
+					default:
+						return 0;
+				}
+			});
+			
+			renderFriendsGrid();
+		}
+		
+		// 分组点击 - 适配原demo卡片结构
+		$(document).on('click', '.group-tag', function() {
+			$('.group-tag').removeClass('active');
+			$(this).addClass('active');
+			currentGroup = $(this).data('group');
+			filterAndSort();
+		});
+		
+		// 排序点击
+		$('.sort-btn').on('click', function() {
+			$('.sort-btn').removeClass('active');
+			$(this).addClass('active');
+			currentSort = $(this).data('sort');
+			filterAndSort();
+		});
+		
+		// 视图切换
+		$('.view-btn').on('click', function() {
+			$('.view-btn').removeClass('active');
+			$(this).addClass('active');
+			currentView = $(this).data('view');
+			
+			if (currentView === 'card') {
+				$('#friends-grid').show();
+				$('#friends-table-container').hide();
+			} else {
+				$('#friends-grid').hide();
+				$('#friends-table-container').show();
+				// 初始化表格
+				if ($('#friends-table').find('tbody').length === 0) {
+					initTable();
+				}
+			}
+		});
+		
+		// 搜索
+		let searchTimer;
+		$('#friends-search-input').on('input', function() {
+			clearTimeout(searchTimer);
+			searchTimer = setTimeout(filterAndSort, 300);
+		});
+		
+		// 初始化表格（简化版，不依赖API）
+		function initTable() {
+			const tableData = filteredFriends.map(friend => ({
+				avatar: '<img src="https://q.qlogo.cn/headimg_dl?dst_uin=' + friend.uin + '&spec=100" style="width:42px;height:42px;border-radius:50%;border:2px solid #fff;box-shadow:0 3px 10px rgba(0,206,201,0.2);" onerror="this.src=\'../Common/images/loading.gif\'">',
+				uin: friend.uin,
+				name: friend.name || 'QQ用户',
+				remark: friend.remark || friend.name || 'QQ用户',
+				groupName: friend.groupName || '未分组',
+				care: friend.care ? '<i class="fa fa-heart text-danger"></i>' : '',
+				addFriendTime: formatFriendTime(friend)
+			}));
+			
+			$('#friends-table').bootstrapTable({
+				data: tableData,
+				columns: [{
+					field: 'avatar',
+					title: '头像',
+					align: 'center',
+					formatter: (value) => value
+				}, {
+					field: 'uin',
+					title: 'QQ',
+					align: 'center',
+					sortable: true
+				}, {
+					field: 'name',
+					title: '昵称',
+					align: 'center'
+				}, {
+					field: 'remark',
+					title: '备注',
+					align: 'center'
+				}, {
+					field: 'groupName',
+					title: '分组',
+					align: 'center',
+					sortable: true
+				}, {
+					field: 'care',
+					title: '关心',
+					align: 'center',
+					formatter: (value) => value
+				}, {
+					field: 'addFriendTime',
+					title: '相识时间',
+					align: 'center',
+					sortable: true
+				}],
+				pagination: true,
+				pageSize: 20,
+				pageList: [10, 20, 50, 100],
+				search: false,
+				showRefresh: false,
+				showToggle: false,
+				showColumns: false
+			});
+		}
+		
+		// 初始化
+		updateStats();
+		renderGroups();
+		filterAndSort();
+	});
+	</script>
+</body>
+
+</html>

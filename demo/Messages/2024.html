@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+	<link rel="icon" href="../Common/images/favicon.ico"> 
+	<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<title>QQ空间备份-说说 Demo</title>
+	<link rel="stylesheet" href="../Common/vendor/css/font-awesome.min.css">
+	<link rel="stylesheet" href="../Common/vendor/css/bootstrap.min.css">
+	<link rel="stylesheet" href="../Common/vendor/css/lightgallery.min.css">
+	<link rel="stylesheet" href="../Common/vendor/css/lightgallery-bundle.min.css">
+	<link rel="stylesheet" type="text/css" href="../Common/css/common.css">
+	<script src="../Common/vendor/js/jquery.min.js"></script>
+	<script src="../Common/vendor/js/bootstrap.bundle.min.js"></script>
+	<script src="../Common/vendor/js/lodash.min.js"></script>
+	<script src="../Common/vendor/js/lightgallery.min.js"></script>
+	<script src="../Common/vendor/js/lg-zoom.min.js"></script>
+	<script src="../Common/vendor/js/lg-thumbnail.min.js"></script>
+	<script src="../Common/vendor/js/lg-fullscreen.min.js"></script>
+	<script src="../Common/vendor/js/lazyload.min.js"></script>
+	
+	<script type="text/javascript" src="../Common/json/config.js"></script>
+	<script type="text/javascript" src="json/messages.js"></script>
+	
+	<style>
+		/* Demo 标记 */
+		.demo-badge {
+			position: fixed;
+			top: 80px;
+			right: 20px;
+			background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+			color: #fff;
+			padding: 8px 16px;
+			border-radius: 20px;
+			font-weight: 600;
+			font-size: 14px;
+			box-shadow: 0 4px 15px rgba(238, 90, 36, 0.4);
+			z-index: 1000;
+		}
+		
+		/* 九宫格样式修正 */
+		.medias {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px;
+			margin-top: 15px;
+		}
+		
+		.medias-item {
+			cursor: pointer;
+			border-radius: 12px;
+			overflow: hidden;
+			transition: all 0.3s ease;
+		}
+		
+		.medias-item:hover {
+			transform: scale(1.02);
+			box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+		}
+		
+		.medias-item img {
+			width: 150px;
+			height: 150px;
+			object-fit: cover;
+		}
+		
+		/* 单图样式 */
+		.medias-item:only-child img {
+			width: 300px;
+			height: auto;
+			max-height: 400px;
+		}
+		
+		/* 转发内容样式 */
+		.source {
+			background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+			border-left: 4px solid;
+			border-image: linear-gradient(135deg, #f093fb, #f5576c) 1;
+			padding: 15px;
+			margin: 15px 0;
+			border-radius: 0 12px 12px 0;
+		}
+	</style>
+</head>
+
+<body class="messages-page">
+	<!-- Demo 标记 -->
+	<div class="demo-badge">
+		<i class="fa fa-star mr-1"></i>Demo 演示
+	</div>
+	
+	<header>
+		<nav class="navbar navbar-expand-lg navbar-dark fixed-top messages-navbar">
+			<a class="navbar-brand" href="../index.html">
+				<i class="fa fa-cloud-download mr-2"></i>QQ空间导出助手
+			</a>
+			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarSupportedContent">
+				<nav aria-label="breadcrumb">
+					<ol class="breadcrumb messages-breadcrumb">
+						<li class="breadcrumb-item"><a href="../index.html"><i class="fa fa-home mr-1"></i>个人中心</a></li>
+						<li class="breadcrumb-item"><a href="index.html"><i class="fa fa-commenting mr-1"></i>说说</a></li>
+						<li class="breadcrumb-item active">2024年</li>
+					</ol>
+				</nav>
+			</div>
+		</nav>
+	</header>
+	
+	<main role="main" class="flex-shrink-0">
+		<div id="messages_html" class="container messages">
+			<!-- 说说列表将由JavaScript动态渲染 -->
+		</div>
+	</main>
+	
+	<!-- 图片预览弹窗 -->
+	<div class="photo-preview-overlay" id="photoPreviewOverlay">
+		<div class="photo-preview-modal">
+			<div class="photo-preview-header">
+				<span class="photo-preview-title" id="photoPreviewTitle">图片预览</span>
+				<div class="photo-preview-actions">
+					<button class="photo-preview-btn btn-fullscreen" id="btnFullscreen" title="全屏">
+						<i class="fa fa-expand"></i>
+					</button>
+					<button class="photo-preview-btn btn-close-preview" id="btnClosePreview" title="关闭">
+						<i class="fa fa-times"></i>
+					</button>
+				</div>
+			</div>
+			<button class="photo-preview-nav prev" id="btnPrevPhoto" title="上一张">
+				<i class="fa fa-chevron-left"></i>
+			</button>
+			<div class="photo-preview-content" id="photoPreviewContent">
+				<img id="previewImage" src="" alt="预览图片">
+			</div>
+			<button class="photo-preview-nav next" id="btnNextPhoto" title="下一张">
+				<i class="fa fa-chevron-right"></i>
+			</button>
+			<div class="photo-preview-footer">
+				<div class="photo-preview-info" id="photoPreviewInfo">
+					<span class="info-item"><i class="fa fa-image"></i> <span id="photoIndex">1/1</span></span>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<footer class="footer mt-auto py-3 messages-footer">
+		<div class="container text-center">
+			<span class="text-white footer-text">
+				<i class="fa fa-leaf mr-2"></i>落叶随风，青春，稀纵即逝
+			</span>
+		</div>
+	</footer>
+	
+	<script>
+		// 格式化日期
+		function formatDate(timestamp) {
+			if (typeof timestamp === 'string') return timestamp;
+			const date = new Date(timestamp * 1000);
+			const y = date.getFullYear();
+			const m = String(date.getMonth() + 1).padStart(2, '0');
+			const d = String(date.getDate()).padStart(2, '0');
+			const h = String(date.getHours()).padStart(2, '0');
+			const min = String(date.getMinutes()).padStart(2, '0');
+			const s = String(date.getSeconds()).padStart(2, '0');
+			return `${y}-${m}-${d} ${h}:${min}:${s}`;
+		}
+		
+		// 渲染说说列表
+		function renderMessages() {
+			const container = document.getElementById('messages_html');
+			let html = '';
+			
+			// 按年月分组
+			const grouped = {};
+			messages.forEach(msg => {
+				const date = new Date(msg.created_time * 1000);
+				const year = date.getFullYear();
+				const month = date.getMonth() + 1;
+				const key = `${year}-${month}`;
+				if (!grouped[key]) {
+					grouped[key] = { year, month, items: [] };
+				}
+				grouped[key].items.push(msg);
+			});
+			
+		// 渲染分组
+		Object.keys(grouped).sort().reverse().forEach(key => {
+			const group = grouped[key];
+			
+			// 月份标题
+			html += `<h3 class="sidebar-h2">${group.month}月 <span class="badge">${group.items.length}条</span></h3>`;
+				
+				// 渲染说说
+				group.items.forEach((msg, idx) => {
+					html += renderMessageCard(msg, idx);
+				});
+			});
+			
+			container.innerHTML = html;
+			
+			// 绑定图片预览事件
+			bindImagePreview();
+		}
+		
+		// 渲染单条说说卡片
+		function renderMessageCard(msg, idx) {
+			let imagesHtml = '';
+			if (msg.custom_images && msg.custom_images.length > 0) {
+				imagesHtml = '<div class="medias">';
+				msg.custom_images.forEach((img, imgIdx) => {
+					imagesHtml += `
+						<div class="medias-item" data-msg-id="${msg.tid}" data-img-idx="${imgIdx}">
+							<img src="${img.custom_url}" alt="图片${imgIdx + 1}" loading="lazy">
+						</div>
+					`;
+				});
+				imagesHtml += '</div>';
+			}
+			
+			// 转发内容
+			let rtHtml = '';
+			if (msg.rt_tid) {
+				rtHtml = `
+					<blockquote class="source">
+						<a class="text-info">${msg.rt_uinname}：</a>
+						<p>${msg.rt_con || ''}</p>
+					</blockquote>
+				`;
+			}
+			
+			// 评论
+			let commentsHtml = '';
+			if (msg.custom_comments && msg.custom_comments.length > 0) {
+				msg.custom_comments.forEach(comment => {
+					commentsHtml += `
+						<hr>
+						<div class="comments mt-2">
+							<div class="comment">
+								<div class="d-flex justify-content-start">
+									<div class="comment-avatar">
+										<img class="avatar border rounded-circle" src="https://q.qlogo.cn/headimg_dl?dst_uin=${comment.uin}&spec=100" style="width:40px;height:40px;" onerror="this.src='../Common/images/loading.gif'">
+									</div>
+									<div class="comment-infos ml-2">
+										<span class="text-primary">${comment.name}</span>
+										<div class="text-muted small">${formatDate(comment.postTime)}</div>
+									</div>
+								</div>
+								<div class="comment-text">
+									<p>${comment.content}</p>
+								</div>
+							</div>
+						</div>
+					`;
+					
+					// 回复
+					if (comment.replies && comment.replies.length > 0) {
+						comment.replies.forEach(reply => {
+							commentsHtml += `
+								<div class="comments ml-5">
+									<div class="comment">
+										<div class="d-flex justify-content-start">
+											<div class="comment-avatar">
+												<img class="avatar border rounded-circle" src="https://q.qlogo.cn/headimg_dl?dst_uin=${reply.uin}&spec=100" style="width:35px;height:35px;" onerror="this.src='../Common/images/loading.gif'">
+											</div>
+											<div class="comment-infos ml-2">
+												<span class="text-primary">${reply.name}</span>
+												<div class="text-muted small">${formatDate(reply.postTime)}</div>
+											</div>
+										</div>
+										<div class="comment-text">
+											<p>${reply.content}</p>
+										</div>
+									</div>
+								</div>
+							`;
+						});
+					}
+				});
+			}
+			
+			// 位置信息
+			let lbsHtml = '';
+			if (msg.lbs && msg.lbs.name) {
+				lbsHtml = `
+					<li class="list-group-item pl-0">
+						<i class="fa fa-map-marker text-primary"></i> ${msg.lbs.idname || ''} ${msg.lbs.name}
+					</li>
+				`;
+			}
+			
+			return `
+				<div id="msg-${msg.tid}" class="card w-70 mt-2 border">
+					<div class="card-body">
+						<div class="d-flex justify-content-start message-infos">
+							<div class="message-avatar-img" style="width:50px;height:50px;">
+								<img class="w-100 h-100 border rounded-circle" src="https://q.qlogo.cn/headimg_dl?dst_uin=${msg.uin}&spec=100" onerror="this.src='../Common/images/loading.gif'">
+							</div>
+							<div class="message-info ml-2">
+								<a class="message-avatar-name">${msg.name}</a>
+								<div class="message-time text-muted small">${msg.custom_create_time}</div>
+							</div>
+						</div>
+						<div class="messageText mt-3">
+							<pre class="card-text content" style="white-space: pre-wrap; font-family: inherit;">${msg.content}</pre>
+							${rtHtml}
+							${imagesHtml}
+							${commentsHtml}
+						</div>
+						<ul class="message-infos small list-group list-group-flush">
+							${lbsHtml}
+							${msg.source_name ? `<li class="list-group-item pl-0"><i class="fa fa-mobile-phone text-info"></i> ${msg.source_name}</li>` : ''}
+						</ul>
+					</div>
+					<div class="card-footer text-muted">
+						<span class="text-primary p-1 fa fa-thumbs-up mr-2 cursor">${msg.likeTotal || 0}</span>
+						<span class="text-primary p-1 fa fa-eye mr-2 cursor">${msg.custom_visitor?.viewCount || 0}</span>
+						<span class="border-primary border rounded text-primary small p-1 float-right">#${idx + 1}</span>
+					</div>
+				</div>
+			`;
+		}
+		
+		// 图片预览功能
+		let currentImages = [];
+		let currentImageIndex = 0;
+		
+		function bindImagePreview() {
+			document.querySelectorAll('.medias-item').forEach(item => {
+				item.addEventListener('click', function() {
+					const msgId = this.dataset.msgId;
+					const imgIdx = parseInt(this.dataset.imgIdx);
+					const msg = messages.find(m => m.tid === msgId);
+					
+					if (msg && msg.custom_images) {
+						currentImages = msg.custom_images;
+						currentImageIndex = imgIdx;
+						showPreview();
+					}
+				});
+			});
+			
+			// 关闭按钮
+			document.getElementById('btnClosePreview').addEventListener('click', closePreview);
+			document.getElementById('photoPreviewOverlay').addEventListener('click', function(e) {
+				if (e.target === this) closePreview();
+			});
+			
+			// 上一张/下一张
+			document.getElementById('btnPrevPhoto').addEventListener('click', () => navigatePhoto(-1));
+			document.getElementById('btnNextPhoto').addEventListener('click', () => navigatePhoto(1));
+			
+			// 全屏
+			document.getElementById('btnFullscreen').addEventListener('click', toggleFullscreen);
+			
+			// 键盘导航
+			document.addEventListener('keydown', function(e) {
+				if (!document.getElementById('photoPreviewOverlay').classList.contains('show')) return;
+				if (e.key === 'Escape') closePreview();
+				if (e.key === 'ArrowLeft') navigatePhoto(-1);
+				if (e.key === 'ArrowRight') navigatePhoto(1);
+			});
+		}
+		
+		function showPreview() {
+			const overlay = document.getElementById('photoPreviewOverlay');
+			const img = document.getElementById('previewImage');
+			
+			img.src = currentImages[currentImageIndex].custom_url;
+			document.getElementById('photoIndex').textContent = `${currentImageIndex + 1}/${currentImages.length}`;
+			
+			overlay.classList.add('show');
+			updateNavButtons();
+		}
+		
+		function closePreview() {
+			document.getElementById('photoPreviewOverlay').classList.remove('show');
+			document.getElementById('photoPreviewOverlay').classList.remove('fullscreen-mode');
+		}
+		
+		function navigatePhoto(direction) {
+			currentImageIndex += direction;
+			if (currentImageIndex < 0) currentImageIndex = currentImages.length - 1;
+			if (currentImageIndex >= currentImages.length) currentImageIndex = 0;
+			
+			document.getElementById('previewImage').src = currentImages[currentImageIndex].custom_url;
+			document.getElementById('photoIndex').textContent = `${currentImageIndex + 1}/${currentImages.length}`;
+			updateNavButtons();
+		}
+		
+		function updateNavButtons() {
+			document.getElementById('btnPrevPhoto').disabled = currentImages.length <= 1;
+			document.getElementById('btnNextPhoto').disabled = currentImages.length <= 1;
+		}
+		
+		function toggleFullscreen() {
+			document.getElementById('photoPreviewOverlay').classList.toggle('fullscreen-mode');
+		}
+		
+		// 初始化
+		document.addEventListener('DOMContentLoaded', renderMessages);
+	</script>
+</body>
+
+</html>

@@ -1,0 +1,30 @@
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# IDE 和编辑器
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Node.js (如果后续使用)
+node_modules/
+npm-debug.log
+
+# 敏感信息
+*.pem
+*.key
+.env
+.env.local
+.env.*.local
+
+# 临时文件
+*.tmp
+*.temp
+*.log
+
+# 压缩包
+*.zip
+*.tar.gz
+*.rar

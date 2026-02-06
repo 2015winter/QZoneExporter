@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+	<link rel="icon" href="../Common/images/favicon.ico"> 
+	<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<title>QQ空间备份-说说 Demo</title>
+	<link rel="stylesheet" href="../Common/vendor/css/font-awesome.min.css">
+	<link rel="stylesheet" href="../Common/vendor/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="../Common/css/common.css">
+	<script src="../Common/vendor/js/jquery.min.js"></script>
+	<script src="../Common/vendor/js/bootstrap.bundle.min.js"></script>
+	
+	<script type="text/javascript" src="../Common/json/config.js"></script>
+	<script type="text/javascript" src="json/messages.js"></script>
+	
+	<style>
+		body {
+			background: linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #ff9a9e 100%);
+			min-height: 100vh;
+			padding-top: 70px;
+			padding-bottom: 80px;
+		}
+		
+		.navbar-messages {
+			background: linear-gradient(135deg, rgba(240, 147, 251, 0.95), rgba(245, 87, 108, 0.95)) !important;
+		}
+		
+		.main-card {
+			background: rgba(255, 255, 255, 0.95);
+			border-radius: 24px;
+			box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+			padding: 40px;
+			margin-top: 20px;
+		}
+		
+		.page-header {
+			text-align: center;
+			margin-bottom: 40px;
+			padding-bottom: 30px;
+			border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+		}
+		
+		.page-header-icon {
+			font-size: 48px;
+			background: linear-gradient(135deg, #f093fb, #f5576c);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+		}
+		
+		.page-header-title {
+			font-size: 32px;
+			font-weight: 700;
+			background: linear-gradient(135deg, #f093fb, #f5576c);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+		}
+		
+		/* 年份导航网格 */
+		.year-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+			gap: 16px;
+			margin-bottom: 32px;
+		}
+		
+		.year-card {
+			background: linear-gradient(145deg, #fff, #f8fafc);
+			border-radius: 16px;
+			padding: 20px;
+			text-decoration: none;
+			transition: all 0.3s ease;
+			border: 2px solid transparent;
+			position: relative;
+			overflow: hidden;
+		}
+		
+		.year-card::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			height: 4px;
+			background: linear-gradient(90deg, #f093fb, #f5576c);
+			transform: scaleX(0);
+			transform-origin: left;
+			transition: transform 0.3s ease;
+		}
+		
+		.year-card:hover {
+			transform: translateY(-4px);
+			box-shadow: 0 12px 32px rgba(240, 147, 251, 0.25);
+			border-color: rgba(240, 147, 251, 0.3);
+			text-decoration: none;
+		}
+		
+		.year-card:hover::before {
+			transform: scaleX(1);
+		}
+		
+		.year-card-inner {
+			display: flex;
+			align-items: baseline;
+			gap: 4px;
+			margin-bottom: 8px;
+		}
+		
+		.year-number {
+			font-size: 32px;
+			font-weight: 700;
+			background: linear-gradient(135deg, #f093fb, #f5576c);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+		}
+		
+		.year-label {
+			font-size: 16px;
+			color: #718096;
+		}
+		
+		.year-stats {
+			display: flex;
+			align-items: baseline;
+			gap: 4px;
+			margin-bottom: 12px;
+		}
+		
+		.year-count {
+			font-size: 20px;
+			font-weight: 600;
+			color: #2d3748;
+		}
+		
+		.year-unit {
+			font-size: 13px;
+			color: #a0aec0;
+		}
+		
+		.year-progress {
+			height: 4px;
+			background: rgba(240, 147, 251, 0.15);
+			border-radius: 2px;
+			overflow: hidden;
+		}
+		
+		.year-progress-bar {
+			height: 100%;
+			background: linear-gradient(90deg, #f093fb, #f5576c);
+			border-radius: 2px;
+		}
+		
+		/* 统计信息行 */
+		.stats-row {
+			display: flex;
+			justify-content: center;
+			gap: 32px;
+			flex-wrap: wrap;
+			padding-top: 24px;
+			border-top: 1px solid rgba(0, 0, 0, 0.08);
+		}
+		
+		.stat-item {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
+		
+		.stat-icon {
+			width: 44px;
+			height: 44px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background: linear-gradient(135deg, rgba(240, 147, 251, 0.1), rgba(245, 87, 108, 0.1));
+			border-radius: 12px;
+			color: #f093fb;
+			font-size: 18px;
+		}
+		
+		.stat-info {
+			display: flex;
+			flex-direction: column;
+		}
+		
+		.stat-value {
+			font-size: 20px;
+			font-weight: 700;
+			color: #2d3748;
+		}
+		
+		.stat-label {
+			font-size: 13px;
+			color: #a0aec0;
+		}
+		
+		.demo-badge {
+			position: fixed;
+			top: 80px;
+			right: 20px;
+			background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+			color: #fff;
+			padding: 8px 16px;
+			border-radius: 20px;
+			font-weight: 600;
+			z-index: 1000;
+		}
+		
+		.footer-messages {
+			background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.9));
+		}
+		
+		/* 链接到原详情页 */
+		.view-all-btn {
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+			padding: 12px 24px;
+			background: linear-gradient(135deg, #f093fb, #f5576c);
+			color: #fff;
+			border-radius: 30px;
+			text-decoration: none;
+			font-weight: 600;
+			transition: all 0.3s ease;
+			margin-top: 24px;
+		}
+		
+		.view-all-btn:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 8px 24px rgba(240, 147, 251, 0.4);
+			color: #fff;
+			text-decoration: none;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="demo-badge"><i class="fa fa-star mr-1"></i>Demo 演示</div>
+	
+	<header>
+		<nav class="navbar navbar-expand-lg navbar-dark fixed-top navbar-messages">
+			<a class="navbar-brand" href="../index.html">
+				<i class="fa fa-cloud-download mr-2"></i>QQ空间导出助手
+			</a>
+			<div class="collapse navbar-collapse">
+				<nav aria-label="breadcrumb">
+					<ol class="breadcrumb" style="background: transparent;">
+						<li class="breadcrumb-item"><a href="../index.html" style="color: rgba(255,255,255,0.85);"><i class="fa fa-home mr-1"></i>个人中心</a></li>
+						<li class="breadcrumb-item active" style="color: rgba(255,255,255,0.9);"><i class="fa fa-commenting-o mr-1"></i>说说</li>
+					</ol>
+				</nav>
+			</div>
+		</nav>
+	</header>
+	
+	<main role="main" class="flex-shrink-0">
+		<div class="container">
+			<div class="main-card">
+				<div class="page-header">
+					<i class="fa fa-commenting-o page-header-icon"></i>
+					<h1 class="page-header-title">说说时光机</h1>
+					<p style="color: #718096;">共 <span id="totalCount">0</span> 条说说，记录了 <span id="yearCount">0</span> 年的青春岁月</p>
+					<a href="2024.html" class="view-all-btn">
+						<i class="fa fa-list"></i>查看全部说说
+					</a>
+				</div>
+				
+				<!-- 年份导航网格 -->
+				<div id="yearGrid" class="year-grid"></div>
+				
+				<!-- 统计信息 -->
+				<div class="stats-row">
+					<div class="stat-item">
+						<i class="fa fa-calendar stat-icon"></i>
+						<div class="stat-info">
+							<span class="stat-value" id="earliestYear">-</span>
+							<span class="stat-label">最早年份</span>
+						</div>
+					</div>
+					<div class="stat-item">
+						<i class="fa fa-clock-o stat-icon"></i>
+						<div class="stat-info">
+							<span class="stat-value" id="latestYear">-</span>
+							<span class="stat-label">最近年份</span>
+						</div>
+					</div>
+					<div class="stat-item">
+						<i class="fa fa-fire stat-icon"></i>
+						<div class="stat-info">
+							<span class="stat-value" id="maxYear">-</span>
+							<span class="stat-label">发说说最多</span>
+						</div>
+					</div>
+					<div class="stat-item">
+						<i class="fa fa-thumbs-up stat-icon"></i>
+						<div class="stat-info">
+							<span class="stat-value" id="totalLikes">0</span>
+							<span class="stat-label">总获赞数</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+	
+	<footer class="footer mt-auto py-3 fixed-bottom footer-messages">
+		<div class="container text-center">
+			<span class="text-white"><i class="fa fa-leaf mr-2"></i>落叶随风，青春，稀纵即逝</span>
+		</div>
+	</footer>
+	
+	<script>
+		function renderIndex() {
+			// 按年份统计说说数量
+			const yearStats = {};
+			let totalLikes = 0;
+			
+			messages.forEach(msg => {
+				// 尝试多种日期格式
+				let year;
+				if (msg.custom_create_time) {
+					year = new Date(msg.custom_create_time).getFullYear();
+				} else if (msg.created_time) {
+					year = new Date(msg.created_time * 1000).getFullYear();
+				} else {
+					year = new Date().getFullYear();
+				}
+				
+				yearStats[year] = (yearStats[year] || 0) + 1;
+				totalLikes += (msg.likeTotal || 0);
+			});
+			
+			// 转换为数组并排序
+			const yearList = Object.keys(yearStats).map(year => ({
+				year: parseInt(year),
+				count: yearStats[year]
+			})).sort((a, b) => b.year - a.year);
+			
+			// 计算最大说说数（用于进度条）
+			const maxCount = Math.max(...yearList.map(y => y.count));
+			
+			// 渲染年份网格
+			const gridHtml = yearList.map(yearInfo => `
+				<a href="${yearInfo.year}.html" class="year-card">
+					<div class="year-card-inner">
+						<span class="year-number">${yearInfo.year}</span>
+						<span class="year-label">年</span>
+					</div>
+					<div class="year-stats">
+						<span class="year-count">${yearInfo.count}</span>
+						<span class="year-unit">条说说</span>
+					</div>
+					<div class="year-progress">
+						<div class="year-progress-bar" style="width: ${(yearInfo.count / maxCount) * 100}%"></div>
+					</div>
+				</a>
+			`).join('');
+			
+			document.getElementById('yearGrid').innerHTML = gridHtml;
+			
+			// 更新统计信息
+			document.getElementById('totalCount').textContent = messages.length;
+			document.getElementById('yearCount').textContent = yearList.length;
+			document.getElementById('totalLikes').textContent = totalLikes;
+			
+			if (yearList.length > 0) {
+				document.getElementById('earliestYear').textContent = yearList[yearList.length - 1].year;
+				document.getElementById('latestYear').textContent = yearList[0].year;
+				
+				// 找出说说最多的年份
+				const maxYearInfo = yearList.reduce((max, y) => y.count > max.count ? y : max, yearList[0]);
+				document.getElementById('maxYear').textContent = maxYearInfo.year;
+			}
+		}
+		
+		document.addEventListener('DOMContentLoaded', renderIndex);
+	</script>
+</body>
+
+</html>

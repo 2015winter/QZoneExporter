@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的分享 - QQ空间导出Demo</title>
+    <link rel="stylesheet" href="../Common/css/common.css">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --card-shadow: 0 4px 15px rgba(240, 147, 251, 0.2);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        /* 头部样式 */
+        .header {
+            background: var(--primary-gradient);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            color: white;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .header h1::before {
+            content: "🔗";
+            font-size: 32px;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateX(-5px);
+        }
+        
+        .stats {
+            margin-top: 15px;
+            display: flex;
+            gap: 30px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        
+        /* 分享列表 */
+        .shares-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .share-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+        }
+        
+        .share-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--card-shadow);
+        }
+        
+        .share-header {
+            padding: 20px 20px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        
+        .share-comment {
+            font-size: 16px;
+            color: #333;
+            line-height: 1.6;
+            flex: 1;
+        }
+        
+        .share-type {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            white-space: nowrap;
+            margin-left: 15px;
+        }
+        
+        .share-content {
+            margin: 0 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            display: flex;
+            gap: 15px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .share-content:hover {
+            background: #f0f1f2;
+        }
+        
+        .share-cover {
+            width: 120px;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+        
+        .share-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .share-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .share-summary {
+            font-size: 13px;
+            color: #666;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .share-source {
+            font-size: 12px;
+            color: #999;
+            margin-top: 8px;
+        }
+        
+        .share-footer {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        .share-time {
+            font-size: 13px;
+            color: #999;
+        }
+        
+        .share-actions {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .action-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 13px;
+            color: #666;
+        }
+        
+        /* 评论区 */
+        .share-comments {
+            padding: 0 20px 20px;
+        }
+        
+        .comments-title {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 12px;
+            padding-top: 15px;
+            border-top: 1px dashed #eee;
+        }
+        
+        .comment-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        
+        .comment-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .comment-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .comment-body {
+            flex: 1;
+        }
+        
+        .comment-user {
+            font-size: 13px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .comment-text {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .comment-time {
+            font-size: 11px;
+            color: #999;
+            margin-top: 4px;
+        }
+        
+        /* Demo标记 */
+        .demo-badge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 100;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+        }
+        
+        /* 筛选栏 */
+        .filter-bar {
+            background: white;
+            border-radius: 15px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .filter-tags {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-tag {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            background: #f0f0f0;
+            color: #666;
+        }
+        
+        .filter-tag:hover {
+            background: #e0e0e0;
+        }
+        
+        .filter-tag.active {
+            background: var(--primary-gradient);
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 22px;
+            }
+            
+            .stats {
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+            
+            .share-content {
+                flex-direction: column;
+            }
+            
+            .share-cover {
+                width: 100%;
+                height: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-badge">📦 DEMO</div>
+    
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <div>
+                    <h1>我的分享</h1>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="totalCount">0</div>
+                            <div class="stat-label">分享总数</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="totalLikes">0</div>
+                            <div class="stat-label">获赞总数</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="totalComments">0</div>
+                            <div class="stat-label">评论总数</div>
+                        </div>
+                    </div>
+                </div>
+                <a href="../index.html" class="back-btn">← 返回首页</a>
+            </div>
+        </header>
+        
+        <div class="filter-bar">
+            <div class="filter-tags">
+                <button class="filter-tag active" data-type="all">全部</button>
+                <button class="filter-tag" data-type="link">🔗 链接</button>
+                <button class="filter-tag" data-type="article">📰 文章</button>
+                <button class="filter-tag" data-type="music">🎵 音乐</button>
+                <button class="filter-tag" data-type="video">🎬 视频</button>
+            </div>
+        </div>
+        
+        <div class="shares-list" id="sharesList">
+            <!-- 分享卡片将通过JS动态生成 -->
+        </div>
+    </div>
+    
+    <script src="json/shares.js"></script>
+    <script>
+        // 当前筛选类型
+        let currentFilter = 'all';
+        
+        // 初始化页面
+        function init() {
+            updateStats();
+            renderShares();
+            bindEvents();
+        }
+        
+        // 更新统计
+        function updateStats() {
+            document.getElementById('totalCount').textContent = dataList.length;
+            document.getElementById('totalLikes').textContent = dataList.reduce((sum, s) => sum + (s.likes || 0), 0);
+            document.getElementById('totalComments').textContent = dataList.reduce((sum, s) => sum + (s.comments ? s.comments.length : 0), 0);
+        }
+        
+        // 渲染分享列表
+        function renderShares() {
+            const list = document.getElementById('sharesList');
+            
+            let filteredList = dataList;
+            if (currentFilter !== 'all') {
+                filteredList = dataList.filter(s => s.share_type === currentFilter);
+            }
+            
+            list.innerHTML = filteredList.map(share => {
+                const typeInfo = typeMap[share.share_type] || { name: '其他', icon: '📌', color: '#999' };
+                
+                // 评论区HTML
+                let commentsHtml = '';
+                if (share.comments && share.comments.length > 0) {
+                    commentsHtml = `
+                        <div class="share-comments">
+                            <div class="comments-title">💬 评论 (${share.comments.length})</div>
+                            ${share.comments.map(comment => `
+                                <div class="comment-item">
+                                    <img class="comment-avatar" src="${comment.avatar}" alt="${comment.user}">
+                                    <div class="comment-body">
+                                        <div class="comment-user">${comment.user}</div>
+                                        <div class="comment-text">${comment.content}</div>
+                                        <div class="comment-time">${formatTime(comment.time)}</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+                
+                return `
+                    <div class="share-card">
+                        <div class="share-header">
+                            <div class="share-comment">${share.comment}</div>
+                            <span class="share-type" style="background: ${typeInfo.color}20; color: ${typeInfo.color}">
+                                ${typeInfo.icon} ${typeInfo.name}
+                            </span>
+                        </div>
+                        <div class="share-content" onclick="window.open('${share.source_url}', '_blank')">
+                            <img class="share-cover" src="${share.cover}" alt="${share.title}">
+                            <div class="share-info">
+                                <h3 class="share-title">${share.title}</h3>
+                                <p class="share-summary">${share.summary}</p>
+                                <div class="share-source">来自 ${share.source}</div>
+                            </div>
+                        </div>
+                        <div class="share-footer">
+                            <span class="share-time">${share.create_time}</span>
+                            <div class="share-actions">
+                                <span class="action-item">👍 ${share.likes}</span>
+                                <span class="action-item">💬 ${share.comments ? share.comments.length : 0}</span>
+                            </div>
+                        </div>
+                        ${commentsHtml}
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // 绑定事件
+        function bindEvents() {
+            document.querySelectorAll('.filter-tag').forEach(tag => {
+                tag.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    currentFilter = this.dataset.type;
+                    renderShares();
+                });
+            });
+        }
+        
+        // 格式化时间
+        function formatTime(timeStr) {
+            const date = new Date(timeStr);
+            return `${date.getMonth() + 1}月${date.getDate()}日 ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+        }
+        
+        // 初始化
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+name: Deploy Demo to Tencent Cloud
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'demo/**'
+  workflow_dispatch:  # 支持手动触发
+
+jobs:
+  deploy:
+    name: Deploy Demo Files
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Deploy demo to server
+        run: |
+          # 仅部署 demo 目录到 /data/demo/qzone
+          rsync -avz --delete \
+            -e "ssh -o StrictHostKeyChecking=no -p ${{ secrets.SERVER_PORT || 22 }}" \
+            ./demo/ \
+            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.DEPLOY_PATH }}
+
+      - name: Verify deployment
+        run: |
+          ssh -o StrictHostKeyChecking=no \
+            -p ${{ secrets.SERVER_PORT || 22 }} \
+            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
+            "ls -la ${{ secrets.DEPLOY_PATH }} && echo '✅ Deployment successful!'"
+
+      - name: Cleanup
+        if: always()
+        run: rm -rf ~/.ssh/id_rsa

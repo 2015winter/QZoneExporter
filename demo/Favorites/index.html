@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的收藏 - QQ空间导出Demo</title>
+    <link rel="stylesheet" href="../Common/vendor/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../Common/vendor/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../Common/css/common.css">
+    <script src="../Common/vendor/js/jquery.min.js"></script>
+    <script src="../Common/vendor/js/bootstrap.bundle.min.js"></script>
+    <style>
+        /* 收藏页面专属样式 - 黄橙色主题 */
+        body {
+            background: linear-gradient(135deg, #feca57 0%, #ff9f43 50%, #f093fb 100%);
+            min-height: 100vh;
+            padding-top: 70px;
+            padding-bottom: 80px;
+        }
+        
+        /* 导航栏样式 */
+        .favorites-navbar {
+            background: linear-gradient(135deg, rgba(254, 202, 87, 0.95), rgba(255, 159, 67, 0.95)) !important;
+            backdrop-filter: blur(10px);
+        }
+        
+        .favorites-breadcrumb {
+            background: transparent !important;
+            margin-bottom: 0;
+            padding-top: 8px;
+        }
+        
+        .favorites-breadcrumb a {
+            color: rgba(255, 255, 255, 0.85) !important;
+        }
+        
+        .favorites-breadcrumb .active {
+            color: rgba(255, 255, 255, 0.9) !important;
+        }
+        
+        /* 主卡片容器 */
+        .favorites-main-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* 页面标题区域 */
+        .favorites-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        }
+        
+        .favorites-header-icon {
+            font-size: 48px;
+            background: linear-gradient(135deg, #feca57, #ff9f43);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+            display: block;
+        }
+        
+        .favorites-header-title {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #feca57, #ff9f43);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+        }
+        
+        .favorites-header-subtitle {
+            color: #718096;
+            font-size: 16px;
+        }
+        
+        .favorites-total-count {
+            font-weight: 600;
+            color: #ff9f43;
+        }
+        
+        /* 筛选标签区域 */
+        .favorites-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        }
+        
+        .filter-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: linear-gradient(145deg, #f8fafc, #fff);
+            border: 1px solid rgba(254, 202, 87, 0.15);
+            border-radius: 30px;
+            font-size: 14px;
+            color: #4a5568;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+        }
+        
+        .filter-tag:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(254, 202, 87, 0.2);
+            background: linear-gradient(135deg, #feca57, #ff9f43);
+            color: #fff;
+            text-decoration: none;
+        }
+        
+        .filter-tag.active {
+            background: linear-gradient(135deg, #feca57, #ff9f43);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 6px 20px rgba(254, 202, 87, 0.3);
+        }
+        
+        .filter-tag .count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 24px;
+            height: 24px;
+            padding: 0 8px;
+            background: rgba(254, 202, 87, 0.1);
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #ff9f43;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-tag:hover .count,
+        .filter-tag.active .count {
+            background: rgba(255, 255, 255, 0.25);
+            color: #fff;
+        }
+        
+        /* 收藏卡片网格 */
+        .favorites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        /* 收藏卡片 */
+        .favorite-card {
+            background: #fff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .favorite-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(254, 202, 87, 0.2);
+        }
+        
+        .favorite-card.active {
+            box-shadow: 0 0 0 3px #ff9f43, 0 10px 30px rgba(254, 202, 87, 0.3);
+            transform: translateY(-5px);
+        }
+        
+        .favorite-cover {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .favorite-card:hover .favorite-cover {
+            transform: scale(1.05);
+        }
+        
+        .favorite-content {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .favorite-type {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            align-self: flex-start;
+        }
+        
+        .favorite-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .favorite-summary {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 12px;
+            flex: 1;
+        }
+        
+        .favorite-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #999;
+            margin-top: auto;
+        }
+        
+        .favorite-source {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .favorite-tags {
+            display: flex;
+            gap: 5px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .tag {
+            padding: 3px 8px;
+            background: rgba(254, 202, 87, 0.1);
+            border-radius: 10px;
+            font-size: 11px;
+            color: #ff9f43;
+        }
+        
+        /* 空状态 */
+        .favorites-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: #718096;
+            display: none;
+        }
+        
+        .favorites-empty i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+        
+        .favorites-empty p {
+            font-size: 16px;
+        }
+        
+        /* 底部 */
+        .favorites-footer {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.9));
+            backdrop-filter: blur(10px);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .footer-text {
+            font-size: 14px;
+            letter-spacing: 1px;
+            color: #fff;
+        }
+        
+        /* ========== 侧边滑出面板样式 ========== */
+        
+        /* 遮罩层 */
+        .detail-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(4px);
+        }
+        
+        .detail-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* 侧边面板 */
+        .detail-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 580px;
+            max-width: 100%;
+            height: 100vh;
+            background: #fff;
+            z-index: 2000;
+            transform: translateX(100%);
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            box-shadow: -10px 0 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .detail-panel.show {
+            transform: translateX(0);
+        }
+        
+        /* 面板头部 */
+        .panel-header {
+            padding: 20px 24px;
+            background: linear-gradient(135deg, #feca57, #ff9f43);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        
+        .panel-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .panel-nav-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            cursor: pointer;
+            color: #fff;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .panel-nav-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.35);
+            transform: scale(1.05);
+        }
+        
+        .panel-nav-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
+        .panel-counter {
+            color: #fff;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 0 12px;
+        }
+        
+        .panel-close {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            cursor: pointer;
+            color: #fff;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.25s ease;
+        }
+        
+        .panel-close:hover {
+            background: rgba(255, 255, 255, 0.35);
+            transform: rotate(90deg);
+        }
+        
+        /* 面板内容 */
+        .panel-body {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 0;
+        }
+        
+        /* 详情封面 */
+        .detail-cover-wrap {
+            position: relative;
+            width: 100%;
+            background: #f8fafc;
+        }
+        
+        .detail-cover {
+            width: 100%;
+            max-height: 320px;
+            object-fit: contain;
+            display: block;
+            background: #f1f5f9;
+        }
+        
+        .detail-cover-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: linear-gradient(to top, #fff, transparent);
+        }
+        
+        /* 详情主体 */
+        .detail-main {
+            padding: 24px;
+        }
+        
+        /* 详情头部 */
+        .detail-header {
+            margin-bottom: 20px;
+        }
+        
+        .detail-type {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        .detail-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a202c;
+            line-height: 1.5;
+            margin: 0 0 12px 0;
+        }
+        
+        .detail-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 13px;
+            color: #718096;
+            flex-wrap: wrap;
+        }
+        
+        .detail-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        /* 正文内容 */
+        .detail-content {
+            font-size: 15px;
+            color: #4a5568;
+            line-height: 1.9;
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin-bottom: 24px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 12px;
+        }
+        
+        /* 标签 */
+        .detail-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding-top: 16px;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .detail-tag {
+            padding: 6px 14px;
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #d97706;
+        }
+        
+        /* 键盘提示 */
+        .panel-tips {
+            padding: 12px 24px;
+            background: #f8fafc;
+            border-top: 1px solid #edf2f7;
+            font-size: 12px;
+            color: #a0aec0;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        
+        .panel-tips kbd {
+            display: inline-block;
+            padding: 2px 6px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 11px;
+            color: #4a5568;
+            margin: 0 2px;
+        }
+        
+        /* ========== 图片预览弹窗 ========== */
+        .image-preview-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .image-preview-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .image-preview-backdrop {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(254, 202, 87, 0.95) 0%, rgba(255, 159, 67, 0.95) 50%, rgba(240, 147, 251, 0.9) 100%);
+            backdrop-filter: blur(10px);
+        }
+        
+        .image-preview-container {
+            position: relative;
+            max-width: 90vw;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        
+        .image-preview-modal.show .image-preview-container {
+            transform: scale(1);
+        }
+        
+        .image-preview-main {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.35);
+            background: #fff;
+            padding: 8px;
+        }
+        
+        .image-preview-main img {
+            display: block;
+            max-width: 85vw;
+            max-height: 78vh;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+        
+        .image-preview-close {
+            position: absolute;
+            top: -50px;
+            right: 0;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            border: none;
+            cursor: pointer;
+            color: #fff;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .image-preview-close:hover {
+            background: rgba(255, 255, 255, 0.5);
+            transform: rotate(90deg) scale(1.1);
+        }
+        
+        .image-preview-info {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: #fff;
+            font-size: 14px;
+        }
+        
+        .image-preview-actions button {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.3);
+            border: none;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .image-preview-actions button:hover {
+            background: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        /* Demo标记 */
+        .demo-badge {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(238, 90, 36, 0.4);
+        }
+        
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .favorites-main-card {
+                padding: 24px 16px;
+                margin: 10px;
+                border-radius: 20px;
+            }
+            
+            .favorites-header-icon { font-size: 36px; }
+            .favorites-header-title { font-size: 24px; }
+            
+            .favorites-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .favorites-filters { gap: 8px; }
+            .filter-tag { padding: 8px 14px; font-size: 13px; }
+            
+            .detail-panel {
+                width: 100%;
+            }
+            
+            .panel-tips {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-badge"><i class="fa fa-star mr-1"></i>Demo 演示</div>
+    
+    <!-- 导航栏 - 使用Bootstrap navbar -->
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark fixed-top favorites-navbar">
+            <a class="navbar-brand" href="https://github.com/2015winter/QZoneExporter" target="_blank">
+                <i class="fa fa-cloud-download mr-2"></i>QQ空间导出助手
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb favorites-breadcrumb">
+                        <li class="breadcrumb-item"><a href="../index.html"><i class="fa fa-home mr-1"></i>个人中心</a></li>
+                        <li class="breadcrumb-item active"><i class="fa fa-star mr-1"></i>收藏</li>
+                    </ol>
+                </nav>
+            </div>
+        </nav>
+    </header>
+    
+    <main role="main" class="flex-shrink-0" style="padding: 20px;">
+        <div class="favorites-main-card">
+        <!-- 页面标题 -->
+        <div class="favorites-header">
+            <i class="fa fa-star favorites-header-icon"></i>
+            <h1 class="favorites-header-title">我的收藏</h1>
+            <p class="favorites-header-subtitle">共 <span class="favorites-total-count" id="favorites-count">0</span> 条收藏，记录了那些打动你的瞬间</p>
+        </div>
+        
+        <!-- 筛选标签 -->
+        <div class="favorites-filters" id="favorites-filters">
+            <button class="filter-tag active" data-type="all">全部 <span class="count" id="filter-all">0</span></button>
+            <button class="filter-tag" data-type="article">📄 文章 <span class="count" id="filter-article">0</span></button>
+            <button class="filter-tag" data-type="music">🎵 音乐 <span class="count" id="filter-music">0</span></button>
+            <button class="filter-tag" data-type="video">🎬 视频 <span class="count" id="filter-video">0</span></button>
+            <button class="filter-tag" data-type="photo">🖼️ 图片 <span class="count" id="filter-photo">0</span></button>
+        </div>
+        
+        <!-- 收藏网格 -->
+        <div class="favorites-grid" id="favorites-grid"></div>
+        
+        <!-- 空状态 -->
+        <div class="favorites-empty" id="favorites-empty">
+            <i class="fa fa-star"></i>
+            <p>暂无收藏内容</p>
+        </div>
+    </div>
+    </main>
+    
+    <!-- 底部 -->
+    <footer class="favorites-footer">
+        <span class="footer-text">
+            <i class="fa fa-star"></i> 收藏美好，珍藏回忆
+        </span>
+    </footer>
+    
+    <!-- 侧边详情面板 -->
+    <div class="detail-overlay" id="detail-overlay"></div>
+    <div class="detail-panel" id="detail-panel">
+        <div class="panel-header">
+            <div class="panel-nav">
+                <button class="panel-nav-btn" id="btn-prev" title="上一条 (←)"><i class="fa fa-chevron-left"></i></button>
+                <span class="panel-counter"><span id="current-index">1</span> / <span id="total-count">0</span></span>
+                <button class="panel-nav-btn" id="btn-next" title="下一条 (→)"><i class="fa fa-chevron-right"></i></button>
+            </div>
+            <button class="panel-close" id="btn-close" title="关闭 (Esc)"><i class="fa fa-times"></i></button>
+        </div>
+        <div class="panel-body" id="panel-body">
+            <!-- 动态内容 -->
+        </div>
+        <div class="panel-tips">
+            <kbd>←</kbd> 上一条 &nbsp;&nbsp; <kbd>→</kbd> 下一条 &nbsp;&nbsp; <kbd>Esc</kbd> 关闭
+        </div>
+    </div>
+    
+    <!-- 图片预览弹窗 -->
+    <div class="image-preview-modal" id="image-preview-modal">
+        <div class="image-preview-backdrop" id="image-preview-backdrop"></div>
+        <div class="image-preview-container">
+            <button class="image-preview-close" id="image-preview-close" title="关闭"><i class="fa fa-times"></i></button>
+            <div class="image-preview-main">
+                <img id="image-preview-img" src="" alt="预览图片">
+            </div>
+            <div class="image-preview-info">
+                <div class="image-preview-actions">
+                    <button id="image-preview-newtab" title="新标签页打开"><i class="fa fa-external-link"></i> 新窗口</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="json/favorites.js"></script>
+    <script>
+        // 当前筛选类型
+        var currentFilter = 'all';
+        // 当前选中的卡片索引
+        var currentIndex = -1;
+        // 面板是否打开
+        var isPanelOpen = false;
+        // 图片预览相关状态
+        var isImagePreviewOpen = false;
+        var previewImageSrc = '';
+        
+        // 初始化页面
+        function init() {
+            updateStats();
+            renderFavorites();
+            bindEvents();
+        }
+        
+        // 更新统计
+        function updateStats() {
+            var total = dataList.length;
+            var articleCount = dataList.filter(function(f) { return f.type === 'article'; }).length;
+            var musicCount = dataList.filter(function(f) { return f.type === 'music'; }).length;
+            var videoCount = dataList.filter(function(f) { return f.type === 'video'; }).length;
+            var photoCount = dataList.filter(function(f) { return f.type === 'photo'; }).length;
+            
+            document.getElementById('favorites-count').textContent = total;
+            document.getElementById('filter-all').textContent = total;
+            document.getElementById('filter-article').textContent = articleCount;
+            document.getElementById('filter-music').textContent = musicCount;
+            document.getElementById('filter-video').textContent = videoCount;
+            document.getElementById('filter-photo').textContent = photoCount;
+        }
+        
+        // 渲染收藏列表
+        function renderFavorites() {
+            var grid = document.getElementById('favorites-grid');
+            var emptyState = document.getElementById('favorites-empty');
+            
+            var filteredList = getFilteredList();
+            
+            if (filteredList.length === 0) {
+                grid.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            grid.style.display = 'grid';
+            emptyState.style.display = 'none';
+            
+            grid.innerHTML = filteredList.map(function(fav, index) {
+                var typeInfo = typeMap[fav.type] || { name: '其他', icon: '📌', color: '#999' };
+                
+                var tagsHtml = '';
+                if (fav.tags && fav.tags.length > 0) {
+                    tagsHtml = '<div class="favorite-tags">' + 
+                        fav.tags.slice(0, 3).map(function(tag) { return '<span class="tag">#' + tag + '</span>'; }).join('') + 
+                        '</div>';
+                }
+                
+                return '<div class="favorite-card" data-index="' + index + '">' +
+                    '<img class="favorite-cover" src="' + fav.cover + '" alt="' + fav.title + '">' +
+                    '<div class="favorite-content">' +
+                        '<span class="favorite-type" style="background: ' + typeInfo.color + '20; color: ' + typeInfo.color + '">' +
+                            typeInfo.icon + ' ' + typeInfo.name +
+                        '</span>' +
+                        '<h3 class="favorite-title">' + fav.title + '</h3>' +
+                        '<p class="favorite-summary">' + fav.content + '</p>' +
+                        '<div class="favorite-meta">' +
+                            '<span class="favorite-source"><span>📍</span> ' + fav.source + '</span>' +
+                            '<span>' + formatTime(fav.create_time) + '</span>' +
+                        '</div>' +
+                        tagsHtml +
+                    '</div>' +
+                '</div>';
+            }).join('');
+            
+            closePanel();
+        }
+        
+        // 获取筛选后的列表
+        function getFilteredList() {
+            if (currentFilter === 'all') {
+                return dataList;
+            }
+            return dataList.filter(function(f) { return f.type === currentFilter; });
+        }
+        
+        // 格式化时间
+        function formatTime(timeStr) {
+            if (!timeStr) return '';
+            var date = new Date(timeStr);
+            if (isNaN(date.getTime())) return timeStr;
+            return (date.getMonth() + 1) + '月' + date.getDate() + '日';
+        }
+        
+        // 打开侧边面板
+        function openPanel(index) {
+            var filteredList = getFilteredList();
+            if (index < 0 || index >= filteredList.length) return;
+            
+            currentIndex = index;
+            isPanelOpen = true;
+            
+            // 更新卡片选中状态
+            document.querySelectorAll('.favorite-card').forEach(function(card) {
+                card.classList.remove('active');
+            });
+            document.querySelector('.favorite-card[data-index="' + index + '"]').classList.add('active');
+            
+            // 显示遮罩和面板
+            document.getElementById('detail-overlay').classList.add('show');
+            document.getElementById('detail-panel').classList.add('show');
+            
+            // 禁止body滚动
+            document.body.style.overflow = 'hidden';
+            
+            // 渲染详情内容
+            renderPanelContent(index);
+            
+            // 更新导航状态
+            updateNavState();
+        }
+        
+        // 关闭侧边面板
+        function closePanel() {
+            isPanelOpen = false;
+            currentIndex = -1;
+            
+            // 移除卡片选中状态
+            document.querySelectorAll('.favorite-card').forEach(function(card) {
+                card.classList.remove('active');
+            });
+            
+            // 隐藏遮罩和面板
+            document.getElementById('detail-overlay').classList.remove('show');
+            document.getElementById('detail-panel').classList.remove('show');
+            
+            // 恢复body滚动
+            document.body.style.overflow = '';
+            
+            // 清空面板内容
+            document.getElementById('panel-body').innerHTML = '';
+        }
+        
+        // 渲染面板内容
+        function renderPanelContent(index) {
+            var filteredList = getFilteredList();
+            var fav = filteredList[index];
+            if (!fav) return;
+            
+            var typeInfo = typeMap[fav.type] || { name: '其他', icon: '📌', color: '#999' };
+            
+            var html = '';
+            
+            // 封面图
+            html += '<div class="detail-cover-wrap">' +
+                '<img class="detail-cover" src="' + fav.cover + '" alt="封面" style="cursor: pointer;" onclick="openImagePreview(\'' + fav.cover + '\')">' +
+                '<div class="detail-cover-overlay"></div>' +
+            '</div>';
+            
+            // 详情主体
+            html += '<div class="detail-main">';
+            
+            // 头部信息
+            html += '<div class="detail-header">' +
+                '<span class="detail-type" style="background: ' + typeInfo.color + '20; color: ' + typeInfo.color + '">' +
+                    typeInfo.icon + ' ' + typeInfo.name +
+                '</span>' +
+                '<h2 class="detail-title">' + fav.title + '</h2>' +
+                '<div class="detail-meta">' +
+                    '<span class="detail-meta-item"><span>📍</span> ' + fav.source + '</span>' +
+                    '<span class="detail-meta-item">收藏于 ' + fav.create_time + '</span>' +
+                '</div>' +
+            '</div>';
+            
+            // 正文内容
+            html += '<div class="detail-content">' + fav.content + '</div>';
+            
+            // 底部标签
+            var tags = fav.tags || [];
+            if (tags.length > 0) {
+                html += '<div class="detail-tags">' +
+                    tags.map(function(tag) { return '<span class="detail-tag">#' + tag + '</span>'; }).join('') +
+                '</div>';
+            }
+            
+            html += '</div>'; // 结束 detail-main
+            
+            // 填充面板内容
+            document.getElementById('panel-body').innerHTML = html;
+            
+            // 滚动到顶部
+            document.getElementById('panel-body').scrollTop = 0;
+        }
+        
+        // 更新导航状态
+        function updateNavState() {
+            var filteredList = getFilteredList();
+            var total = filteredList.length;
+            
+            document.getElementById('current-index').textContent = currentIndex + 1;
+            document.getElementById('total-count').textContent = total;
+            
+            // 更新按钮状态
+            document.getElementById('btn-prev').disabled = currentIndex <= 0;
+            document.getElementById('btn-next').disabled = currentIndex >= total - 1;
+        }
+        
+        // 上一条
+        function goPrev() {
+            if (currentIndex > 0) {
+                openPanel(currentIndex - 1);
+            }
+        }
+        
+        // 下一条
+        function goNext() {
+            var filteredList = getFilteredList();
+            if (currentIndex < filteredList.length - 1) {
+                openPanel(currentIndex + 1);
+            }
+        }
+        
+        // ========== 图片预览弹窗功能 ==========
+        
+        // 打开图片预览
+        function openImagePreview(src) {
+            if (!src) return;
+            
+            previewImageSrc = src;
+            isImagePreviewOpen = true;
+            
+            document.getElementById('image-preview-img').src = src;
+            document.getElementById('image-preview-modal').classList.add('show');
+        }
+        
+        // 关闭图片预览
+        function closeImagePreview() {
+            isImagePreviewOpen = false;
+            document.getElementById('image-preview-modal').classList.remove('show');
+        }
+        
+        // 在新标签页打开图片
+        function openImageInNewTab() {
+            if (previewImageSrc) {
+                window.open(previewImageSrc, '_blank');
+            }
+        }
+        
+        // 绑定事件
+        function bindEvents() {
+            // 筛选标签点击
+            document.querySelectorAll('.filter-tag').forEach(function(tag) {
+                tag.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-tag').forEach(function(t) {
+                        t.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    currentFilter = this.dataset.type;
+                    renderFavorites();
+                });
+            });
+            
+            // 卡片点击 - 打开侧边面板
+            document.getElementById('favorites-grid').addEventListener('click', function(e) {
+                var card = e.target.closest('.favorite-card');
+                if (card) {
+                    var index = parseInt(card.dataset.index);
+                    openPanel(index);
+                }
+            });
+            
+            // 关闭按钮点击
+            document.getElementById('btn-close').addEventListener('click', closePanel);
+            
+            // 遮罩点击关闭
+            document.getElementById('detail-overlay').addEventListener('click', closePanel);
+            
+            // 上一条/下一条按钮
+            document.getElementById('btn-prev').addEventListener('click', goPrev);
+            document.getElementById('btn-next').addEventListener('click', goNext);
+            
+            // ========== 图片预览弹窗事件 ==========
+            document.getElementById('image-preview-close').addEventListener('click', closeImagePreview);
+            document.getElementById('image-preview-backdrop').addEventListener('click', closeImagePreview);
+            document.getElementById('image-preview-newtab').addEventListener('click', openImageInNewTab);
+            
+            // 键盘事件
+            document.addEventListener('keydown', function(e) {
+                // 图片预览弹窗的键盘事件
+                if (isImagePreviewOpen) {
+                    if (e.key === 'Escape') {
+                        closeImagePreview();
+                        e.preventDefault();
+                    }
+                    return;
+                }
+                
+                // 侧边面板的键盘事件
+                if (!isPanelOpen) return;
+                
+                if (e.key === 'Escape') {
+                    closePanel();
+                    e.preventDefault();
+                } else if (e.key === 'ArrowLeft') {
+                    goPrev();
+                    e.preventDefault();
+                } else if (e.key === 'ArrowRight') {
+                    goNext();
+                    e.preventDefault();
+                }
+            });
+            
+            // 阻止面板内点击事件冒泡到遮罩
+            document.getElementById('detail-panel').addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        }
+        
+        // 页面加载完成后初始化
+        init();
+    </script>
+</body>
+</html>
