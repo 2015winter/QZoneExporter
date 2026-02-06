@@ -22,24 +22,24 @@ jobs:
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.TENCENT_SERVER_SG_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+          ssh-keyscan -H ${{ secrets.TENCENT_SERVER_SG_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
 
       - name: Deploy demo to server
         run: |
           # 仅部署 demo 目录到 /data/demo/qzone
           rsync -avz --delete \
-            -e "ssh -o StrictHostKeyChecking=no -p ${{ secrets.SERVER_PORT || 22 }}" \
+            -e "ssh -o StrictHostKeyChecking=no -p ${{ secrets.TENCENT_SERVER_SG_PORT || 22 }}" \
             ./demo/ \
-            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.DEPLOY_PATH }}
+            ${{ secrets.TENCENT_SERVER_SG_USER }}@${{ secrets.TENCENT_SERVER_SG_HOST }}:${{ secrets.TENCENT_SERVER_SG_TARGET }}
 
       - name: Verify deployment
         run: |
           ssh -o StrictHostKeyChecking=no \
-            -p ${{ secrets.SERVER_PORT || 22 }} \
-            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
-            "ls -la ${{ secrets.DEPLOY_PATH }} && echo '✅ Deployment successful!'"
+            -p ${{ secrets.TENCENT_SERVER_SG_PORT || 22 }} \
+            ${{ secrets.TENCENT_SERVER_SG_USER }}@${{ secrets.TENCENT_SERVER_SG_HOST }} \
+            "ls -la ${{ secrets.TENCENT_SERVER_SG_TARGET }} && echo '✅ Deployment successful!'"
 
       - name: Cleanup
         if: always()
