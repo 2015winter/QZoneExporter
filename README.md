@@ -73,7 +73,7 @@
 
 ## 🖼 备份预览 | Preview
 
-[👉 点击查看在线演示](https://2015winter.github.io/QZoneExporter/demo/index.html)
+[👉 点击查看在线演示](https://demo.laxdu.com/qzone/index.html)
 
 <details open>
 <summary>展开查看截图</summary>
