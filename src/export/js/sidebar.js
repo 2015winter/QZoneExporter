@@ -1,3 +1,14 @@
+// 立即执行：在页面渲染前设置侧边栏宽度CSS变量，避免跳动
+(function() {
+    const savedWidth = localStorage.getItem('sidebarWidth');
+    if (savedWidth) {
+        const width = parseInt(savedWidth);
+        if (width >= 150 && width <= 400) {
+            document.documentElement.style.setProperty('--sidebar-width', (width + 10) + 'px');
+        }
+    }
+})();
+
 const initSidebar = function() {
     // 清空目录
     $("#BlogAnchor").remove();
@@ -111,6 +122,8 @@ const initSidebarResize = function() {
         newWidth = Math.max(150, Math.min(400, newWidth));
         
         $sidebar.css('width', newWidth + 'px');
+        // 同时设置CSS变量和直接设置margin-left（兼容新旧页面）
+        document.documentElement.style.setProperty('--sidebar-width', (newWidth + 10) + 'px');
         $content.css('margin-left', (newWidth + 10) + 'px');
         // 收藏页面调整卡片的左边距
         if ($favoritesCard.length) {
@@ -136,6 +149,8 @@ const initSidebarResize = function() {
         const width = parseInt(savedWidth);
         if (width >= 150 && width <= 400) {
             $sidebar.css('width', width + 'px');
+            // 同时设置CSS变量和直接设置margin-left（兼容新旧页面）
+            document.documentElement.style.setProperty('--sidebar-width', (width + 10) + 'px');
             $content.css('margin-left', (width + 10) + 'px');
             // 收藏页面恢复卡片的左边距
             if ($favoritesCard.length) {

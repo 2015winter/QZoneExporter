@@ -19,125 +19,101 @@
 	<script type="text/javascript" src="../Common/json/config.js"></script>
 	<script type="text/javascript" src="json/videos.js"></script>
 	<script type="text/javascript" src="../Common/js/common.js"></script>
-	<script type="text/javascript" src="../Common/js/sidebar.js"></script>
 	<style>
-		/* 视频页面专属样式 - 红色主题 #ff6b6b */
+		/* 视频年份页样式 - 与索引页保持一致 */
 		body {
-			background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+			background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 50%, #feca57 100%) !important;
 			min-height: 100vh;
+			padding-top: 70px;
+			padding-bottom: 80px;
 		}
 		
-		/* 顶部导航 - 红色渐变 */
+		/* 顶部导航 - 与索引页一致 */
 		.videos-navbar {
 			background: linear-gradient(135deg, rgba(255, 107, 107, 0.95), rgba(238, 90, 36, 0.95)) !important;
 			backdrop-filter: blur(10px);
 		}
 		
-		/* 主容器 - 考虑左侧栏 */
-		.videos-container {
-			padding: 80px 30px 40px 30px;
-			max-width: none !important;
-			transition: margin-left 0.1s ease;
+		/* 隐藏侧边栏 */
+		#BlogAnchor {
+			display: none !important;
 		}
 		
-		@media (min-width: 1001px) {
-			.videos-container {
-				margin-left: 220px; /* 左侧栏宽度，会被JS动态调整 */
-			}
-		}
-		
+		/* 覆盖 common.css 中的 #videos_html 限制 */
 		#videos_html {
 			max-width: none !important;
+			margin-left: 0 !important;
 		}
 		
-		/* 视频列表保持原有宽度 */
-		#videos_html .row.videos {
-			max-width: 60vw;
+		/* 白色内容卡片 - 与索引页完全一致 */
+		.main-card {
+			background: rgba(255, 255, 255, 0.95);
+			backdrop-filter: blur(20px);
+			border-radius: 24px;
+			box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+			padding: 40px;
+			margin-top: 20px;
 		}
 		
-		@media (max-width: 1000px) {
-			.videos-container {
-				margin-left: 0 !important;
-				padding: 70px 15px 30px 15px;
-			}
-			#videos_html {
-				max-width: none !important;
-				margin-left: 0 !important;
-			}
-			#videos_html .row.videos {
-				max-width: 100%;
-			}
+		/* 页面头部 - 与索引页一致 */
+		.page-header {
+			text-align: center;
+			margin-bottom: 40px;
+			padding-bottom: 30px;
+			border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 		}
 		
-		/* 年份标题 - h1用于侧边栏层级 */
-		h1.sidebar-year {
-			margin: 0 0 24px 0;
-			font-size: inherit;
-			font-weight: normal;
-			width: 100%;
+		.page-header-icon {
+			font-size: 48px;
+			background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			margin-bottom: 16px;
 		}
 		
-		.year-header {
-			display: flex;
-			align-items: center;
-			padding: 16px 24px;
-			background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-			border-radius: 16px;
-			box-shadow: 0 8px 24px rgba(255, 107, 107, 0.3);
-			width: 100%;
-		}
-		
-		.year-icon {
-			width: 48px;
-			height: 48px;
-			background: rgba(255, 255, 255, 0.2);
-			border-radius: 12px;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			margin-right: 16px;
-			flex-shrink: 0;
-		}
-		
-		.year-icon i {
-			font-size: 24px;
-			color: #fff;
-		}
-		
-		.year-title-text {
-			color: #fff;
-			font-size: 22px;
+		.page-header-title {
+			font-size: 32px;
 			font-weight: 700;
-			text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-			flex: 1;
+			background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
 		}
 		
-		.year-count {
-			background: rgba(255, 255, 255, 0.25);
-			color: #fff;
-			font-size: 14px;
-			font-weight: 600;
-			padding: 6px 16px;
-			border-radius: 20px;
-			white-space: nowrap;
-			flex-shrink: 0;
+		.page-header-subtitle {
+			color: #718096;
+			font-size: 15px;
 		}
 		
-		/* 月份标题 */
+		@media (max-width: 768px) {
+			.main-card {
+				padding: 24px 16px;
+				margin: 10px;
+				border-radius: 20px;
+			}
+			
+			.page-header-icon {
+				font-size: 36px;
+			}
+			
+			.page-header-title {
+				font-size: 24px;
+			}
+		}
+		}
+		
+		/* 月份区块 */
 		.month-section {
-			margin-bottom: 20px;
-			width: 100%;
+			margin-bottom: 24px;
 		}
 		
 		.month-header {
 			display: flex;
 			align-items: center;
 			padding: 10px 16px;
-			background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(238, 90, 36, 0.1));
+			background: linear-gradient(135deg, rgba(255, 107, 107, 0.08), rgba(238, 90, 36, 0.08));
 			border-radius: 10px;
 			margin-bottom: 16px;
 			border-left: 4px solid #ff6b6b;
-			width: 100%;
 		}
 		
 		.month-title-text {
@@ -178,22 +154,7 @@
 			font-size: 18px;
 		}
 		
-		/* 响应式 */
-		@media (max-width: 768px) {
-			.year-header {
-				padding: 12px 16px;
-				border-radius: 12px;
-			}
-			
-			.year-icon {
-				width: 40px;
-				height: 40px;
-			}
-			
-			.year-title-text {
-				font-size: 18px;
-			}
-		}
+
 		
 		/* 底部统计图标栏 - 红色渐变背景 */
 		#videos_html .card-footer {
@@ -238,6 +199,16 @@
 			transform: translate(-50%, -50%) scale(1.1);
 			box-shadow: 0 6px 20px rgba(255, 107, 107, 0.5);
 		}
+		
+		/* 视频卡片圆角修复 - 消除黑色区域 */
+		#videos_html .thumbnail .video-wrapper {
+			background: linear-gradient(135deg, rgba(255, 107, 107, 0.3), rgba(238, 90, 36, 0.3)) !important;
+		}
+		
+		#videos_html .thumbnail .video-wrapper .video-poster {
+			border-top-left-radius: calc(0.5rem - 1px);
+			border-top-right-radius: calc(0.5rem - 1px);
+		}
 	</style>
 </head>
 
@@ -254,36 +225,33 @@
 				<nav aria-label="breadcrumb">
 					<ol class="breadcrumb" style="background: transparent;">
 						<li class="breadcrumb-item"><a href="../index.html" style="color: rgba(255,255,255,0.8);"><i class="fa fa-home mr-1"></i>个人中心</a></li>
-						<li class="breadcrumb-item active" aria-current="page" style="color: rgba(255,255,255,0.95);">视频</li>
+						<li class="breadcrumb-item"><a href="index.html" style="color: rgba(255,255,255,0.8);"><i class="fa fa-play-circle mr-1"></i>视频</a></li>
+						<li class="breadcrumb-item active" aria-current="page" style="color: rgba(255,255,255,0.95);"><%:=targetYear%>年</li>
 					</ol>
 				</nav>
 			</div>
 		</nav>
 	</header>
 	<main role="main" class="flex-shrink-0">
-		<div id="videos_html" class="videos-container">
-			<%/* 遍历年份 */%>
-			<%for (const [year, yearMap] of videoMaps) {%>
-			<!-- 年份标题 (h1用于侧边栏一级) -->
-			<h1 class="sidebar-year" data-sidebar='<%:=year%>年<span class="badge badge-primary badge-pill itemSize"><%:=API.Utils.sumYearItemSize(yearMap)%></span>'>
-				<div class="year-header">
-					<div class="year-icon">
-						<i class="fa fa-calendar"></i>
+		<div class="container">
+			<!-- 白色内容卡片 -->
+			<div id="videos_html" class="main-card">
+				<!-- 页面头部 -->
+				<div class="page-header">
+					<i class="fa fa-play-circle page-header-icon"></i>
+					<h1 class="page-header-title"><%:=targetYear%>年视频</h1>
+					<p class="page-header-subtitle">共 <%:=total%> 个视频</p>
+				</div>
+				
+				<%/* 遍历年份 */%>
+				<%for (const [year, yearMap] of videoMaps) {%>
+				<%/* 遍历月份 */%>
+				<%for (const [month, monthVideos] of yearMap) {%>
+				<div class="month-section">
+					<div class="month-header">
+						<span class="month-title-text"><i class="fa fa-folder-open"></i><%:=month%>月</span>
+						<span class="month-count"><%:=monthVideos.length%> 个</span>
 					</div>
-					<span class="year-title-text"><%:=year%>年</span>
-					<span class="year-count"><%:=API.Utils.sumYearItemSize(yearMap)%> 个视频</span>
-				</div>
-			</h1>
-			
-			<%/* 遍历月份 */%>
-			<%for (const [month, monthVideos] of yearMap) {%>
-			<div class="month-section">
-				<!-- 月份标题 (h2用于侧边栏二级) -->
-				<span class="sidebar-h2" data-tag="h2" data-sidebar='<%:=month%>月<span class="badge badge-secondary badge-pill itemSize"><%:=monthVideos.length%></span>'></span>
-				<div class="month-header">
-					<span class="month-title-text"><i class="fa fa-folder-open"></i><%:=month%>月</span>
-					<span class="month-count"><%:=monthVideos.length%> 个</span>
-				</div>
 				
 				<!-- 视频列表 - 保留原有卡片样式 -->
 				<div id="lightgallery-<%:=year%>-<%:=month%>" class="row videos">
@@ -332,15 +300,16 @@
 				</div>
 			</div>
 			<%}%>
-			<%}%>
-			
-			<%if(!videoMaps || videoMaps.size === 0){%>
-			<div class="empty-state">
-				<i class="fa fa-video-camera"></i>
-				<p>暂无视频</p>
-			</div>
-			<%}%>
-		</div>
+				<%}%>
+				
+				<%if(!videoMaps || videoMaps.size === 0){%>
+				<div class="empty-state">
+					<i class="fa fa-video-camera"></i>
+					<p>暂无视频</p>
+				</div>
+				<%}%>
+			</div><!-- /.main-card -->
+		</div><!-- /.container -->
 	</main>
 	<script type="text/javascript">
 		// 当前年份

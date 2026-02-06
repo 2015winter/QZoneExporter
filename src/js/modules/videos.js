@@ -337,18 +337,30 @@ API.Videos.exportToHtml = async(videos) => {
         // 基于JSON生成JS
         await API.Common.writeJsonToJs('videos', videos, moduleFolder + '/json/videos.js');
 
-        // 根据年月分组
-        const videoMaps = API.Utils.groupedByTime(videos, 'uploadTime', 'all');
-
-        // 生成视频汇总列表HTML（包含侧边栏导航）
-        await API.Common.writeHtmlofTpl('videos', { 
-            videoMaps: videoMaps, 
-            total: videos.length,
-            targetYear: 'ALL' 
-        }, moduleFolder + "/index.html");
-
-        // 根据年份分组生成年份HTML
+        // 根据年份分组
         const year_maps = API.Utils.groupedByTime(videos, 'uploadTime', 'year');
+        
+        // 构建年份列表数据（用于导航页）
+        let yearList = [];
+        let maxCount = 0;
+        let maxYear = '';
+        let totalLikes = 0;
+        for (const [year, yearItems] of year_maps) {
+            const count = yearItems.length;
+            yearList.push({ year: year, count: count });
+            if (count > maxCount) {
+                maxCount = count;
+                maxYear = year;
+            }
+        }
+        // 计算总获赞数
+        for (const video of videos) {
+            totalLikes += (video.likeTotal || 0);
+        }
+        // 按年份倒序排列（最新年份在前）
+        yearList.sort((a, b) => b.year - a.year);
+
+        // 生成年份HTML页面
         for (const [year, year_items] of year_maps) {
             // 该年份的年月分组
             let _videoMaps = new Map();
@@ -361,6 +373,16 @@ API.Videos.exportToHtml = async(videos) => {
                 targetYear: year 
             }, moduleFolder + "/" + year + ".html");
         }
+
+        // 基于模板生成索引页HTML（轻量级，只包含年份入口）
+        let indexParams = {
+            yearList: yearList,
+            total: videos.length,
+            maxCount: maxCount,
+            maxYear: maxYear,
+            totalLikes: totalLikes
+        }
+        await API.Common.writeHtmlofTpl('videos_index', indexParams, moduleFolder + "/index.html");
 
     } catch (error) {
         console.error('导出视频到HTML异常', error, videos);
