@@ -1,490 +1,1132 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的分享 - QQ空间导出Demo</title>
-    <link rel="stylesheet" href="../Common/css/common.css">
-    <style>
-        :root {
-            --primary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --card-shadow: 0 4px 15px rgba(240, 147, 251, 0.2);
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-        
-        /* 头部样式 */
-        .header {
-            background: var(--primary-gradient);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            color: white;
-            box-shadow: var(--card-shadow);
-        }
-        
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .header h1 {
-            font-size: 28px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .header h1::before {
-            content: "🔗";
-            font-size: 32px;
-        }
-        
-        .back-btn {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-            text-decoration: none;
-        }
-        
-        .back-btn:hover {
-            background: rgba(255,255,255,0.3);
-            transform: translateX(-5px);
-        }
-        
-        .stats {
-            margin-top: 15px;
-            display: flex;
-            gap: 30px;
-        }
-        
-        .stat-item {
-            text-align: center;
-        }
-        
-        .stat-value {
-            font-size: 24px;
-            font-weight: bold;
-        }
-        
-        .stat-label {
-            font-size: 12px;
-            opacity: 0.9;
-        }
-        
-        /* 分享列表 */
-        .shares-list {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        
-        .share-card {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            transition: all 0.3s;
-        }
-        
-        .share-card:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--card-shadow);
-        }
-        
-        .share-header {
-            padding: 20px 20px 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
-        
-        .share-comment {
-            font-size: 16px;
-            color: #333;
-            line-height: 1.6;
-            flex: 1;
-        }
-        
-        .share-type {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            white-space: nowrap;
-            margin-left: 15px;
-        }
-        
-        .share-content {
-            margin: 0 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            display: flex;
-            gap: 15px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        
-        .share-content:hover {
-            background: #f0f1f2;
-        }
-        
-        .share-cover {
-            width: 120px;
-            height: 90px;
-            object-fit: cover;
-            border-radius: 8px;
-            flex-shrink: 0;
-        }
-        
-        .share-info {
-            flex: 1;
-            min-width: 0;
-        }
-        
-        .share-title {
-            font-size: 15px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 8px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        
-        .share-summary {
-            font-size: 13px;
-            color: #666;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        
-        .share-source {
-            font-size: 12px;
-            color: #999;
-            margin-top: 8px;
-        }
-        
-        .share-footer {
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top: 1px solid #f0f0f0;
-        }
-        
-        .share-time {
-            font-size: 13px;
-            color: #999;
-        }
-        
-        .share-actions {
-            display: flex;
-            gap: 20px;
-        }
-        
-        .action-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 13px;
-            color: #666;
-        }
-        
-        /* 评论区 */
-        .share-comments {
-            padding: 0 20px 20px;
-        }
-        
-        .comments-title {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 12px;
-            padding-top: 15px;
-            border-top: 1px dashed #eee;
-        }
-        
-        .comment-item {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 12px;
-        }
-        
-        .comment-item:last-child {
-            margin-bottom: 0;
-        }
-        
-        .comment-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        
-        .comment-body {
-            flex: 1;
-        }
-        
-        .comment-user {
-            font-size: 13px;
-            font-weight: 500;
-            color: #333;
-            margin-bottom: 4px;
-        }
-        
-        .comment-text {
-            font-size: 13px;
-            color: #666;
-            line-height: 1.5;
-        }
-        
-        .comment-time {
-            font-size: 11px;
-            color: #999;
-            margin-top: 4px;
-        }
-        
-        /* Demo标记 */
-        .demo-badge {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            z-index: 100;
-            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
-        }
-        
-        /* 筛选栏 */
-        .filter-bar {
-            background: white;
-            border-radius: 15px;
-            padding: 15px 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        
-        .filter-tags {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        
-        .filter-tag {
-            padding: 8px 16px;
-            border-radius: 20px;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-            background: #f0f0f0;
-            color: #666;
-        }
-        
-        .filter-tag:hover {
-            background: #e0e0e0;
-        }
-        
-        .filter-tag.active {
-            background: var(--primary-gradient);
-            color: white;
-        }
-        
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 22px;
-            }
-            
-            .stats {
-                flex-wrap: wrap;
-                gap: 15px;
-            }
-            
-            .share-content {
-                flex-direction: column;
-            }
-            
-            .share-cover {
-                width: 100%;
-                height: 150px;
-            }
-        }
-    </style>
+	<link rel="icon" href="../Common/images/favicon.ico"> 
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>QQ空间备份-分享</title>
+	<link rel="stylesheet" href="../Common/vendor/css/font-awesome.min.css">
+	<link rel="stylesheet" href="../Common/vendor/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="../Common/css/common.css">
+	
+	<style>
+		/* 分享页面专属样式 - 浅紫色主题 #a29bfe */
+		:root {
+			--primary-gradient: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+			--card-shadow: 0 4px 15px rgba(162, 155, 254, 0.2);
+			--primary-color: #a29bfe;
+			--primary-dark: #6c5ce7;
+		}
+		
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+		
+		body {
+			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+			background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+			min-height: 100vh;
+			padding: 20px;
+			padding-top: 80px;
+			padding-bottom: 80px;
+		}
+		
+		/* 导航栏样式 */
+		.shares-navbar {
+			background: var(--primary-gradient) !important;
+			backdrop-filter: blur(10px);
+		}
+		
+		.shares-breadcrumb {
+			background: transparent !important;
+			margin-bottom: 0;
+			padding-top: 8px;
+		}
+		
+		.shares-breadcrumb .breadcrumb-item a {
+			color: rgba(255, 255, 255, 0.85);
+			transition: color 0.3s ease;
+		}
+		
+		.shares-breadcrumb .breadcrumb-item a:hover {
+			color: #fff;
+			text-decoration: none;
+		}
+		
+		.shares-breadcrumb .breadcrumb-item.active {
+			color: rgba(255, 255, 255, 0.9);
+		}
+		
+		.shares-breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+			color: rgba(255, 255, 255, 0.5);
+		}
+		
+		/* 主卡片容器 - 收藏页风格 */
+		.shares-main-card {
+			background: rgba(255, 255, 255, 0.95);
+			backdrop-filter: blur(20px);
+			border-radius: 24px;
+			box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+			padding: 40px;
+			max-width: 1200px;
+			margin: 0 auto;
+		}
+		
+		/* 页面标题区域 - 收藏页风格 */
+		.shares-header {
+			text-align: center;
+			margin-bottom: 40px;
+			padding-bottom: 30px;
+			border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+		}
+		
+		.shares-header-icon {
+			font-size: 48px;
+			background: var(--primary-gradient);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			margin-bottom: 16px;
+			display: block;
+		}
+		
+		.shares-header-title {
+			font-size: 32px;
+			font-weight: 700;
+			background: var(--primary-gradient);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			margin-bottom: 12px;
+		}
+		
+		.shares-header-subtitle {
+			color: #718096;
+			font-size: 16px;
+		}
+		
+		.shares-total-count {
+			font-weight: 600;
+			color: var(--primary-color);
+		}
+		
+		/* 筛选标签区域 - 收藏页风格 */
+		.shares-filters {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 12px;
+			justify-content: center;
+			margin-bottom: 32px;
+			padding-bottom: 24px;
+			border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+		}
+		
+		.filter-tag {
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+			padding: 10px 20px;
+			background: linear-gradient(145deg, #f8fafc, #fff);
+			border: 1px solid rgba(162, 155, 254, 0.15);
+			border-radius: 30px;
+			font-size: 14px;
+			color: #4a5568;
+			cursor: pointer;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			text-decoration: none;
+		}
+		
+		.filter-tag:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 6px 20px rgba(162, 155, 254, 0.2);
+			background: var(--primary-gradient);
+			color: #fff;
+			text-decoration: none;
+		}
+		
+		.filter-tag.active {
+			background: var(--primary-gradient);
+			color: #fff;
+			border-color: transparent;
+			box-shadow: 0 6px 20px rgba(162, 155, 254, 0.3);
+		}
+		
+		.filter-tag .count {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			min-width: 24px;
+			height: 24px;
+			padding: 0 8px;
+			background: rgba(162, 155, 254, 0.1);
+			border-radius: 12px;
+			font-size: 12px;
+			font-weight: 600;
+			color: var(--primary-color);
+			transition: all 0.3s ease;
+		}
+		
+		.filter-tag:hover .count,
+		.filter-tag.active .count {
+			background: rgba(255, 255, 255, 0.25);
+			color: #fff;
+		}
+		
+		/* 分享卡片网格 - 收藏页风格 */
+		.shares-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+			gap: 20px;
+		}
+		
+		/* 分享卡片 - 收藏页风格 */
+		.share-card {
+			background: #fff;
+			border-radius: 16px;
+			overflow: hidden;
+			box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+			transition: all 0.3s ease;
+			cursor: pointer;
+			display: flex;
+			flex-direction: column;
+			height: 100%;
+		}
+		
+		.share-card:hover {
+			transform: translateY(-5px);
+			box-shadow: 0 10px 30px rgba(162, 155, 254, 0.2);
+		}
+		
+		.share-card.active {
+			box-shadow: 0 0 0 3px var(--primary-color), 0 10px 30px rgba(162, 155, 254, 0.3);
+			transform: translateY(-5px);
+		}
+		
+		.share-card-cover {
+			width: 100%;
+			height: 180px;
+			object-fit: cover;
+			transition: transform 0.3s ease;
+			background: linear-gradient(135deg, #e8e4ff 0%, #d4d0f7 100%);
+		}
+		
+		.share-card:hover .share-card-cover {
+			transform: scale(1.05);
+		}
+		
+		.share-card-content {
+			padding: 20px;
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+		}
+		
+		.share-card-type {
+			display: inline-flex;
+			align-items: center;
+			gap: 5px;
+			padding: 4px 12px;
+			border-radius: 12px;
+			font-size: 12px;
+			font-weight: 600;
+			margin-bottom: 10px;
+			align-self: flex-start;
+			background: rgba(162, 155, 254, 0.15);
+			color: var(--primary-dark);
+		}
+		
+		.share-card-title {
+			font-size: 16px;
+			font-weight: 600;
+			color: #333;
+			margin-bottom: 8px;
+			line-height: 1.4;
+			display: -webkit-box;
+			-webkit-line-clamp: 2;
+			-webkit-box-orient: vertical;
+			overflow: hidden;
+		}
+		
+		.share-card-summary {
+			font-size: 14px;
+			color: #666;
+			line-height: 1.6;
+			display: -webkit-box;
+			-webkit-line-clamp: 3;
+			-webkit-box-orient: vertical;
+			overflow: hidden;
+			margin-bottom: 12px;
+			flex: 1;
+		}
+		
+		.share-card-meta {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			font-size: 12px;
+			color: #999;
+			margin-top: auto;
+		}
+		
+		.share-card-source {
+			display: flex;
+			align-items: center;
+			gap: 5px;
+		}
+		
+		.share-card-actions {
+			display: flex;
+			gap: 12px;
+		}
+		
+		.share-card-actions span {
+			display: flex;
+			align-items: center;
+			gap: 4px;
+		}
+		
+		/* 空状态 */
+		.shares-empty {
+			text-align: center;
+			padding: 60px 20px;
+			color: #718096;
+			display: none;
+		}
+		
+		.shares-empty i {
+			font-size: 64px;
+			margin-bottom: 20px;
+			opacity: 0.3;
+		}
+		
+		.shares-empty p {
+			font-size: 16px;
+		}
+		
+		/* 底部页脚 */
+		.shares-footer {
+			background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.9));
+			backdrop-filter: blur(10px);
+			position: fixed;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			z-index: 1000;
+			padding: 15px;
+			text-align: center;
+		}
+		
+		.footer-text {
+			font-size: 14px;
+			letter-spacing: 1px;
+			color: #fff;
+		}
+		
+		/* ========== 侧边滑出面板样式 ========== */
+		
+		/* 遮罩层 */
+		.detail-overlay {
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: rgba(0, 0, 0, 0.5);
+			z-index: 1999;
+			opacity: 0;
+			visibility: hidden;
+			transition: all 0.3s ease;
+			backdrop-filter: blur(4px);
+		}
+		
+		.detail-overlay.show {
+			opacity: 1;
+			visibility: visible;
+		}
+		
+		/* 侧边面板 */
+		.detail-panel {
+			position: fixed;
+			top: 0;
+			right: 0;
+			width: 620px;
+			max-width: 100%;
+			height: 100vh;
+			background: #fff;
+			z-index: 2000;
+			transform: translateX(100%);
+			transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+			display: flex;
+			flex-direction: column;
+			box-shadow: -10px 0 40px rgba(0, 0, 0, 0.15);
+		}
+		
+		.detail-panel.show {
+			transform: translateX(0);
+		}
+		
+		/* 面板头部 */
+		.panel-header {
+			padding: 20px 24px;
+			background: var(--primary-gradient);
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			flex-shrink: 0;
+		}
+		
+		.panel-nav {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+		}
+		
+		.panel-nav-btn {
+			width: 38px;
+			height: 38px;
+			border-radius: 10px;
+			background: rgba(255, 255, 255, 0.2);
+			border: none;
+			cursor: pointer;
+			color: #fff;
+			font-size: 16px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			transition: all 0.2s ease;
+		}
+		
+		.panel-nav-btn:hover:not(:disabled) {
+			background: rgba(255, 255, 255, 0.35);
+			transform: scale(1.05);
+		}
+		
+		.panel-nav-btn:disabled {
+			opacity: 0.4;
+			cursor: not-allowed;
+		}
+		
+		.panel-counter {
+			color: #fff;
+			font-size: 14px;
+			font-weight: 500;
+			padding: 0 12px;
+		}
+		
+		.panel-close {
+			width: 40px;
+			height: 40px;
+			border-radius: 50%;
+			background: rgba(255, 255, 255, 0.2);
+			border: none;
+			cursor: pointer;
+			color: #fff;
+			font-size: 20px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			transition: all 0.25s ease;
+		}
+		
+		.panel-close:hover {
+			background: rgba(255, 255, 255, 0.35);
+			transform: rotate(90deg);
+		}
+		
+		/* 面板内容 */
+		.panel-body {
+			flex: 1;
+			overflow-y: auto;
+			overflow-x: hidden;
+			padding: 0;
+		}
+		
+		/* ========== 详情内容样式 ========== */
+		
+		/* 详情头部 */
+		.detail-header {
+			padding: 20px;
+			border-bottom: 1px solid #f0f0f0;
+		}
+		
+		.detail-user {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
+		
+		.detail-avatar {
+			width: 50px;
+			height: 50px;
+			border-radius: 50%;
+			object-fit: cover;
+			border: 2px solid var(--primary-color);
+		}
+		
+		.detail-user-info {
+			flex: 1;
+		}
+		
+		.detail-user-name {
+			font-weight: 600;
+			color: #333;
+			font-size: 16px;
+		}
+		
+		.detail-time {
+			font-size: 13px;
+			color: #999;
+			margin-top: 4px;
+		}
+		
+		.detail-type {
+			display: inline-flex;
+			align-items: center;
+			gap: 5px;
+			padding: 4px 12px;
+			border-radius: 12px;
+			font-size: 12px;
+			background: rgba(162, 155, 254, 0.15);
+			color: var(--primary-dark);
+		}
+		
+		/* 分享描述 */
+		.detail-desc {
+			font-size: 16px;
+			color: #333;
+			line-height: 1.8;
+			padding: 20px;
+			border-bottom: 1px solid #f0f0f0;
+		}
+		
+		/* 分享来源内容 */
+		.detail-source {
+			margin: 20px;
+			padding: 15px;
+			background: #f8f9fa;
+			border-radius: 12px;
+			border-left: 4px solid var(--primary-color);
+			cursor: pointer;
+			transition: background 0.3s;
+		}
+		
+		.detail-source:hover {
+			background: #f0f1f2;
+		}
+		
+		.detail-source-title {
+			font-size: 16px;
+			font-weight: 600;
+			color: #333;
+			margin-bottom: 8px;
+			line-height: 1.5;
+		}
+		
+		.detail-source-title a {
+			color: inherit;
+			text-decoration: none;
+		}
+		
+		.detail-source-title a:hover {
+			color: var(--primary-dark);
+		}
+		
+		.detail-source-summary {
+			font-size: 14px;
+			color: #666;
+			line-height: 1.6;
+			margin-bottom: 8px;
+		}
+		
+		.detail-source-from {
+			font-size: 12px;
+			color: #999;
+		}
+		
+		/* 统计信息 */
+		.detail-stats {
+			padding: 15px 20px;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			border-top: 1px solid #f0f0f0;
+			background: #fafafa;
+		}
+		
+		.detail-floor {
+			font-size: 12px;
+			background: linear-gradient(135deg, rgba(162, 155, 254, 0.1), rgba(108, 92, 231, 0.1));
+			padding: 4px 10px;
+			border-radius: 10px;
+			color: var(--primary-dark);
+		}
+		
+		.detail-actions {
+			display: flex;
+			gap: 20px;
+		}
+		
+		.detail-action-item {
+			display: flex;
+			align-items: center;
+			gap: 5px;
+			font-size: 13px;
+			color: #666;
+			cursor: pointer;
+			transition: color 0.3s;
+		}
+		
+		.detail-action-item:hover {
+			color: var(--primary-dark);
+		}
+		
+		.detail-action-item .fa {
+			color: var(--primary-dark);
+		}
+		
+		/* 评论区 */
+		.detail-comments {
+			padding: 20px;
+			border-top: 1px solid #f0f0f0;
+		}
+		
+		.detail-comments-title {
+			font-size: 14px;
+			color: #666;
+			margin-bottom: 16px;
+			padding-bottom: 12px;
+			border-bottom: 1px dashed #eee;
+		}
+		
+		.detail-comment-item {
+			display: flex;
+			gap: 10px;
+			margin-bottom: 12px;
+			padding: 12px;
+			background: #f8f9fa;
+			border-radius: 10px;
+		}
+		
+		.detail-comment-item:last-child {
+			margin-bottom: 0;
+		}
+		
+		.detail-comment-avatar {
+			width: 36px;
+			height: 36px;
+			border-radius: 50%;
+			object-fit: cover;
+			flex-shrink: 0;
+		}
+		
+		.detail-comment-body {
+			flex: 1;
+		}
+		
+		.detail-comment-user {
+			font-size: 13px;
+			font-weight: 500;
+			color: #333;
+			margin-bottom: 4px;
+		}
+		
+		.detail-comment-text {
+			font-size: 13px;
+			color: #666;
+			line-height: 1.5;
+		}
+		
+		.detail-comment-time {
+			font-size: 11px;
+			color: #999;
+			margin-top: 4px;
+		}
+		
+		/* 键盘提示 */
+		.panel-tips {
+			padding: 12px 24px;
+			background: #f8fafc;
+			border-top: 1px solid #edf2f7;
+			font-size: 12px;
+			color: #a0aec0;
+			text-align: center;
+			flex-shrink: 0;
+		}
+		
+		.panel-tips kbd {
+			display: inline-block;
+			padding: 2px 6px;
+			background: #e2e8f0;
+			border-radius: 4px;
+			font-family: inherit;
+			font-size: 11px;
+			color: #4a5568;
+			margin: 0 2px;
+		}
+		
+		/* Demo标记 */
+		.demo-badge {
+			position: fixed;
+			top: 80px;
+			right: 20px;
+			background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+			color: #fff;
+			padding: 8px 16px;
+			border-radius: 20px;
+			font-weight: 600;
+			font-size: 14px;
+			box-shadow: 0 4px 15px rgba(238, 90, 36, 0.4);
+			z-index: 1001;
+		}
+		
+		/* 响应式 */
+		@media (max-width: 768px) {
+			.shares-main-card {
+				padding: 24px 16px;
+				margin: 10px;
+				border-radius: 20px;
+			}
+			
+			.shares-header-icon { font-size: 36px; }
+			.shares-header-title { font-size: 24px; }
+			
+			.shares-grid {
+				grid-template-columns: 1fr;
+				gap: 16px;
+			}
+			
+			.shares-filters { gap: 8px; }
+			.filter-tag { padding: 8px 14px; font-size: 13px; }
+			
+			.detail-panel {
+				width: 100%;
+			}
+			
+			.panel-tips {
+				display: none;
+			}
+		}
+	</style>
 </head>
+
 <body>
-    <div class="demo-badge">📦 DEMO</div>
-    
-    <div class="container">
-        <header class="header">
-            <div class="header-content">
-                <div>
-                    <h1>我的分享</h1>
-                    <div class="stats">
-                        <div class="stat-item">
-                            <div class="stat-value" id="totalCount">0</div>
-                            <div class="stat-label">分享总数</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value" id="totalLikes">0</div>
-                            <div class="stat-label">获赞总数</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value" id="totalComments">0</div>
-                            <div class="stat-label">评论总数</div>
-                        </div>
-                    </div>
-                </div>
-                <a href="../index.html" class="back-btn">← 返回首页</a>
-            </div>
-        </header>
-        
-        <div class="filter-bar">
-            <div class="filter-tags">
-                <button class="filter-tag active" data-type="all">全部</button>
-                <button class="filter-tag" data-type="link">🔗 链接</button>
-                <button class="filter-tag" data-type="article">📰 文章</button>
-                <button class="filter-tag" data-type="music">🎵 音乐</button>
-                <button class="filter-tag" data-type="video">🎬 视频</button>
-            </div>
-        </div>
-        
-        <div class="shares-list" id="sharesList">
-            <!-- 分享卡片将通过JS动态生成 -->
-        </div>
-    </div>
-    
-    <script src="json/shares.js"></script>
-    <script>
-        // 当前筛选类型
-        let currentFilter = 'all';
-        
-        // 初始化页面
-        function init() {
-            updateStats();
-            renderShares();
-            bindEvents();
-        }
-        
-        // 更新统计
-        function updateStats() {
-            document.getElementById('totalCount').textContent = dataList.length;
-            document.getElementById('totalLikes').textContent = dataList.reduce((sum, s) => sum + (s.likes || 0), 0);
-            document.getElementById('totalComments').textContent = dataList.reduce((sum, s) => sum + (s.comments ? s.comments.length : 0), 0);
-        }
-        
-        // 渲染分享列表
-        function renderShares() {
-            const list = document.getElementById('sharesList');
-            
-            let filteredList = dataList;
-            if (currentFilter !== 'all') {
-                filteredList = dataList.filter(s => s.share_type === currentFilter);
-            }
-            
-            list.innerHTML = filteredList.map(share => {
-                const typeInfo = typeMap[share.share_type] || { name: '其他', icon: '📌', color: '#999' };
-                
-                // 评论区HTML
-                let commentsHtml = '';
-                if (share.comments && share.comments.length > 0) {
-                    commentsHtml = `
-                        <div class="share-comments">
-                            <div class="comments-title">💬 评论 (${share.comments.length})</div>
-                            ${share.comments.map(comment => `
-                                <div class="comment-item">
-                                    <img class="comment-avatar" src="${comment.avatar}" alt="${comment.user}">
-                                    <div class="comment-body">
-                                        <div class="comment-user">${comment.user}</div>
-                                        <div class="comment-text">${comment.content}</div>
-                                        <div class="comment-time">${formatTime(comment.time)}</div>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    `;
-                }
-                
-                return `
-                    <div class="share-card">
-                        <div class="share-header">
-                            <div class="share-comment">${share.comment}</div>
-                            <span class="share-type" style="background: ${typeInfo.color}20; color: ${typeInfo.color}">
-                                ${typeInfo.icon} ${typeInfo.name}
-                            </span>
-                        </div>
-                        <div class="share-content" onclick="window.open('${share.source_url}', '_blank')">
-                            <img class="share-cover" src="${share.cover}" alt="${share.title}">
-                            <div class="share-info">
-                                <h3 class="share-title">${share.title}</h3>
-                                <p class="share-summary">${share.summary}</p>
-                                <div class="share-source">来自 ${share.source}</div>
-                            </div>
-                        </div>
-                        <div class="share-footer">
-                            <span class="share-time">${share.create_time}</span>
-                            <div class="share-actions">
-                                <span class="action-item">👍 ${share.likes}</span>
-                                <span class="action-item">💬 ${share.comments ? share.comments.length : 0}</span>
-                            </div>
-                        </div>
-                        ${commentsHtml}
-                    </div>
-                `;
-            }).join('');
-        }
-        
-        // 绑定事件
-        function bindEvents() {
-            document.querySelectorAll('.filter-tag').forEach(tag => {
-                tag.addEventListener('click', function() {
-                    document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                    currentFilter = this.dataset.type;
-                    renderShares();
-                });
-            });
-        }
-        
-        // 格式化时间
-        function formatTime(timeStr) {
-            const date = new Date(timeStr);
-            return `${date.getMonth() + 1}月${date.getDate()}日 ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
-        }
-        
-        // 初始化
-        init();
-    </script>
+	<!-- Demo标记 -->
+	<div class="demo-badge">
+		<i class="fa fa-star mr-1"></i>Demo 演示
+	</div>
+	
+	<header>
+		<nav class="navbar navbar-expand-lg navbar-dark fixed-top shares-navbar">
+			<a class="navbar-brand" target="_blank" href="https://github.com/2015winter/QZoneExporter">
+				<i class="fa fa-cloud-download mr-2"></i>QQ空间导出助手
+			</a>
+			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarSupportedContent">
+				<nav aria-label="breadcrumb">
+					<ol class="breadcrumb shares-breadcrumb">
+						<li class="breadcrumb-item"><a href="../index.html"><i class="fa fa-home mr-1"></i>个人中心</a></li>
+						<li class="breadcrumb-item active" aria-current="page"><i class="fa fa-share-alt mr-1"></i>分享</li>
+					</ol>
+				</nav>
+			</div>
+		</nav>
+	</header>
+	
+	<main role="main" class="flex-shrink-0" style="padding: 20px;">
+		<div class="shares-main-card">
+			<!-- 页面标题 -->
+			<div class="shares-header">
+				<i class="fa fa-share-alt shares-header-icon"></i>
+				<h1 class="shares-header-title">我的分享</h1>
+				<p class="shares-header-subtitle">共 <span class="shares-total-count" id="shares-count">0</span> 条分享，记录了那些值得分享的瞬间</p>
+			</div>
+			
+			<!-- 筛选标签 - 由JavaScript动态生成 -->
+			<div class="shares-filters" id="shares-filters"></div>
+			
+			<!-- 分享网格 -->
+			<div class="shares-grid" id="shares-grid">
+				<!-- 动态生成 -->
+			</div>
+			
+			<!-- 空状态 -->
+			<div class="shares-empty" id="shares-empty">
+				<i class="fa fa-share-alt"></i>
+				<p>暂无分享内容</p>
+			</div>
+		</div>
+	</main>
+	
+	<!-- 侧边详情面板 -->
+	<div class="detail-overlay" id="detail-overlay"></div>
+	<div class="detail-panel" id="detail-panel">
+		<div class="panel-header">
+			<div class="panel-nav">
+				<button class="panel-nav-btn" id="btn-prev" title="上一条 (←)"><i class="fa fa-chevron-left"></i></button>
+				<span class="panel-counter"><span id="current-index">1</span> / <span id="total-count">0</span></span>
+				<button class="panel-nav-btn" id="btn-next" title="下一条 (→)"><i class="fa fa-chevron-right"></i></button>
+			</div>
+			<button class="panel-close" id="btn-close" title="关闭 (Esc)"><i class="fa fa-times"></i></button>
+		</div>
+		<div class="panel-body" id="panel-body">
+			<!-- 动态内容 -->
+		</div>
+		<div class="panel-tips">
+			<kbd>←</kbd> 上一条 &nbsp;&nbsp; <kbd>→</kbd> 下一条 &nbsp;&nbsp; <kbd>Esc</kbd> 关闭
+		</div>
+	</div>
+	
+	<!-- 底部 -->
+	<footer class="shares-footer">
+		<span class="footer-text">
+			<i class="fa fa-share-alt"></i> 分享美好，记录精彩
+		</span>
+	</footer>
+	
+	<script src="../Common/vendor/js/jquery.min.js"></script>
+	<script src="../Common/vendor/js/bootstrap.bundle.min.js"></script>
+	<script src="json/shares.js"></script>
+	<script>
+		// 当前筛选类型
+		var currentFilter = 'all';
+		// 当前选中的卡片索引
+		var currentIndex = -1;
+		// 面板是否打开
+		var isPanelOpen = false;
+		// 当前筛选后的列表
+		var filteredList = [];
+		
+		// 分享类型配置（唯一维护点）- 与模板保持一致
+		var shareTypeConfig = [
+			{type: 'blog', name: '日志', icon: '📝'},
+			{type: 'album', name: '相册', icon: '📚'},
+			{type: 'photo', name: '照片', icon: '🖼️'},
+			{type: 'link', name: '网页', icon: '🌐'},
+			{type: 'video', name: '视频', icon: '🎬'},
+			{type: 'product', name: '商品', icon: '🛒'},
+			{type: 'article', name: '新闻', icon: '📰'},
+			{type: 'weibo', name: '微博', icon: '💬'},
+			{type: 'music', name: '音乐', icon: '🎵'},
+			{type: 'other', name: '其它', icon: '📎'}
+		];
+		
+		// 初始化页面
+		function init() {
+			filteredList = dataList.slice();
+			renderFilters();
+			renderShares();
+			bindEvents();
+			updateCount();
+		}
+		
+		// 渲染筛选标签
+		function renderFilters() {
+			if (typeof dataList === 'undefined' || !Array.isArray(dataList)) return;
+			
+			// 统计各类型数量
+			var typeCounts = {};
+			for (var i = 0; i < dataList.length; i++) {
+				var typeName = dataList[i].share_type;
+				typeCounts[typeName] = (typeCounts[typeName] || 0) + 1;
+			}
+			
+			// 生成按钮HTML
+			var html = '<button class="filter-tag active" data-type="all">全部 <span class="count">' + dataList.length + '</span></button>';
+			for (var i = 0; i < shareTypeConfig.length; i++) {
+				var config = shareTypeConfig[i];
+				var count = typeCounts[config.type] || 0;
+				html += '<button class="filter-tag" data-type="' + config.type + '">' + config.icon + ' ' + config.name + ' <span class="count">' + count + '</span></button>';
+			}
+			
+			$('#shares-filters').html(html);
+		}
+		
+		// 渲染分享卡片
+		function renderShares() {
+			var html = '';
+			for (var i = 0; i < filteredList.length; i++) {
+				var share = filteredList[i];
+				var typeInfo = typeMap[share.share_type] || { name: '其他', icon: '📌', color: '#999' };
+				var picsumSeed = share.id || Date.now();
+				var coverUrl = share.cover || 'https://picsum.photos/seed/' + picsumSeed + '/400/300';
+				
+				html += '<div class="share-card" data-index="' + i + '" data-id="' + share.id + '" data-type="' + share.share_type + '">';
+				html += '<img class="share-card-cover" src="' + coverUrl + '" alt="封面" onerror="this.onerror=null;this.src=\'https://picsum.photos/seed/' + picsumSeed + '/400/300\'">';
+				html += '<div class="share-card-content">';
+				html += '<span class="share-card-type">' + typeInfo.icon + ' ' + typeInfo.name + '</span>';
+				html += '<h3 class="share-card-title">' + escapeHtml(share.title) + '</h3>';
+				html += '<p class="share-card-summary">' + escapeHtml(share.summary || share.comment || '') + '</p>';
+				html += '<div class="share-card-meta">';
+				html += '<span class="share-card-source">' + (share.source ? '<span>📍</span> ' + escapeHtml(share.source) : '') + '</span>';
+				html += '<span>' + formatDate(share.create_time) + '</span>';
+				html += '</div>';
+				html += '<div class="share-card-meta" style="margin-top: 8px;">';
+				html += '<span></span>';
+				html += '<div class="share-card-actions">';
+				html += '<span>👍 ' + (share.likes || 0) + '</span>';
+				html += '<span>💬 ' + (share.comments ? share.comments.length : 0) + '</span>';
+				html += '</div>';
+				html += '</div>';
+				html += '</div>';
+				html += '</div>';
+			}
+			
+			$('#shares-grid').html(html);
+			
+			// 显示/隐藏空状态
+			if (filteredList.length === 0) {
+				$('#shares-empty').show();
+			} else {
+				$('#shares-empty').hide();
+			}
+		}
+		
+		// 更新计数
+		function updateCount() {
+			$('#shares-count').text(filteredList.length);
+		}
+		
+		// 打开侧边面板
+		function openPanel(index) {
+			if (index < 0 || index >= filteredList.length) return;
+			
+			currentIndex = index;
+			isPanelOpen = true;
+			
+			// 更新卡片选中状态
+			$('.share-card').removeClass('active');
+			$('.share-card[data-index="' + index + '"]').addClass('active');
+			
+			// 显示遮罩和面板
+			$('#detail-overlay').addClass('show');
+			$('#detail-panel').addClass('show');
+			
+			// 禁止body滚动
+			$('body').css('overflow', 'hidden');
+			
+			// 渲染详情内容
+			renderPanelContent(index);
+			
+			// 更新导航状态
+			updateNavState();
+		}
+		
+		// 关闭侧边面板
+		function closePanel() {
+			isPanelOpen = false;
+			currentIndex = -1;
+			
+			// 移除卡片选中状态
+			$('.share-card').removeClass('active');
+			
+			// 隐藏遮罩和面板
+			$('#detail-overlay').removeClass('show');
+			$('#detail-panel').removeClass('show');
+			
+			// 恢复body滚动
+			$('body').css('overflow', '');
+			
+			// 清空面板内容
+			$('#panel-body').html('');
+		}
+		
+		// 渲染面板内容
+		function renderPanelContent(index) {
+			var share = filteredList[index];
+			if (!share) return;
+			
+			var typeInfo = typeMap[share.share_type] || { name: '其他', icon: '📌', color: '#999' };
+			var html = '';
+			
+			// 详情头部
+			html += '<div class="detail-header">';
+			html += '<div class="detail-user">';
+			html += '<img class="detail-avatar" src="https://i.pravatar.cc/100?img=1" alt="头像">';
+			html += '<div class="detail-user-info">';
+			html += '<div class="detail-user-name">Demo用户</div>';
+			html += '<div class="detail-time">' + formatDate(share.create_time) + '</div>';
+			html += '</div>';
+			html += '<span class="detail-type">' + typeInfo.icon + ' ' + typeInfo.name + '</span>';
+			html += '</div>';
+			html += '</div>';
+			
+			// 分享描述
+			if (share.comment) {
+				html += '<div class="detail-desc">' + escapeHtml(share.comment) + '</div>';
+			}
+			
+			// 分享来源内容
+			html += '<div class="detail-source" onclick="window.open(\'' + (share.source_url || '#') + '\', \'_blank\')">';
+			html += '<h3 class="detail-source-title"><a href="' + (share.source_url || '#') + '" target="_blank">' + escapeHtml(share.title) + '</a></h3>';
+			if (share.summary) {
+				html += '<p class="detail-source-summary">' + escapeHtml(share.summary) + '</p>';
+			}
+			if (share.source) {
+				html += '<div class="detail-source-from">来自 ' + escapeHtml(share.source) + '</div>';
+			}
+			html += '</div>';
+			
+			// 统计信息
+			var floorNum = filteredList.length - index;
+			html += '<div class="detail-stats">';
+			html += '<span class="detail-floor">#' + floorNum + '</span>';
+			html += '<div class="detail-actions">';
+			html += '<span class="detail-action-item"><i class="fa fa-thumbs-up"></i> ' + (share.likes || 0) + '</span>';
+			html += '<span class="detail-action-item"><i class="fa fa-comment"></i> ' + (share.comments ? share.comments.length : 0) + '</span>';
+			html += '</div>';
+			html += '</div>';
+			
+			// 评论区
+			if (share.comments && share.comments.length > 0) {
+				html += '<div class="detail-comments">';
+				html += '<div class="detail-comments-title">💬 评论 (' + share.comments.length + ')</div>';
+				
+				for (var j = 0; j < share.comments.length; j++) {
+					var comment = share.comments[j];
+					
+					html += '<div class="detail-comment-item">';
+					html += '<img class="detail-comment-avatar" src="' + (comment.avatar || 'https://i.pravatar.cc/100?img=' + (j + 10)) + '" alt="头像">';
+					html += '<div class="detail-comment-body">';
+					html += '<div class="detail-comment-user">' + escapeHtml(comment.user) + '</div>';
+					html += '<div class="detail-comment-text">' + escapeHtml(comment.content) + '</div>';
+					html += '<div class="detail-comment-time">' + formatDate(comment.time) + '</div>';
+					html += '</div>';
+					html += '</div>';
+				}
+				
+				html += '</div>';
+			}
+			
+			// 填充面板内容
+			$('#panel-body').html(html);
+			
+			// 滚动到顶部
+			$('#panel-body').scrollTop(0);
+		}
+		
+		// 更新导航状态
+		function updateNavState() {
+			var total = filteredList.length;
+			
+			$('#current-index').text(currentIndex + 1);
+			$('#total-count').text(total);
+			
+			// 更新按钮状态
+			$('#btn-prev').prop('disabled', currentIndex <= 0);
+			$('#btn-next').prop('disabled', currentIndex >= total - 1);
+		}
+		
+		// 上一条
+		function goPrev() {
+			if (currentIndex > 0) {
+				openPanel(currentIndex - 1);
+			}
+		}
+		
+		// 下一条
+		function goNext() {
+			if (currentIndex < filteredList.length - 1) {
+				openPanel(currentIndex + 1);
+			}
+		}
+		
+		// 绑定事件
+		function bindEvents() {
+			// 筛选标签点击
+			$(document).on('click', '.filter-tag', function() {
+				$('.filter-tag').removeClass('active');
+				$(this).addClass('active');
+				currentFilter = $(this).data('type');
+				filterShares();
+			});
+			
+			// 卡片点击 - 打开侧边面板
+			$('#shares-grid').on('click', '.share-card', function(e) {
+				var index = parseInt($(this).data('index'));
+				openPanel(index);
+			});
+			
+			// 关闭按钮点击
+			$('#btn-close').on('click', closePanel);
+			
+			// 遮罩点击关闭
+			$('#detail-overlay').on('click', closePanel);
+			
+			// 上一条/下一条按钮
+			$('#btn-prev').on('click', goPrev);
+			$('#btn-next').on('click', goNext);
+			
+			// 键盘事件
+			$(document).on('keydown', function(e) {
+				if (!isPanelOpen) return;
+				
+				if (e.key === 'Escape') {
+					closePanel();
+					e.preventDefault();
+				} else if (e.key === 'ArrowLeft') {
+					goPrev();
+					e.preventDefault();
+				} else if (e.key === 'ArrowRight') {
+					goNext();
+					e.preventDefault();
+				}
+			});
+			
+			// 阻止面板内点击事件冒泡到遮罩
+			$('#detail-panel').on('click', function(e) {
+				e.stopPropagation();
+			});
+		}
+		
+		// 筛选分享
+		function filterShares() {
+			if (currentFilter === 'all') {
+				filteredList = dataList.slice();
+			} else {
+				filteredList = [];
+				for (var i = 0; i < dataList.length; i++) {
+					if (dataList[i].share_type === currentFilter) {
+						filteredList.push(dataList[i]);
+					}
+				}
+			}
+			
+			renderShares();
+			updateCount();
+		}
+		
+		// 格式化日期
+		function formatDate(dateStr) {
+			if (!dateStr) return '';
+			var date = new Date(dateStr);
+			var year = date.getFullYear();
+			var month = ('0' + (date.getMonth() + 1)).slice(-2);
+			var day = ('0' + date.getDate()).slice(-2);
+			var hour = ('0' + date.getHours()).slice(-2);
+			var minute = ('0' + date.getMinutes()).slice(-2);
+			return year + '-' + month + '-' + day + ' ' + hour + ':' + minute;
+		}
+		
+		// HTML转义
+		function escapeHtml(str) {
+			if (!str) return '';
+			return str.replace(/&/g, '&amp;')
+					  .replace(/</g, '&lt;')
+					  .replace(/>/g, '&gt;')
+					  .replace(/"/g, '&quot;')
+					  .replace(/'/g, '&#039;');
+		}
+		
+		// 页面加载完成后初始化
+		$(document).ready(function() {
+			init();
+		});
+	</script>
 </body>
+
 </html>

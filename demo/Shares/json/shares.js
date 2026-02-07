@@ -115,7 +115,7 @@ var dataList = [
     },
     {
         id: 6,
-        share_type: "article",
+        share_type: "blog",
         title: "程序员的自我修养：如何写出优雅的代码",
         source: "掘金",
         source_url: "https://juejin.cn/",
@@ -151,13 +151,72 @@ var dataList = [
         comment: "超级好听！循环播放中 🎶",
         likes: 98,
         comments: []
+    },
+    {
+        id: 8,
+        share_type: "photo",
+        title: "2024新年烟花摄影作品集",
+        source: "图虫",
+        source_url: "https://tuchong.com/",
+        summary: "精选2024跨年夜各地烟花照片，记录这美好的瞬间。",
+        cover: "https://picsum.photos/seed/share8/400/300",
+        create_time: "2024-01-01 00:30:00",
+        comment: "新年快乐！🎆",
+        likes: 234,
+        comments: [
+            {
+                user: "摄影师老李",
+                avatar: "https://i.pravatar.cc/100?img=20",
+                content: "拍得真美！",
+                time: "2024-01-01 01:00:00"
+            }
+        ]
+    },
+    {
+        id: 9,
+        share_type: "album",
+        title: "日本京都赏樱之旅",
+        source: "小红书",
+        source_url: "https://xiaohongshu.com/",
+        summary: "记录了我们在京都赏樱的美好时光，清水寺、哲学之道、�的山公园...",
+        cover: "https://picsum.photos/seed/share9/400/300",
+        create_time: "2023-04-10 15:20:00",
+        comment: "樱花真的太美了，明年还要去！🌸",
+        likes: 456,
+        comments: [
+            {
+                user: "旅行达人",
+                avatar: "https://i.pravatar.cc/100?img=21",
+                content: "好想去日本看樱花",
+                time: "2023-04-10 16:00:00"
+            }
+        ]
+    },
+    {
+        id: 10,
+        share_type: "weibo",
+        title: "今天的天气真好",
+        source: "微博",
+        source_url: "https://weibo.com/",
+        summary: "阳光明媚，心情也跟着好起来了~",
+        cover: "https://picsum.photos/seed/share10/400/300",
+        create_time: "2024-01-20 10:00:00",
+        comment: "分享一下好心情",
+        likes: 45,
+        comments: []
     }
 ];
 
-// 分享类型映射
+// 分享类型映射 - 与模板保持一致
 var typeMap = {
-    "link": { name: "链接", icon: "🔗", color: "#4A90E2" },
-    "music": { name: "音乐", icon: "🎵", color: "#E24A90" },
-    "video": { name: "视频", icon: "🎬", color: "#E2904A" },
-    "article": { name: "文章", icon: "📰", color: "#4AE290" }
+    "blog": { name: "日志", icon: "📝", color: "#6c5ce7" },
+    "album": { name: "相册", icon: "📚", color: "#00b894" },
+    "photo": { name: "照片", icon: "🖼️", color: "#0984e3" },
+    "link": { name: "网页", icon: "🌐", color: "#a29bfe" },
+    "video": { name: "视频", icon: "🎬", color: "#e17055" },
+    "product": { name: "商品", icon: "🛒", color: "#fdcb6e" },
+    "article": { name: "新闻", icon: "📰", color: "#55efc4" },
+    "weibo": { name: "微博", icon: "💬", color: "#74b9ff" },
+    "music": { name: "音乐", icon: "🎵", color: "#fd79a8" },
+    "other": { name: "其它", icon: "📎", color: "#b2bec3" }
 };
