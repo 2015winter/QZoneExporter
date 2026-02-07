@@ -824,10 +824,8 @@
 				<p class="shares-header-subtitle">共 <span class="shares-total-count" id="shares-count"><%:=total%></span> 条分享，记录了那些值得分享的瞬间</p>
 			</div>
 			
-			<!-- 筛选标签 -->
-			<div class="shares-filters" id="shares-filters">
-				<button class="filter-tag active" data-type="all">全部 <span class="count" id="filter-all"><%:=total%></span></button>
-			</div>
+			<!-- 筛选标签 - 由JavaScript动态生成 -->
+			<div class="shares-filters" id="shares-filters"></div>
 			
 			<!-- 分享网格 -->
 			<div class="shares-grid" id="shares-grid">
@@ -840,7 +838,8 @@
 					<%const shareTitle = (share.source && share.source.title) ? share.source.title : '分享内容'%>
 					<%const shareDesc = share.desc || (share.source && share.source.desc) || '暂无详细描述'%>
 					<%const sourceFrom = (share.source && share.source.from && share.source.from.name) || ''%>
-					<div class="share-card" data-index="<%:=index%>" data-id="<%:=share.id%>">
+					<%const shareTypeName = API.Shares.getDisplayType(share.type)%>
+					<div class="share-card" data-index="<%:=index%>" data-id="<%:=share.id%>" data-type="<%:=shareTypeName%>">
 						<img class="share-card-cover lazyload" src="<%:=coverUrl || ('https://picsum.photos/seed/' + picsumSeed + '/400/300')%>" alt="封面" onerror="this.onerror=null;this.src='https://picsum.photos/seed/<%:=picsumSeed%>/400/300'">
 						<div class="share-card-content">
 							<span class="share-card-type"><%:=API.Shares.getDisplayType(share.type)%></span>
@@ -904,9 +903,46 @@
 		// 面板是否打开
 		var isPanelOpen = false;
 		
+		// 分享类型配置（唯一维护点）
+		var shareTypeConfig = [
+			{type: '日志', icon: '📝'},
+			{type: '相册', icon: '📚'},
+			{type: '照片', icon: '🖼️'},
+			{type: '网页', icon: '🌐'},
+			{type: '视频', icon: '🎬'},
+			{type: '商品', icon: '🛒'},
+			{type: '新闻', icon: '📰'},
+			{type: '微博', icon: '💬'},
+			{type: '音乐', icon: '🎵'},
+			{type: '其它', icon: '📎'}
+		];
+		
 		// 初始化页面
 		function init() {
+			renderFilters();
 			bindEvents();
+		}
+		
+		// 渲染筛选标签
+		function renderFilters() {
+			if (typeof shares === 'undefined' || !Array.isArray(shares)) return;
+			
+			// 统计各类型数量
+			var typeCounts = {};
+			for (var i = 0; i < shares.length; i++) {
+				var typeName = API.Shares.getDisplayType(shares[i].type);
+				typeCounts[typeName] = (typeCounts[typeName] || 0) + 1;
+			}
+			
+			// 生成按钮HTML
+			var html = '<button class="filter-tag active" data-type="all">全部 <span class="count">' + shares.length + '</span></button>';
+			for (var i = 0; i < shareTypeConfig.length; i++) {
+				var config = shareTypeConfig[i];
+				var count = typeCounts[config.type] || 0;
+				html += '<button class="filter-tag" data-type="' + config.type + '">' + config.icon + ' ' + config.type + ' <span class="count">' + count + '</span></button>';
+			}
+			
+			$('#shares-filters').html(html);
 		}
 		
 		// 打开侧边面板
@@ -1154,6 +1190,14 @@
 		
 		// 绑定事件
 		function bindEvents() {
+			// 筛选标签点击
+			$('.filter-tag').on('click', function() {
+				$('.filter-tag').removeClass('active');
+				$(this).addClass('active');
+				currentFilter = $(this).data('type');
+				filterShares();
+			});
+			
 			// 卡片点击 - 打开侧边面板
 			$('#shares-grid').on('click', '.share-card', function(e) {
 				var index = parseInt($(this).data('index'));
@@ -1190,6 +1234,32 @@
 			$('#detail-panel').on('click', function(e) {
 				e.stopPropagation();
 			});
+		}
+		
+		// 筛选分享
+		function filterShares() {
+			var $cards = $('.share-card');
+			var visibleCount = 0;
+			
+			$cards.each(function() {
+				var cardType = $(this).data('type');
+				if (currentFilter === 'all' || cardType === currentFilter) {
+					$(this).show();
+					visibleCount++;
+				} else {
+					$(this).hide();
+				}
+			});
+			
+			// 更新显示数量
+			$('#shares-count').text(visibleCount);
+			
+			// 显示/隐藏空状态
+			if (visibleCount === 0) {
+				$('#shares-empty').show();
+			} else {
+				$('#shares-empty').hide();
+			}
 		}
 		
 		// 页面加载完成后初始化
