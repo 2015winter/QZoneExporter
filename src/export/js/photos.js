@@ -8,6 +8,8 @@ $(function() {
 
     // 渲染导航相册名称
     $(".breadcrumb-item.active").text(album.name);
+    // 导航栏数据加载完成，显示面包屑（防止闪烁）
+    $(".breadcrumb").addClass('ready');
 
     // 非静态页面，需要生成相片列表，静态页面默认生成
     // 获取模板元素
@@ -186,6 +188,9 @@ $(function() {
 
     // 初始化默认布局为时间线
     applyLayout('timeline');
+
+    // 数据加载完成，显示内容区域（防止闪烁）
+    $('#photos_html').addClass('ready');
 
     // ==================== 自定义小窗预览功能 ====================
     

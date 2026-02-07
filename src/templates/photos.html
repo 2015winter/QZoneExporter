@@ -33,6 +33,17 @@
 
 	<script type="text/javascript" src="../Albums/json/albums.js"></script>
 	<style>
+		/* 防止页面切换闪烁 - 初始隐藏内容区域和导航栏面包屑 */
+		.tz-gallery,
+		.breadcrumb {
+			opacity: 0;
+			transition: opacity 0.15s ease-in;
+		}
+		.tz-gallery.ready,
+		.breadcrumb.ready {
+			opacity: 1;
+		}
+		
 		/* 相册详情页样式 - 绿色主题与Albums/index.html统一 */
 		body {
 			background: linear-gradient(135deg, #11998e 0%, #38ef7d 50%, #96fbc4 100%);
