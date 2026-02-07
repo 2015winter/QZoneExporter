@@ -23,6 +23,11 @@
 	<script src="js/blogs.js"></script>
 	
 	<style>
+		/* 始终显示滚动条，避免切换时布局偏移 */
+		html {
+			overflow-y: scroll;
+		}
+		
 		/* 日志页面专属样式 - 与首页风格一致 */
 		body.blogs-page {
 			background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
