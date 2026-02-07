@@ -25,6 +25,11 @@
 			box-sizing: border-box;
 		}
 		
+		/* 始终显示滚动条，避免切换时布局偏移 */
+		html {
+			overflow-y: scroll;
+		}
+		
 		body {
 			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 			background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
