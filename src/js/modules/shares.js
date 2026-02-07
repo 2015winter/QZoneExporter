@@ -451,24 +451,9 @@ API.Shares.exportToHtml = async(shares) => {
         // 基于JSON生成JS
         await API.Common.writeJsonToJs('shares', shares, moduleFolder + '/json/shares.js');
 
-        // 分享数据根据年份分组
-        let yearMaps = API.Utils.groupedByTime(shares, "shareTime", 'year');
-        // 基于模板生成年份分享HTML
-        for (const [year, yearItems] of yearMaps) {
-            // 基于模板生成所有分享HTML
-            let _sharesMaps = new Map();
-            const monthMaps = API.Utils.groupedByTime(yearItems, "shareTime", 'month');
-            _sharesMaps.set(year, monthMaps);
-            let params = {
-                sharesMaps: _sharesMaps,
-                total: yearItems.length
-            }
-            await API.Common.writeHtmlofTpl('shares', params, moduleFolder + "/" + year + ".html");
-        }
-
-        // 基于模板生成汇总分享HTML
+        // 直接导出所有分享到单个页面（不按年份分组）
         let params = {
-            sharesMaps: API.Utils.groupedByTime(shares, "shareTime", 'all'),
+            sharesList: shares,
             total: shares.length
         }
         await API.Common.writeHtmlofTpl('shares', params, moduleFolder + "/index.html");

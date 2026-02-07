@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 
 <head>
 	<link rel="icon" href="../Common/images/favicon.ico"> 
-	<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>QQ空间备份-分享</title>
 	<link rel="stylesheet" href="../Common/vendor/css/font-awesome.min.css">
 	<link rel="stylesheet" href="../Common/vendor/css/bootstrap.min.css">
@@ -31,26 +32,42 @@
 	<script type="text/javascript" src="../Common/json/config.js"></script>
 	<script type="text/javascript" src="json/shares.js"></script>
 	<script type="text/javascript" src="../Common/js/common.js"></script>
-	<script type="text/javascript" src="../Common/js/sidebar.js"></script>
 	<script type="text/javascript" src="js/shares.js"></script>
 	
 	<style>
 		/* 分享页面专属样式 - 浅紫色主题 #a29bfe */
-		body.shares-page {
-			background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 50%, #fd79a8 100%);
+		:root {
+			--primary-gradient: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+			--card-shadow: 0 4px 15px rgba(162, 155, 254, 0.2);
+			--primary-color: #a29bfe;
+			--primary-dark: #6c5ce7;
+		}
+		
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+		
+		body {
+			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+			background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
 			min-height: 100vh;
-			padding-top: 70px;
-			padding-bottom: 40px;
+			padding: 20px;
+			padding-top: 80px;
+			padding-bottom: 80px;
 		}
 		
 		/* 导航栏样式 */
 		.shares-navbar {
-			background: linear-gradient(135deg, rgba(162, 155, 254, 0.95), rgba(108, 92, 231, 0.95)) !important;
+			background: var(--primary-gradient) !important;
 			backdrop-filter: blur(10px);
 		}
 		
 		.shares-breadcrumb {
 			background: transparent !important;
+			margin-bottom: 0;
+			padding-top: 8px;
 		}
 		
 		.shares-breadcrumb .breadcrumb-item a {
@@ -71,92 +88,246 @@
 			color: rgba(255, 255, 255, 0.5);
 		}
 		
-		/* 年份分组标题 */
-		.shares-page .year-group {
-			margin-top: 32px;
+		/* 主卡片容器 - 收藏页风格 */
+		.shares-main-card {
+			background: rgba(255, 255, 255, 0.95);
+			backdrop-filter: blur(20px);
+			border-radius: 24px;
+			box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+			padding: 40px;
+			max-width: 1200px;
+			margin: 0 auto;
+		}
+		
+		/* 页面标题区域 - 收藏页风格 */
+		.shares-header {
+			text-align: center;
+			margin-bottom: 40px;
+			padding-bottom: 30px;
+			border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+		}
+		
+		.shares-header-icon {
+			font-size: 48px;
+			background: var(--primary-gradient);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
 			margin-bottom: 16px;
+			display: block;
 		}
 		
-		.shares-page .year-group:first-of-type {
-			margin-top: 0;
-		}
-		
-		.shares-page .year-title {
-			display: inline-flex;
-			align-items: center;
-			gap: 10px;
-			background: linear-gradient(135deg, #a29bfe, #6c5ce7);
-			color: #fff;
-			padding: 10px 24px;
-			border-radius: 25px;
-			font-weight: 600;
-			font-size: 16px;
-		}
-		
-		/* 月份分组标题 */
-		.shares-page .month-group {
-			margin-top: 20px;
+		.shares-header-title {
+			font-size: 32px;
+			font-weight: 700;
+			background: var(--primary-gradient);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
 			margin-bottom: 12px;
 		}
 		
-		.shares-page .month-title {
+		.shares-header-subtitle {
+			color: #718096;
+			font-size: 16px;
+		}
+		
+		.shares-total-count {
+			font-weight: 600;
+			color: var(--primary-color);
+		}
+		
+		/* 筛选标签区域 - 收藏页风格 */
+		.shares-filters {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 12px;
+			justify-content: center;
+			margin-bottom: 32px;
+			padding-bottom: 24px;
+			border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+		}
+		
+		.filter-tag {
 			display: inline-flex;
 			align-items: center;
 			gap: 8px;
-			background: rgba(162, 155, 254, 0.25);
-			color: #fff;
-			padding: 6px 16px;
-			border-radius: 18px;
-			font-weight: 500;
+			padding: 10px 20px;
+			background: linear-gradient(145deg, #f8fafc, #fff);
+			border: 1px solid rgba(162, 155, 254, 0.15);
+			border-radius: 30px;
 			font-size: 14px;
+			color: #4a5568;
+			cursor: pointer;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			text-decoration: none;
 		}
 		
-		/* 分享卡片样式 */
-		.shares-page .share-row {
-			background: rgba(255, 255, 255, 0.95);
-			backdrop-filter: blur(10px);
-			border-radius: 16px !important;
-			border: none !important;
-			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+		.filter-tag:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 6px 20px rgba(162, 155, 254, 0.2);
+			background: var(--primary-gradient);
+			color: #fff;
+			text-decoration: none;
+		}
+		
+		.filter-tag.active {
+			background: var(--primary-gradient);
+			color: #fff;
+			border-color: transparent;
+			box-shadow: 0 6px 20px rgba(162, 155, 254, 0.3);
+		}
+		
+		.filter-tag .count {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			min-width: 24px;
+			height: 24px;
+			padding: 0 8px;
+			background: rgba(162, 155, 254, 0.1);
+			border-radius: 12px;
+			font-size: 12px;
+			font-weight: 600;
+			color: var(--primary-color);
 			transition: all 0.3s ease;
 		}
 		
-		.shares-page .share-row:hover {
-			transform: translateY(-4px);
-			box-shadow: 0 12px 40px rgba(162, 155, 254, 0.25);
+		.filter-tag:hover .count,
+		.filter-tag.active .count {
+			background: rgba(255, 255, 255, 0.25);
+			color: #fff;
 		}
 		
-		/* 分享卡片底部 */
-		.shares-page .share-row .card-footer {
-			background: linear-gradient(135deg, rgba(162, 155, 254, 0.1), rgba(108, 92, 231, 0.1)) !important;
-			border-top: 1px solid rgba(162, 155, 254, 0.2) !important;
-			border-radius: 0 0 16px 16px !important;
+		/* 分享卡片网格 - 收藏页风格 */
+		.shares-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+			gap: 20px;
 		}
 		
-		.shares-page .share-row .card-footer .fa-thumbs-up,
-		.shares-page .share-row .card-footer .fa-eye {
-			color: #6c5ce7 !important;
+		/* 分享卡片 - 收藏页风格 */
+		.share-card {
+			background: #fff;
+			border-radius: 16px;
+			overflow: hidden;
+			box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+			transition: all 0.3s ease;
+			cursor: pointer;
+			display: flex;
+			flex-direction: column;
+			height: 100%;
 		}
 		
-		.shares-page .share-row .card-footer .border-primary {
-			border-color: #a29bfe !important;
-			color: #6c5ce7 !important;
+		.share-card:hover {
+			transform: translateY(-5px);
+			box-shadow: 0 10px 30px rgba(162, 155, 254, 0.2);
 		}
 		
-		/* 分享类型标签 */
-		.shares-page .border-warning {
-			border-color: #a29bfe !important;
-			color: #6c5ce7 !important;
-			background: rgba(162, 155, 254, 0.1);
+		.share-card.active {
+			box-shadow: 0 0 0 3px var(--primary-color), 0 10px 30px rgba(162, 155, 254, 0.3);
+			transform: translateY(-5px);
 		}
 		
-		/* 引用块样式 */
-		.shares-page blockquote.source {
-			border-left: 4px solid #a29bfe;
-			background: rgba(162, 155, 254, 0.08);
-			padding: 12px 16px;
-			border-radius: 0 8px 8px 0;
-			margin: 12px 0;
+		.share-card-cover {
+			width: 100%;
+			height: 180px;
+			object-fit: cover;
+			transition: transform 0.3s ease;
+			background: linear-gradient(135deg, #e8e4ff 0%, #d4d0f7 100%);
+		}
+		
+		.share-card:hover .share-card-cover {
+			transform: scale(1.05);
+		}
+		
+		.share-card-content {
+			padding: 20px;
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+		}
+		
+		.share-card-type {
+			display: inline-flex;
+			align-items: center;
+			gap: 5px;
+			padding: 4px 12px;
+			border-radius: 12px;
+			font-size: 12px;
+			font-weight: 600;
+			margin-bottom: 10px;
+			align-self: flex-start;
+			background: rgba(162, 155, 254, 0.15);
+			color: var(--primary-dark);
+		}
+		
+		.share-card-title {
+			font-size: 16px;
+			font-weight: 600;
+			color: #333;
+			margin-bottom: 8px;
+			line-height: 1.4;
+			display: -webkit-box;
+			-webkit-line-clamp: 2;
+			-webkit-box-orient: vertical;
+			overflow: hidden;
+		}
+		
+		.share-card-summary {
+			font-size: 14px;
+			color: #666;
+			line-height: 1.6;
+			display: -webkit-box;
+			-webkit-line-clamp: 3;
+			-webkit-box-orient: vertical;
+			overflow: hidden;
+			margin-bottom: 12px;
+			flex: 1;
+		}
+		
+		.share-card-meta {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			font-size: 12px;
+			color: #999;
+			margin-top: auto;
+		}
+		
+		.share-card-source {
+			display: flex;
+			align-items: center;
+			gap: 5px;
+		}
+		
+		.share-card-actions {
+			display: flex;
+			gap: 12px;
+		}
+		
+		.share-card-actions span {
+			display: flex;
+			align-items: center;
+			gap: 4px;
+		}
+		
+		/* 空状态 */
+		.shares-empty {
+			text-align: center;
+			padding: 60px 20px;
+			color: #718096;
+			display: none;
+		}
+		
+		.shares-empty i {
+			font-size: 64px;
+			margin-bottom: 20px;
+			opacity: 0.3;
+		}
+		
+		.shares-empty p {
+			font-size: 16px;
 		}
 		
 		/* 底部页脚 */
@@ -168,32 +339,463 @@
 			left: 0;
 			right: 0;
 			z-index: 1000;
+			padding: 15px;
+			text-align: center;
 		}
 		
-		.shares-footer .footer-text {
+		.footer-text {
 			font-size: 14px;
 			letter-spacing: 1px;
+			color: #fff;
+		}
+		
+		/* ========== 侧边滑出面板样式 ========== */
+		
+		/* 遮罩层 */
+		.detail-overlay {
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: rgba(0, 0, 0, 0.5);
+			z-index: 1999;
+			opacity: 0;
+			visibility: hidden;
+			transition: all 0.3s ease;
+			backdrop-filter: blur(4px);
+		}
+		
+		.detail-overlay.show {
+			opacity: 1;
+			visibility: visible;
+		}
+		
+		/* 侧边面板 */
+		.detail-panel {
+			position: fixed;
+			top: 0;
+			right: 0;
+			width: 620px;
+			max-width: 100%;
+			height: 100vh;
+			background: #fff;
+			z-index: 2000;
+			transform: translateX(100%);
+			transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+			display: flex;
+			flex-direction: column;
+			box-shadow: -10px 0 40px rgba(0, 0, 0, 0.15);
+		}
+		
+		.detail-panel.show {
+			transform: translateX(0);
+		}
+		
+		/* 面板头部 */
+		.panel-header {
+			padding: 20px 24px;
+			background: var(--primary-gradient);
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			flex-shrink: 0;
+		}
+		
+		.panel-nav {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+		}
+		
+		.panel-nav-btn {
+			width: 38px;
+			height: 38px;
+			border-radius: 10px;
+			background: rgba(255, 255, 255, 0.2);
+			border: none;
+			cursor: pointer;
+			color: #fff;
+			font-size: 16px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			transition: all 0.2s ease;
+		}
+		
+		.panel-nav-btn:hover:not(:disabled) {
+			background: rgba(255, 255, 255, 0.35);
+			transform: scale(1.05);
+		}
+		
+		.panel-nav-btn:disabled {
+			opacity: 0.4;
+			cursor: not-allowed;
+		}
+		
+		.panel-counter {
+			color: #fff;
+			font-size: 14px;
+			font-weight: 500;
+			padding: 0 12px;
+		}
+		
+		.panel-close {
+			width: 40px;
+			height: 40px;
+			border-radius: 50%;
+			background: rgba(255, 255, 255, 0.2);
+			border: none;
+			cursor: pointer;
+			color: #fff;
+			font-size: 20px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			transition: all 0.25s ease;
+		}
+		
+		.panel-close:hover {
+			background: rgba(255, 255, 255, 0.35);
+			transform: rotate(90deg);
+		}
+		
+		/* 面板内容 */
+		.panel-body {
+			flex: 1;
+			overflow-y: auto;
+			overflow-x: hidden;
+			padding: 0;
+		}
+		
+		/* ========== 详情内容样式 - 保留原分享内容样式 ========== */
+		
+		/* 详情头部 */
+		.detail-header {
+			padding: 20px;
+			border-bottom: 1px solid #f0f0f0;
+		}
+		
+		.detail-user {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
+		
+		.detail-avatar {
+			width: 50px;
+			height: 50px;
+			border-radius: 50%;
+			object-fit: cover;
+			border: 2px solid var(--primary-color);
+		}
+		
+		.detail-user-info {
+			flex: 1;
+		}
+		
+		.detail-user-name {
+			font-weight: 600;
+			color: #333;
+			font-size: 16px;
+		}
+		
+		.detail-user-name a {
+			color: inherit;
+			text-decoration: none;
+		}
+		
+		.detail-user-name a:hover {
+			color: var(--primary-dark);
+		}
+		
+		.detail-time {
+			font-size: 13px;
+			color: #999;
+			margin-top: 4px;
+		}
+		
+		.detail-type {
+			display: inline-flex;
+			align-items: center;
+			gap: 5px;
+			padding: 4px 12px;
+			border-radius: 12px;
+			font-size: 12px;
+			background: rgba(162, 155, 254, 0.15);
+			color: var(--primary-dark);
+		}
+		
+		/* 分享描述 */
+		.detail-desc {
+			font-size: 16px;
+			color: #333;
+			line-height: 1.8;
+			padding: 20px;
+			border-bottom: 1px solid #f0f0f0;
+		}
+		
+		/* 分享来源内容 */
+		.detail-source {
+			margin: 20px;
+			padding: 15px;
+			background: #f8f9fa;
+			border-radius: 12px;
+			border-left: 4px solid var(--primary-color);
+			cursor: pointer;
+			transition: background 0.3s;
+		}
+		
+		.detail-source:hover {
+			background: #f0f1f2;
+		}
+		
+		.detail-source-title {
+			font-size: 16px;
+			font-weight: 600;
+			color: #333;
+			margin-bottom: 8px;
+			line-height: 1.5;
+		}
+		
+		.detail-source-title a {
+			color: inherit;
+			text-decoration: none;
+		}
+		
+		.detail-source-title a:hover {
+			color: var(--primary-dark);
+		}
+		
+		.detail-source-summary {
+			font-size: 14px;
+			color: #666;
+			line-height: 1.6;
+			margin-bottom: 8px;
+		}
+		
+		.detail-source-from {
+			font-size: 12px;
+			color: #999;
+		}
+		
+		/* 分享媒体区域 */
+		.detail-medias {
+			margin: 0 20px 20px;
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px;
+		}
+		
+		.detail-medias .medias-item {
+			border-radius: 8px;
+			overflow: hidden;
+			cursor: pointer;
+		}
+		
+		.detail-medias .medias-item img {
+			width: 100px;
+			height: 100px;
+			object-fit: cover;
+			transition: transform 0.3s;
+		}
+		
+		.detail-medias .medias-item:hover img {
+			transform: scale(1.05);
+		}
+		
+		/* 统计信息 */
+		.detail-stats {
+			padding: 15px 20px;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			border-top: 1px solid #f0f0f0;
+			background: #fafafa;
+		}
+		
+		.detail-floor {
+			font-size: 12px;
+			background: linear-gradient(135deg, rgba(162, 155, 254, 0.1), rgba(108, 92, 231, 0.1));
+			padding: 4px 10px;
+			border-radius: 10px;
+			color: var(--primary-dark);
+		}
+		
+		.detail-actions {
+			display: flex;
+			gap: 20px;
+		}
+		
+		.detail-action-item {
+			display: flex;
+			align-items: center;
+			gap: 5px;
+			font-size: 13px;
+			color: #666;
+			cursor: pointer;
+			transition: color 0.3s;
+		}
+		
+		.detail-action-item:hover {
+			color: var(--primary-dark);
+		}
+		
+		.detail-action-item .fa {
+			color: var(--primary-dark);
+		}
+		
+		/* 评论区 */
+		.detail-comments {
+			padding: 20px;
+			border-top: 1px solid #f0f0f0;
+		}
+		
+		.detail-comments-title {
+			font-size: 14px;
+			color: #666;
+			margin-bottom: 16px;
+			padding-bottom: 12px;
+			border-bottom: 1px dashed #eee;
+		}
+		
+		.detail-comment-item {
+			display: flex;
+			gap: 10px;
+			margin-bottom: 12px;
+			padding: 12px;
+			background: #f8f9fa;
+			border-radius: 10px;
+		}
+		
+		.detail-comment-item:last-child {
+			margin-bottom: 0;
+		}
+		
+		.detail-comment-avatar {
+			width: 36px;
+			height: 36px;
+			border-radius: 50%;
+			object-fit: cover;
+			flex-shrink: 0;
+		}
+		
+		.detail-comment-body {
+			flex: 1;
+		}
+		
+		.detail-comment-user {
+			font-size: 13px;
+			font-weight: 500;
+			color: #333;
+			margin-bottom: 4px;
+		}
+		
+		.detail-comment-user a {
+			color: inherit;
+			text-decoration: none;
+		}
+		
+		.detail-comment-user a:hover {
+			color: var(--primary-dark);
+		}
+		
+		.detail-comment-text {
+			font-size: 13px;
+			color: #666;
+			line-height: 1.5;
+		}
+		
+		.detail-comment-time {
+			font-size: 11px;
+			color: #999;
+			margin-top: 4px;
+		}
+		
+		.detail-comment-images {
+			margin-top: 8px;
+			display: flex;
+			flex-wrap: wrap;
+			gap: 6px;
+		}
+		
+		.detail-comment-images img {
+			width: 60px;
+			height: 60px;
+			object-fit: cover;
+			border-radius: 6px;
+			cursor: pointer;
+		}
+		
+		/* 回复样式 */
+		.detail-reply-item {
+			margin-top: 10px;
+			padding: 10px;
+			background: #fff;
+			border-radius: 8px;
+			border-left: 3px solid var(--primary-color);
+		}
+		
+		/* 私密标记 */
+		.private-tag {
+			color: #f39c12;
+			font-size: 12px;
+			margin-left: 8px;
+		}
+		
+		/* 键盘提示 */
+		.panel-tips {
+			padding: 12px 24px;
+			background: #f8fafc;
+			border-top: 1px solid #edf2f7;
+			font-size: 12px;
+			color: #a0aec0;
+			text-align: center;
+			flex-shrink: 0;
+		}
+		
+		.panel-tips kbd {
+			display: inline-block;
+			padding: 2px 6px;
+			background: #e2e8f0;
+			border-radius: 4px;
+			font-family: inherit;
+			font-size: 11px;
+			color: #4a5568;
+			margin: 0 2px;
 		}
 		
 		/* 响应式 */
 		@media (max-width: 768px) {
-			body.shares-page {
-				padding-top: 60px;
-				padding-bottom: 30px;
+			.shares-main-card {
+				padding: 24px 16px;
+				margin: 10px;
+				border-radius: 20px;
 			}
 			
-			.shares-page .sidebar-h1 {
-				font-size: 1.3rem;
+			.shares-header-icon { font-size: 36px; }
+			.shares-header-title { font-size: 24px; }
+			
+			.shares-grid {
+				grid-template-columns: 1fr;
+				gap: 16px;
 			}
 			
-			.shares-page .sidebar-h2 {
-				font-size: 1rem;
+			.shares-filters { gap: 8px; }
+			.filter-tag { padding: 8px 14px; font-size: 13px; }
+			
+			.detail-panel {
+				width: 100%;
+			}
+			
+			.panel-tips {
+				display: none;
 			}
 		}
 	</style>
 </head>
 
-<body class="shares-page">
+<body>
 	<header>
 		<nav class="navbar navbar-expand-lg navbar-dark fixed-top shares-navbar">
 			<a class="navbar-brand" target="_blank" href="https://github.com/2015winter/QZoneExporter">
@@ -212,186 +814,389 @@
 			</div>
 		</nav>
 	</header>
-	<main role="main" class="flex-shrink-0">
-		<div id="shares_html" class="container messages">
-			<%for (const [year, yearMap] of sharesMaps) {%>
-				<div class="year-group">
-					<span class="year-title sidebar-h1" data-tag="h1" data-sidebar='<%:=year%>年<span class="badge badge-primary badge-pill itemSize"><%:=API.Utils.sumYearItemSize(yearMap)%><span>'>
-						<i class="fa fa-calendar"></i><%:=year%>年
-					</span>
-				</div>
-				<%for (const [month, monthItems] of yearMap) {%>
-					<div class="month-group">
-						<span class="month-title sidebar-h2" data-tag="h2" data-sidebar='<%:=month%>月<span class="badge badge-secondary badge-pill itemSize"><%:=monthItems.length%><span>'>
-							<i class="fa fa-clock-o"></i><%:=month%>月
-						</span>
-					</div>
-					<%for (let index = 0; index < monthItems.length; index++) {%>
-						<%const share = monthItems[index]%>
-						<%total = total -1%>
-						<div id="<%:='share-' + share.id%>" class="card w-70 mt-3 border share-row">
-							<div class="card-body">
-								<div class="comments">
-									<div class="comment p-0">
-										<div class="d-flex justify-content-start ">
-											<div class="comment-avatar">
-												<a class="avatar p-0 m-0" target="_blank" href="<%:=API.Common.getUserUrl(share.uin)%>">
-													<img class="lazyload loading w-100 h-100 border rounded-circle" src="<%:=API.Common.getUserLogoLocalUrl(share.uin, true)%>" >
-												</a>
-											</div>
-											<div class="comment-infos ml-2">
-												<a target="_blank" href="<%:=API.Common.getUserUrl(share.uin)%>">
-													<span><%:=API.Common.formatContent(share.nickname, 'HTML', false, false, false, false, true)%></span>
-												</a>
-												分享<span class="border-warning border rounded text-warning small p-1"><%:=API.Shares.getDisplayType(share.type)%></span>
-												<div class="text-muted small mt-1"><%:=API.Utils.formatDate(share.shareTime)%></div>
-											</div>
-										</div>
-										<div class="messageText mt-2">
-											<!-- 分享描述 -->
-											<%if(share && share.desc){%>
-												<p id="<%:='share-desc-' + share.id%>"><%:=API.Common.formatContent(share.desc, "HTML", false, false, false, false, true)%></p>
-											<%}%>
-											<blockquote class="source">
-												<!-- 分享源标题 -->
-												<%if(share.source && share.source.title){%>
-													<p><a target="_blank" href="<%:=share.source.url%>"><%:=API.Common.formatContent(share.source.title, "HTML", false, false, false, false, true)%></a></p>
-												<%}%>
-												<!-- 分享源描述 -->
-												<%if(share.source && share.source.desc){%>
-													<p id="<%:='share-source-desc-' + share.id%>"><%:=API.Common.formatContent(share.source.desc, "HTML", false, false, false, false, true)%></p>
-												<%}%>
-												<!-- 分享内容 -->
-												<!-- 多媒体内容 -->
-											<!-- 分享源图片 -->
-											<%if(share.source && share.source.images && share.source.images.length > 0){%>
-												<div id="<%:='share-medias-' + share.id%>" class="medias row pl-3 lightgallery <%:=API.Common.getImgClassType(share,true)%>">
-													<%for (let idx = 0; idx < share.source.images.length; idx++) {%>
-														<%const image = share.source.images[idx];%>
-														<%const imgUrl = image.custom_filepath || image.custom_url || image.url || '';%>
-														<%if(imgUrl){%>
-														<a class="medias-item border message-lightbox" data-idx="<%:=idx%>" data-src="<%:=imgUrl%>" data-sub-html="#<%:='share-source-desc-' + share.id%>">
-															<img class="lazyload loading w-100 h-100" data-idx="<%:=idx%>" src="<%:=imgUrl%>" data-src="<%:=imgUrl%>">
-														</a>
-														<%}%>
-													<%}%>
-												</div>
-											<%}%>
-											</blockquote>
-											<!-- 分享评论 -->
-											<%if(share.comments && share.comments.length > 0){%>
-												<%for(let comment of share.comments){%>
-													<hr>
-													<div class="comments">
-														<div class="comment">
-															<div class="d-flex justify-content-start ">
-																<div class="comment-avatar">
-																	<a class="avatar p-0 m-0" target="_blank" href="<%:=API.Common.getUserUrl(API.Common.getCommentUser(comment).uin)%>">
-																		<img class="lazyload loading w-100 h-100 border rounded-circle" src="<%:=API.Common.getUserLogoLocalUrl(API.Common.getCommentUser(comment).uin, true)%>" >
-																	</a>
-																</div>
-																<div class="comment-infos ml-2">
-																	<a target="_blank" href="<%:=API.Common.getUserUrl(API.Common.getCommentUser(comment).uin)%>">
-																		<span><%:=API.Common.formatContent(API.Common.getCommentUser(comment).name, 'HTML', false, false, false, false, true)%></span>
-																	</a>
-																	<%if(comment.private){%>
-																		<span class="text-warning"> 私密评论 </span>
-																	<%}%>
-																	<div class="text-muted small"><%:=API.Utils.formatDate(comment.postTime || comment.create_time)%></div>
-																</div>
-															</div>
-															<div class="comment-text">
-																<!-- 评论 -->
-																<div class="messageText">
-																	<!-- 评论内容 -->
-																	<p><%:=API.Common.formatContent(comment.content, 'HTML', false, false, false, false, true)%></p>
-																	<!-- 评论图片 -->
-																	<%if(comment.pic && comment.pic.length > 0){%>
-																		<div class="comment-lightgallery">
-																			<%for (let cmIdx = 0; cmIdx < comment.pic.length; cmIdx++) {%>
-																				<%const image = comment.pic[cmIdx];%>
-																				<a class="comment-img-lightbox" data-idx="<%:=cmIdx%>" data-sub-html="<%:=API.Common.formatContent(comment.content, 'HTML', false, false, false, false, true)%>"
-																					data-src="<%:=(image.custom_filepath || image.custom_url || image.o_url || image.hd_url || image.b_url || image.s_url || image.url)%>">
-																					<img src="<%:=(image.custom_filepath || image.custom_url || image.o_url || image.hd_url || image.b_url || image.s_url || image.url)%>" class="comment-img img-thumbnail">
-																				</a>
-																			<%}%>
-																		</div>
-																	<%}%>
-																</div>
-																<!-- 评论回复 -->
-																<%if(comment.replies){%>
-																	<%for(let reply of comment.replies){%>
-																		<div class="comments m-1">
-																			<div class="comment">
-																				<div class="d-flex justify-content-start">
-																					<div class="comment-avatar">
-																						<a class="avatar p-0 m-0 " target="_blank" href="<%:=API.Common.getUserUrl(API.Common.getCommentUser(reply).uin)%>">
-																							<img class="lazyload loading w-100 h-100 border rounded-circle" src="<%:=API.Common.getUserLogoLocalUrl(API.Common.getCommentUser(reply).uin, true)%>">
-																						</a>
-																					</div>
-																					<div class="comment-infos ml-2">
-																						<a target="_blank" href="<%:=API.Common.getUserUrl(API.Common.getCommentUser(reply).uin)%>">
-																							<span><%:=API.Common.formatContent(API.Common.getCommentUser(reply).name, 'HTML', false, false, false, false, true)%></span>
-																						</a>
-																						<%if(reply.private){%>
-																							<span class="text-warning"> 私密回复 </span>
-																						<%}%>
-																						<div class="text-muted small"><%:=API.Utils.formatDate(reply.postTime || reply.create_time)%></div>
-																					</div>
-																				</div>
-																				<div class="comment-text">
-																					<div class="messageText">
-																						<!-- 回复内容 -->
-																						<p><%:=API.Common.formatContent(reply.content, 'HTML', false, false, false, false, true)%></p>
-																						<!-- 回复图片 -->
-																						<%if(reply.pic){%>
-																							<div class="comment-lightgallery">
-																								<%for (let cmIdx = 0; cmIdx < reply.pic.length; cmIdx++) {%>
-																									<%const image = reply.pic[cmIdx];%>
-																									<a class="comment-img-lightbox" data-idx="<%:=cmIdx%>" data-sub-html="<%:=API.Common.formatContent(reply.content, 'HTML', false, false, false, false, true)%>" 
-																										data-src="<%:=(image.custom_filepath || image.custom_url || image.o_url || image.hd_url || image.b_url || image.s_url || image.url)%>">
-																										<img src="<%:=(image.custom_filepath || image.custom_url || image.o_url || image.hd_url || image.b_url || image.s_url || image.url)%>" class="comment-img img-thumbnail">
-																									</a>
-																								<%}%>
-																							</div>
-																						<%}%>
-																					</div>
-																				</div>
-																			</div>
-																		</div>
-																	<%}%>
-																<%}%>
-															</div>
-														</div>
-													</div>
-												<%}%>
-											<%}%>
-										</div>
-										<!-- 分享源来源 -->
-										<%if(share.source && share.source.from){%>
-											<ul class="list-group list-group-flush">
-												<li class="list-group-item pl-0">
-													<%if(share.source.from.name){%>
-														<span class="text-secondary">来自<a target="_blank" href="<%:=share.source.from.url%>"><%:=share.source.from.name%></a> </span>
-													<%}%>
-													<span class="text-secondary">共分享<%:=share.source.count%>次</span>
-												</li>
-											</ul>
-										<%}%>
-									</div>
+	
+	<main role="main" class="flex-shrink-0" style="padding: 20px;">
+		<div class="shares-main-card">
+			<!-- 页面标题 -->
+			<div class="shares-header">
+				<i class="fa fa-share-alt shares-header-icon"></i>
+				<h1 class="shares-header-title">我的分享</h1>
+				<p class="shares-header-subtitle">共 <span class="shares-total-count" id="shares-count"><%:=total%></span> 条分享，记录了那些值得分享的瞬间</p>
+			</div>
+			
+			<!-- 筛选标签 -->
+			<div class="shares-filters" id="shares-filters">
+				<button class="filter-tag active" data-type="all">全部 <span class="count" id="filter-all"><%:=total%></span></button>
+			</div>
+			
+			<!-- 分享网格 -->
+			<div class="shares-grid" id="shares-grid">
+					<%for (let index = 0; index < sharesList.length; index++) {%>
+					<%const share = sharesList[index]%>
+					<%const picsumSeed = share.id || Date.now()%>
+					<%const sourceImages = share.source && share.source.images || []%>
+					<%const firstImage = sourceImages[0] || {}%>
+					<%const coverUrl = firstImage.custom_filepath || firstImage.custom_url || firstImage.url || ''%>
+					<%const shareTitle = (share.source && share.source.title) ? share.source.title : '分享内容'%>
+					<%const shareDesc = share.desc || (share.source && share.source.desc) || '暂无详细描述'%>
+					<%const sourceFrom = (share.source && share.source.from && share.source.from.name) || ''%>
+					<div class="share-card" data-index="<%:=index%>" data-id="<%:=share.id%>">
+						<img class="share-card-cover lazyload" src="<%:=coverUrl || ('https://picsum.photos/seed/' + picsumSeed + '/400/300')%>" alt="封面" onerror="this.onerror=null;this.src='https://picsum.photos/seed/<%:=picsumSeed%>/400/300'">
+						<div class="share-card-content">
+							<span class="share-card-type"><%:=API.Shares.getDisplayType(share.type)%></span>
+							<h3 class="share-card-title"><%:=API.Common.formatContent(shareTitle, 'HTML', false, false, false, false, true)%></h3>
+							<p class="share-card-summary"><%:=API.Common.formatContent(shareDesc, 'HTML', false, false, false, false, true)%></p>
+							<div class="share-card-meta">
+								<span class="share-card-source"><%if(sourceFrom){%><span>📍</span> <%:=sourceFrom%><%}%></span>
+								<span><%:=API.Utils.formatDate(share.shareTime)%></span>
+							</div>
+							<div class="share-card-meta" style="margin-top: 8px;">
+								<span></span>
+								<div class="share-card-actions">
+									<span>👍 <%:=share.likeTotal || 0%></span>
+									<span>💬 <%:=share.comments ? share.comments.length : 0%></span>
 								</div>
 							</div>
-							<div class="card-footer text-muted">
-								<span class="text-primary p-1 fa fa-thumbs-up mr-2 cursor viewlikes" title="点赞列表" data-field="id" data-target="<%:=share.id%>"><%:=share.likeTotal || 0 %></span>
-								<span class="text-primary p-1 fa fa-eye mr-2 cursor viewVisitors" title="最近访问" data-field="id" data-target="<%:=share.id%>"><%:=share.custom_visitor && share.custom_visitor.viewCount || 0 %></span>
-								<span class="border-primary border rounded text-primary small p-1 float-right" title="当前楼层">#<%:=total + 1 %></span>
-							</div>
 						</div>
-					<%}%>
+					</div>
 				<%}%>
-			<%}%>
+			</div>
+			
+			<!-- 空状态 -->
+			<div class="shares-empty" id="shares-empty">
+				<i class="fa fa-share-alt"></i>
+				<p>暂无分享内容</p>
+			</div>
 		</div>
 	</main>
+	
+	<!-- 侧边详情面板 -->
+	<div class="detail-overlay" id="detail-overlay"></div>
+	<div class="detail-panel" id="detail-panel">
+		<div class="panel-header">
+			<div class="panel-nav">
+				<button class="panel-nav-btn" id="btn-prev" title="上一条 (←)"><i class="fa fa-chevron-left"></i></button>
+				<span class="panel-counter"><span id="current-index">1</span> / <span id="total-count">0</span></span>
+				<button class="panel-nav-btn" id="btn-next" title="下一条 (→)"><i class="fa fa-chevron-right"></i></button>
+			</div>
+			<button class="panel-close" id="btn-close" title="关闭 (Esc)"><i class="fa fa-times"></i></button>
+		</div>
+		<div class="panel-body" id="panel-body">
+			<!-- 动态内容 -->
+		</div>
+		<div class="panel-tips">
+			<kbd>←</kbd> 上一条 &nbsp;&nbsp; <kbd>→</kbd> 下一条 &nbsp;&nbsp; <kbd>Esc</kbd> 关闭
+		</div>
+	</div>
+	
+	<!-- 底部 -->
+	<footer class="shares-footer">
+		<span class="footer-text">
+			<i class="fa fa-share-alt"></i> 分享美好，记录精彩
+		</span>
+	</footer>
+	
+	<script>
+		// 当前筛选类型
+		var currentFilter = 'all';
+		// 当前选中的卡片索引
+		var currentIndex = -1;
+		// 面板是否打开
+		var isPanelOpen = false;
+		
+		// 初始化页面
+		function init() {
+			bindEvents();
+		}
+		
+		// 打开侧边面板
+		function openPanel(index) {
+			if (typeof shares === 'undefined' || !Array.isArray(shares)) return;
+			if (index < 0 || index >= shares.length) return;
+			
+			currentIndex = index;
+			isPanelOpen = true;
+			
+			// 更新卡片选中状态
+			$('.share-card').removeClass('active');
+			$('.share-card[data-index="' + index + '"]').addClass('active');
+			
+			// 显示遮罩和面板
+			$('#detail-overlay').addClass('show');
+			$('#detail-panel').addClass('show');
+			
+			// 禁止body滚动
+			$('body').css('overflow', 'hidden');
+			
+			// 渲染详情内容
+			renderPanelContent(index);
+			
+			// 更新导航状态
+			updateNavState();
+		}
+		
+		// 关闭侧边面板
+		function closePanel() {
+			isPanelOpen = false;
+			currentIndex = -1;
+			
+			// 移除卡片选中状态
+			$('.share-card').removeClass('active');
+			
+			// 隐藏遮罩和面板
+			$('#detail-overlay').removeClass('show');
+			$('#detail-panel').removeClass('show');
+			
+			// 恢复body滚动
+			$('body').css('overflow', '');
+			
+			// 清空面板内容
+			$('#panel-body').html('');
+		}
+		
+		// 渲染面板内容 - 保留原分享内容样式
+		function renderPanelContent(index) {
+			var share = shares[index];
+			if (!share) return;
+			
+			var html = '';
+			
+			// 详情头部 - 用户信息
+			html += '<div class="detail-header">';
+			html += '<div class="detail-user">';
+			html += '<a target="_blank" href="' + API.Common.getUserUrl(share.uin) + '">';
+			html += '<img class="detail-avatar" src="' + API.Common.getUserLogoLocalUrl(share.uin, true) + '" alt="头像">';
+			html += '</a>';
+			html += '<div class="detail-user-info">';
+			html += '<div class="detail-user-name"><a target="_blank" href="' + API.Common.getUserUrl(share.uin) + '">' + API.Common.formatContent(share.nickname, 'HTML', false, false, false, false, true) + '</a></div>';
+			html += '<div class="detail-time">' + API.Utils.formatDate(share.shareTime) + '</div>';
+			html += '</div>';
+			html += '<span class="detail-type">' + API.Shares.getDisplayType(share.type) + '</span>';
+			html += '</div>';
+			html += '</div>';
+			
+			// 分享描述
+			if (share.desc) {
+				html += '<div class="detail-desc">' + API.Common.formatContent(share.desc, 'HTML', false, false, false, false, true) + '</div>';
+			}
+			
+			// 分享来源内容（封面图已在卡片上显示，详情面板只显示标题、描述等文字信息）
+			if (share.source) {
+				var sourceImages = share.source.images || [];
+				var sourceUrl = share.source.url || '';
+				
+				html += '<div class="detail-source" onclick="' + (sourceUrl ? "window.open('" + sourceUrl + "', '_blank')" : '') + '">';
+				
+				if (share.source.title) {
+					html += '<h3 class="detail-source-title"><a target="_blank" href="' + sourceUrl + '">' + API.Common.formatContent(share.source.title, 'HTML', false, false, false, false, true) + '</a></h3>';
+				}
+				if (share.source.desc) {
+					html += '<p class="detail-source-summary">' + API.Common.formatContent(share.source.desc, 'HTML', false, false, false, false, true) + '</p>';
+				}
+				if (share.source.from && share.source.from.name) {
+					html += '<div class="detail-source-from">来自 ' + share.source.from.name + '</div>';
+				}
+				html += '</div>';
+				
+				// 所有图片（不再跳过第一张，因为封面图已在卡片上单独显示）
+				// 只显示有效的图片（添加 onerror 处理来隐藏加载失败的图片）
+				if (sourceImages.length > 0) {
+					var hasValidImage = false;
+					var mediasHtml = '';
+					for (var i = 0; i < sourceImages.length; i++) {
+						var img = sourceImages[i];
+						var imgUrl = img.custom_filepath || img.custom_url || img.url || '';
+						if (imgUrl) {
+							hasValidImage = true;
+							mediasHtml += '<a class="medias-item" data-src="' + imgUrl + '"><img src="' + imgUrl + '" alt="" onerror="this.parentElement.style.display=\'none\'"></a>';
+						}
+					}
+					if (hasValidImage) {
+						html += '<div class="detail-medias" id="detail-medias-' + share.id + '">' + mediasHtml + '</div>';
+					}
+				}
+			} else {
+				// 无来源内容时，显示简单说明
+				html += '<div class="detail-source">';
+				html += '<h3 class="detail-source-title">分享内容</h3>';
+				html += '<p class="detail-source-summary">暂无详细描述</p>';
+				html += '</div>';
+			}
+			
+			// 统计信息
+			var floorNum = shares.length - index;
+			html += '<div class="detail-stats">';
+			html += '<span class="detail-floor">#' + floorNum + '</span>';
+			html += '<div class="detail-actions">';
+			html += '<span class="detail-action-item viewlikes" title="点赞列表" data-field="id" data-target="' + share.id + '"><i class="fa fa-thumbs-up"></i> ' + (share.likeTotal || 0) + '</span>';
+			html += '<span class="detail-action-item viewVisitors" title="最近访问" data-field="id" data-target="' + share.id + '"><i class="fa fa-eye"></i> ' + (share.custom_visitor && share.custom_visitor.viewCount || 0) + '</span>';
+			html += '<span class="detail-action-item"><i class="fa fa-comment"></i> ' + (share.comments ? share.comments.length : 0) + '</span>';
+			html += '</div>';
+			html += '</div>';
+			
+			// 评论区
+			if (share.comments && share.comments.length > 0) {
+				html += '<div class="detail-comments">';
+				html += '<div class="detail-comments-title">💬 评论 (' + share.comments.length + ')</div>';
+				
+				for (var j = 0; j < share.comments.length; j++) {
+					var comment = share.comments[j];
+					var commentUser = API.Common.getCommentUser(comment);
+					
+					html += '<div class="detail-comment-item">';
+					html += '<a target="_blank" href="' + API.Common.getUserUrl(commentUser.uin) + '">';
+					html += '<img class="detail-comment-avatar" src="' + API.Common.getUserLogoLocalUrl(commentUser.uin, true) + '" alt="头像">';
+					html += '</a>';
+					html += '<div class="detail-comment-body">';
+					html += '<div class="detail-comment-user">';
+					html += '<a target="_blank" href="' + API.Common.getUserUrl(commentUser.uin) + '">' + API.Common.formatContent(commentUser.name, 'HTML', false, false, false, false, true) + '</a>';
+					if (comment.private) {
+						html += '<span class="private-tag">私密评论</span>';
+					}
+					html += '</div>';
+					html += '<div class="detail-comment-text">' + API.Common.formatContent(comment.content, 'HTML', false, false, false, false, true) + '</div>';
+					
+					// 评论图片
+					if (comment.pic && comment.pic.length > 0) {
+						html += '<div class="detail-comment-images">';
+						for (var k = 0; k < comment.pic.length; k++) {
+							var pic = comment.pic[k];
+							var picUrl = pic.custom_filepath || pic.custom_url || pic.o_url || pic.hd_url || pic.b_url || pic.s_url || pic.url;
+							html += '<img src="' + picUrl + '" alt="" onclick="window.open(\'' + picUrl + '\', \'_blank\')">';
+						}
+						html += '</div>';
+					}
+					
+					html += '<div class="detail-comment-time">' + API.Utils.formatDate(comment.postTime || comment.create_time) + '</div>';
+					
+					// 回复
+					if (comment.replies && comment.replies.length > 0) {
+						for (var m = 0; m < comment.replies.length; m++) {
+							var reply = comment.replies[m];
+							var replyUser = API.Common.getCommentUser(reply);
+							
+							html += '<div class="detail-reply-item">';
+							html += '<div class="detail-comment-user">';
+							html += '<a target="_blank" href="' + API.Common.getUserUrl(replyUser.uin) + '">' + API.Common.formatContent(replyUser.name, 'HTML', false, false, false, false, true) + '</a>';
+							if (reply.private) {
+								html += '<span class="private-tag">私密回复</span>';
+							}
+							html += '</div>';
+							html += '<div class="detail-comment-text">' + API.Common.formatContent(reply.content, 'HTML', false, false, false, false, true) + '</div>';
+							
+							// 回复图片
+							if (reply.pic && reply.pic.length > 0) {
+								html += '<div class="detail-comment-images">';
+								for (var n = 0; n < reply.pic.length; n++) {
+									var rPic = reply.pic[n];
+									var rPicUrl = rPic.custom_filepath || rPic.custom_url || rPic.o_url || rPic.hd_url || rPic.b_url || rPic.s_url || rPic.url;
+									html += '<img src="' + rPicUrl + '" alt="" onclick="window.open(\'' + rPicUrl + '\', \'_blank\')">';
+								}
+								html += '</div>';
+							}
+							
+							html += '<div class="detail-comment-time">' + API.Utils.formatDate(reply.postTime || reply.create_time) + '</div>';
+							html += '</div>';
+						}
+					}
+					
+					html += '</div>';
+					html += '</div>';
+				}
+				
+				html += '</div>';
+			}
+			
+			// 填充面板内容
+			$('#panel-body').html(html);
+			
+			// 滚动到顶部
+			$('#panel-body').scrollTop(0);
+			
+			// 初始化详情中的图片画廊
+			var mediasEl = document.getElementById('detail-medias-' + share.id);
+			if (mediasEl && $(mediasEl).find('.medias-item').length > 0) {
+				lightGallery(mediasEl, {
+					selector: '.medias-item',
+					plugins: [lgZoom, lgThumbnail, lgFullscreen, lgRotate],
+					speed: 300,
+					thumbnail: true,
+					download: false
+				});
+			}
+		}
+		
+		// 更新导航状态
+		function updateNavState() {
+			var total = shares.length;
+			
+			$('#current-index').text(currentIndex + 1);
+			$('#total-count').text(total);
+			
+			// 更新按钮状态
+			$('#btn-prev').prop('disabled', currentIndex <= 0);
+			$('#btn-next').prop('disabled', currentIndex >= total - 1);
+		}
+		
+		// 上一条
+		function goPrev() {
+			if (currentIndex > 0) {
+				openPanel(currentIndex - 1);
+			}
+		}
+		
+		// 下一条
+		function goNext() {
+			if (currentIndex < shares.length - 1) {
+				openPanel(currentIndex + 1);
+			}
+		}
+		
+		// 绑定事件
+		function bindEvents() {
+			// 卡片点击 - 打开侧边面板
+			$('#shares-grid').on('click', '.share-card', function(e) {
+				var index = parseInt($(this).data('index'));
+				openPanel(index);
+			});
+			
+			// 关闭按钮点击
+			$('#btn-close').on('click', closePanel);
+			
+			// 遮罩点击关闭
+			$('#detail-overlay').on('click', closePanel);
+			
+			// 上一条/下一条按钮
+			$('#btn-prev').on('click', goPrev);
+			$('#btn-next').on('click', goNext);
+			
+			// 键盘事件
+			$(document).on('keydown', function(e) {
+				if (!isPanelOpen) return;
+				
+				if (e.key === 'Escape') {
+					closePanel();
+					e.preventDefault();
+				} else if (e.key === 'ArrowLeft') {
+					goPrev();
+					e.preventDefault();
+				} else if (e.key === 'ArrowRight') {
+					goNext();
+					e.preventDefault();
+				}
+			});
+			
+			// 阻止面板内点击事件冒泡到遮罩
+			$('#detail-panel').on('click', function(e) {
+				e.stopPropagation();
+			});
+		}
+		
+		// 页面加载完成后初始化
+		$(document).ready(function() {
+			init();
+		});
+	</script>
 </body>
 
 </html>

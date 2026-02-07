@@ -666,6 +666,12 @@ const ExportFiles = [{
     original: 'export/images/favicon.ico',
     target: 'Common/images/favicon.ico'
 }, {
+    original: 'export/images/share.svg',
+    target: 'Common/images/share.svg'
+}, {
+    original: 'export/images/earth.svg',
+    target: 'Common/images/earth.svg'
+}, {
     original: 'export/js/common.js',
     target: 'Common/js/common.js'
 }, {
