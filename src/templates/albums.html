@@ -188,11 +188,59 @@
 			width: 100%;
 			height: 100%;
 			object-fit: cover;
-			transition: transform 0.3s ease;
+			transition: transform 0.4s ease;
 		}
 		
 		.album-card:hover .album-cover img {
 			transform: scale(1.1);
+		}
+		
+		/* 悬浮详情覆盖层 */
+		.album-cover-overlay {
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(135deg, rgba(17, 153, 142, 0.93), rgba(56, 239, 125, 0.88));
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			padding: 20px;
+			opacity: 0;
+			transition: opacity 0.3s ease;
+		}
+		
+		.album-card:hover .album-cover-overlay {
+			opacity: 1;
+		}
+		
+		.album-cover-overlay .overlay-item {
+			display: flex;
+			align-items: center;
+			margin-bottom: 10px;
+			color: #fff;
+			font-size: 13px;
+		}
+		
+		.album-cover-overlay .overlay-item:last-child {
+			margin-bottom: 0;
+		}
+		
+		.album-cover-overlay .overlay-item i {
+			width: 20px;
+			font-size: 12px;
+			opacity: 0.85;
+		}
+		
+		.album-cover-overlay .overlay-label {
+			opacity: 0.85;
+			margin-right: 6px;
+			font-size: 12px;
+		}
+		
+		.album-cover-overlay .overlay-value {
+			font-weight: 500;
 		}
 		
 		.album-count {
@@ -205,38 +253,50 @@
 			border-radius: 20px;
 			font-size: 13px;
 			font-weight: 600;
+			z-index: 2;
 		}
 		
 		.album-info {
-			padding: 20px;
+			padding: 16px 20px 20px;
 		}
 		
 		.album-name {
-			font-size: 18px;
+			font-size: 17px;
 			font-weight: 600;
 			color: #333;
-			margin-bottom: 8px;
+			margin-bottom: 6px;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
 		}
 		
 		.album-desc {
-			font-size: 14px;
-			color: #666;
-			line-height: 1.5;
-			display: -webkit-box;
-			-webkit-line-clamp: 2;
-			-webkit-box-orient: vertical;
+			font-size: 13px;
+			color: #888;
+			line-height: 1.4;
+			white-space: nowrap;
 			overflow: hidden;
-			min-height: 42px;
+			text-overflow: ellipsis;
+			margin-bottom: 12px;
 		}
 		
 		.album-stats {
-			margin-top: 12px;
+			display: flex;
+			justify-content: space-between;
 			font-size: 13px;
 			color: #999;
+			padding-top: 12px;
+			border-top: 1px solid rgba(17, 153, 142, 0.1);
 		}
 		
 		.album-stats span {
-			margin-right: 15px;
+			display: flex;
+			align-items: center;
+			gap: 4px;
+		}
+		
+		.album-stats span i {
+			font-size: 12px;
 		}
 		
 		.footer-albums {
@@ -272,7 +332,16 @@
 			}
 			
 			.album-cover {
-				height: 150px;
+				height: 140px;
+			}
+			
+			.album-cover-overlay {
+				padding: 12px;
+			}
+			
+			.album-cover-overlay .overlay-item {
+				font-size: 11px;
+				margin-bottom: 6px;
 			}
 			
 			.album-info {
@@ -284,7 +353,13 @@
 			}
 			
 			.album-desc {
-				font-size: 12px;
+				font-size: 11px;
+				margin-bottom: 10px;
+			}
+			
+			.album-stats {
+				font-size: 11px;
+				padding-top: 10px;
 			}
 		}
 	</style>
@@ -349,11 +424,31 @@
 							<div class="album-cover">
 								<img src="<%:=(album.custom_filepath || album.custom_url || album.url || album.pre)%>" alt="<%:=album.name%>" loading="lazy">
 								<span class="album-count"><i class="fa fa-image mr-1"></i><%:=album.total%></span>
+								<!-- 悬浮显示时间详情 -->
+								<div class="album-cover-overlay">
+									<div class="overlay-item">
+										<i class="fa fa-plus-circle"></i>
+										<span class="overlay-label">创建时间</span>
+										<span class="overlay-value"><%:=API.Utils.formatDate(album.createtime || album.create_time)%></span>
+									</div>
+									<div class="overlay-item">
+										<i class="fa fa-refresh"></i>
+										<span class="overlay-label">更新时间</span>
+										<span class="overlay-value"><%:=API.Utils.formatDate(album.modifytime)%></span>
+									</div>
+									<%if(album.lastuploadtime){%>
+									<div class="overlay-item">
+										<i class="fa fa-cloud-upload"></i>
+										<span class="overlay-label">最后上传</span>
+										<span class="overlay-value"><%:=API.Utils.formatDate(album.lastuploadtime)%></span>
+									</div>
+									<%}%>
+								</div>
 							</div>
-							<div class="album-info" data-toggle="tooltip" data-html="true" title="<%:=API.Photos.getAlbumBasicInfoTooltip(album)%>">
+							<div class="album-info">
 								<span class="category-badge"><%:=className%></span>
-								<h3 class="album-name"><%:=API.Utils.formatContent(album.name, "HTML", false, false, false, false, true)%></h3>
-								<p class="album-desc"><%:=album.desc || '暂无描述'%></p>
+								<h3 class="album-name" title="<%:=album.name%>"><%:=API.Utils.formatContent(album.name, "HTML", false, false, false, false, true)%></h3>
+								<p class="album-desc" title="<%:=album.desc || '暂无描述'%>"><%:=album.desc || '暂无描述'%></p>
 								<div class="album-stats">
 									<span><i class="fa fa-heart text-danger"></i> <%:=album.likes ? album.likes.length : 0%></span>
 									<span><i class="fa fa-comment text-info"></i> <%:=album.comments ? album.comments.length : 0%></span>
@@ -389,13 +484,6 @@
 			}
 			$('#totalAlbumsCount').text(totalAlbums);
 			$('#totalPhotosCount').text(totalPhotos);
-			
-			// 初始化提示
-			$('[data-toggle="tooltip"]').tooltip({
-				placement: 'auto',
-				container: 'body',
-				boundary: 'window'
-			});
 			
 			// 搜索和排序功能
 			const albumCards = $('.album-card');
