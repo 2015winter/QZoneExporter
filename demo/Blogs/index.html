@@ -78,6 +78,25 @@
 					<!-- 由JS动态生成 -->
 				</div>
 				
+				<!-- 工具栏 -->
+				<div class="blogs-toolbar">
+					<div class="blogs-search">
+						<i class="fa fa-search"></i>
+						<input type="text" id="blogs-search-input" placeholder="搜索日志标题...">
+					</div>
+					<div class="blogs-sort">
+						<button class="sort-btn active" data-sort="time-desc">
+							<i class="fa fa-sort-amount-desc mr-1"></i>最新
+						</button>
+						<button class="sort-btn" data-sort="time-asc">
+							<i class="fa fa-sort-amount-asc mr-1"></i>最早
+						</button>
+						<button class="sort-btn" data-sort="view-desc">
+							<i class="fa fa-eye mr-1"></i>最多浏览
+						</button>
+					</div>
+				</div>
+				
 				<!-- 日志列表 -->
 				<div class="blogs-grid" id="blogsList">
 					<!-- 由JS动态生成 -->
@@ -116,6 +135,25 @@
 	</footer>
 	
 	<script>
+		// 全局状态
+		let filteredBlogs = [...blogs];
+		let currentCategory = 'all';
+		let currentSort = 'time-desc';
+		
+		// 获取排序用的时间戳
+		function getBlogTimestamp(blog) {
+			const time = blog.pubTime || blog.pubtime;
+			if (!time) return 0;
+			
+			if (typeof time === 'string') {
+				return new Date(time).getTime() || 0;
+			}
+			if (typeof time === 'number') {
+				return time < 10000000000 ? time * 1000 : time;
+			}
+			return 0;
+		}
+		
 		// 渲染日志列表
 		function renderBlogs() {
 			const container = document.getElementById('blogsList');
@@ -135,9 +173,84 @@
 			});
 			categoriesContainer.innerHTML = catHtml;
 			
-			// 渲染日志卡片
+			document.getElementById('totalCount').textContent = blogs.length;
+			
+			// 绑定分类筛选
+			document.querySelectorAll('.category-tag').forEach(tag => {
+				tag.addEventListener('click', function() {
+					document.querySelectorAll('.category-tag').forEach(t => t.classList.remove('active'));
+					this.classList.add('active');
+					currentCategory = this.dataset.category;
+					filterAndSort();
+				});
+			});
+			
+			// 绑定排序按钮
+			document.querySelectorAll('.sort-btn').forEach(btn => {
+				btn.addEventListener('click', function() {
+					document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+					this.classList.add('active');
+					currentSort = this.dataset.sort;
+					filterAndSort();
+				});
+			});
+			
+			// 绑定搜索
+			let searchTimer;
+			document.getElementById('blogs-search-input').addEventListener('input', function() {
+				clearTimeout(searchTimer);
+				searchTimer = setTimeout(filterAndSort, 300);
+			});
+			
+			// 初始渲染
+			filterAndSort();
+		}
+		
+		// 筛选和排序
+		function filterAndSort() {
+			// 筛选分类
+			if (currentCategory === 'all') {
+				filteredBlogs = [...blogs];
+			} else {
+				filteredBlogs = blogs.filter(b => (b.category || '未分类') === currentCategory);
+			}
+			
+			// 搜索
+			const searchText = document.getElementById('blogs-search-input').value.trim().toLowerCase();
+			if (searchText) {
+				filteredBlogs = filteredBlogs.filter(b => (b.title || '').toLowerCase().includes(searchText));
+			}
+			
+			// 排序
+			filteredBlogs.sort((a, b) => {
+				switch (currentSort) {
+					case 'time-desc':
+						return getBlogTimestamp(b) - getBlogTimestamp(a);
+					case 'time-asc':
+						return getBlogTimestamp(a) - getBlogTimestamp(b);
+					case 'view-desc':
+						const aView = (a.custom_visitor && a.custom_visitor.viewCount) || 0;
+						const bView = (b.custom_visitor && b.custom_visitor.viewCount) || 0;
+						return bView - aView;
+					default:
+						return 0;
+				}
+			});
+			
+			renderBlogsGrid();
+		}
+		
+		// 渲染日志卡片
+		function renderBlogsGrid() {
+			const container = document.getElementById('blogsList');
+			
+			if (filteredBlogs.length === 0) {
+				container.innerHTML = '<div class="blogs-empty"><i class="fa fa-book"></i><p>暂无日志</p></div>';
+				return;
+			}
+			
 			let html = '';
-			blogs.forEach(blog => {
+			filteredBlogs.forEach(blog => {
 				const isRepost = blog.effect === 1;
 				html += `
 					<div class="blog-card" data-category="${blog.category}" onclick="showBlog('${blog.blogid}')">
@@ -155,25 +268,6 @@
 				`;
 			});
 			container.innerHTML = html;
-			
-			document.getElementById('totalCount').textContent = blogs.length;
-			
-			// 绑定分类筛选
-			document.querySelectorAll('.category-tag').forEach(tag => {
-				tag.addEventListener('click', function() {
-					document.querySelectorAll('.category-tag').forEach(t => t.classList.remove('active'));
-					this.classList.add('active');
-					
-					const category = this.dataset.category;
-					document.querySelectorAll('.blog-card').forEach(card => {
-						if (category === 'all' || card.dataset.category === category) {
-							card.style.display = '';
-						} else {
-							card.style.display = 'none';
-						}
-					});
-				});
-			});
 		}
 		
 		// 显示日志详情

@@ -1198,7 +1198,6 @@ body.messages-page {
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
     border: none !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    animation: fadeInUp 0.5s ease-out;
 }
 
 /* 说说内容容器居中 */
@@ -3039,7 +3038,6 @@ body.blogs-page {
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
     padding: 40px;
     margin-top: 20px;
-    animation: fadeInUp 0.6s ease-out;
 }
 
 /* 页面标题区域 */
