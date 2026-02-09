@@ -209,6 +209,16 @@
 			border-top-left-radius: calc(0.5rem - 1px);
 			border-top-right-radius: calc(0.5rem - 1px);
 		}
+		
+		/* 移动端：播放按钮始终可见 */
+		@media (hover: none) {
+			#videos_html .thumbnail .video-wrapper .play-btn {
+				opacity: 1 !important;
+			}
+			#videos_html .thumbnail .video-wrapper .btn-fullscreen {
+				opacity: 0.8 !important;
+			}
+		}
 	</style>
 </head>
 

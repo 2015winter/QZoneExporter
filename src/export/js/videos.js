@@ -53,6 +53,7 @@ $(function() {
                         <span class="video-modal-title"><i class="fa fa-video-camera mr-2"></i>视频播放</span>
                         <div class="video-modal-counter">1 / 1</div>
                         <div class="video-modal-actions">
+                            <button class="video-modal-btn btn-download-video" title="下载视频"><i class="fa fa-download"></i></button>
                             <button class="video-modal-btn btn-fullscreen-video" title="全屏"><i class="fa fa-expand"></i></button>
                             <button class="video-modal-btn btn-close-video" title="关闭"><i class="fa fa-times"></i></button>
                         </div>
@@ -83,6 +84,18 @@ $(function() {
 
         // 关闭按钮
         $('.btn-close-video').on('click', closeVideoModal);
+
+        // 下载按钮
+        $('.btn-download-video').on('click', function() {
+            const videoInfo = videoList[currentVideoIndex];
+            if (!videoInfo || !videoInfo.src) return;
+            
+            const fileName = (videoInfo.title || '视频').replace(/[\\/:*?"<>|]/g, '_') + '.mp4';
+            const link = document.createElement('a');
+            link.href = videoInfo.src;
+            link.download = fileName;
+            link.click();
+        });
 
         // 全屏按钮 - 页内全屏
         $('.btn-fullscreen-video').on('click', function() {
@@ -181,14 +194,17 @@ $(function() {
         const video = $('#modalVideo')[0];
         if (video) {
             video.pause();
-            video.src = '';
         }
-        $('#videoModal').removeClass('show fullscreen-mode');
+        // 添加 closing 类，保持内容位置不变，只做淡出
+        $('#videoModal').addClass('closing').removeClass('show');
         // 重置全屏按钮图标
         $('.btn-fullscreen-video i').removeClass('fa-compress').addClass('fa-expand');
         setTimeout(() => {
-            $('#videoModal').hide();
-        }, 300);
+            $('#videoModal').removeClass('closing fullscreen-mode').css('display', 'none');
+            if (video) {
+                video.src = '';
+            }
+        }, 400);
     }
 
     // 弹窗播放视频
@@ -199,7 +215,7 @@ $(function() {
         currentVideoIndex = videoIndex;
         const videoInfo = videoList[currentVideoIndex];
         
-        $('#videoModal').show();
+        $('#videoModal').css('display', 'flex');
         setTimeout(() => {
             $('#videoModal').addClass('show');
         }, 10);
@@ -215,7 +231,7 @@ $(function() {
         currentVideoIndex = videoIndex;
         const videoInfo = videoList[currentVideoIndex];
         
-        $('#videoModal').show();
+        $('#videoModal').css('display', 'flex');
         setTimeout(() => {
             $('#videoModal').addClass('show fullscreen-mode');
             $('.btn-fullscreen-video i').removeClass('fa-expand').addClass('fa-compress');
@@ -245,9 +261,12 @@ $(function() {
 
     // 视频播放功能
     function initVideoPlayer() {
-        // 点击播放按钮 - 弹窗播放
-        $('.play-btn').on('click', function(e) {
+        // 使用事件委托绑定，同时支持 click 和 touchend（移动端优先响应 touchend）
+        $(document).on('click touchend', '.play-btn', function(e) {
+            e.preventDefault();
             e.stopPropagation();
+            if (e.type === 'touchend') e.stopImmediatePropagation(); // 阻止后续 click
+            
             const wrapper = $(this).closest('.video-wrapper');
             const videoSrc = wrapper.data('video-src');
             if (videoSrc) {
@@ -256,9 +275,12 @@ $(function() {
             }
         });
 
-        // 点击全屏按钮 - 全屏播放
-        $('.btn-fullscreen').on('click', function(e) {
+        // 全屏按钮
+        $(document).on('click touchend', '.btn-fullscreen', function(e) {
+            e.preventDefault();
             e.stopPropagation();
+            if (e.type === 'touchend') e.stopImmediatePropagation();
+            
             const wrapper = $(this).closest('.video-wrapper');
             const videoSrc = wrapper.data('video-src');
             if (videoSrc) {
@@ -267,9 +289,11 @@ $(function() {
             }
         });
 
-        // 点击封面图片 - 弹窗播放
-        $('.video-poster').on('click', function(e) {
+        // 封面图片
+        $(document).on('click touchend', '.video-poster', function(e) {
+            e.preventDefault();
             e.stopPropagation();
+            
             const wrapper = $(this).closest('.video-wrapper');
             const videoSrc = wrapper.data('video-src');
             if (videoSrc) {

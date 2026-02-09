@@ -1554,6 +1554,13 @@ body.messages-page {
     cursor: pointer;
 }
 
+/* 移动端：按钮始终可见 */
+@media (hover: none) {
+    #videos_html .thumbnail .video-wrapper .btn-fullscreen {
+        opacity: 0.85 !important;
+    }
+}
+
 #videos_html .thumbnail .card-body {
     background: linear-gradient(180deg, rgba(255, 107, 107, 0.15) 0%, rgba(238, 90, 36, 0.25) 100%);
     border-top: none;
@@ -1572,7 +1579,6 @@ body.messages-page {
 
 /* 视频预览遮罩层 */
 .video-modal {
-    display: none;
     position: fixed;
     top: 0;
     left: 0;
@@ -1581,6 +1587,7 @@ body.messages-page {
     background: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(10px);
     z-index: 9999;
+    display: none;
     justify-content: center;
     align-items: center;
     opacity: 0;
@@ -1588,8 +1595,16 @@ body.messages-page {
 }
 
 .video-modal.show {
-    display: flex;
     opacity: 1;
+}
+
+/* 关闭时禁用 transform 动画，只做淡出 */
+.video-modal.closing {
+    opacity: 0;
+}
+
+.video-modal.closing .video-modal-content {
+    transform: scale(1) translateY(0);
 }
 
 /* 左右导航按钮 - 相对于视频弹窗容器定位，保持位置稳定 - 红色主题 */
@@ -1635,13 +1650,13 @@ body.messages-page {
 .video-modal-content {
     position: relative;
     background: linear-gradient(145deg, #1e1e1e, #2d2d2d);
-    border-radius: 24px;
+    border-radius: 20px;
     box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255,255,255,0.1);
-    max-width: 85vw;
-    max-height: 85vh;
+    width: 90vw;
+    max-width: 800px;
     display: flex;
     flex-direction: column;
-    overflow: visible;
+    overflow: hidden;
     transform: scale(0.9) translateY(20px);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -1714,6 +1729,14 @@ body.messages-page {
     background: rgba(255,100,100,0.6);
 }
 
+.video-modal-btn.btn-download-video {
+    background: rgba(100,255,150,0.4);
+}
+
+.video-modal-btn.btn-download-video:hover {
+    background: rgba(100,255,150,0.6);
+}
+
 .video-modal-btn.btn-fullscreen-video {
     background: rgba(100,200,255,0.4);
 }
@@ -1728,16 +1751,15 @@ body.messages-page {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 24px;
-    overflow: auto;
-    min-height: 300px;
+    padding: 16px;
+    overflow: hidden;
     background: radial-gradient(ellipse at center, #2a2a2a 0%, #1a1a1a 100%);
     position: relative;
 }
 
 #modalVideo {
-    max-width: 100%;
-    max-height: calc(80vh - 140px);
+    width: 100%;
+    max-height: 70vh;
     border-radius: 6px;
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
 }
@@ -1816,17 +1838,17 @@ body.messages-page {
 /* 响应式适配 */
 @media (max-width: 768px) {
     .video-modal-content {
-        max-width: 95vw;
-        max-height: 90vh;
-        border-radius: 16px;
+        width: 95vw;
+        max-width: none;
+        border-radius: 12px;
     }
     
     #modalVideo {
-        max-height: calc(85vh - 140px);
+        max-height: 50vh;
     }
     
     .video-modal-title {
-        max-width: 120px;
+        max-width: 100px;
         font-size: 12px;
     }
     
@@ -1836,15 +1858,15 @@ body.messages-page {
     }
     
     .video-modal-header {
-        padding: 10px 14px;
+        padding: 10px 12px;
     }
     
     .video-modal-footer {
-        padding: 10px 14px;
+        padding: 8px 12px;
     }
     
     .video-modal-body {
-        padding: 14px;
+        padding: 10px;
     }
     
     .video-modal-info {
@@ -1852,7 +1874,7 @@ body.messages-page {
     }
     
     .video-modal-info .info-item {
-        padding: 4px 10px;
+        padding: 4px 8px;
         font-size: 11px;
     }
     
