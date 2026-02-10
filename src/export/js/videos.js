@@ -59,7 +59,7 @@ $(function() {
                         </div>
                     </div>
                     <div class="video-modal-body">
-                        <video id="modalVideo" controls preload="metadata"></video>
+                        <video id="modalVideo" controls playsinline preload="metadata"></video>
                     </div>
                     <div class="video-modal-footer">
                         <div class="video-modal-info">
@@ -261,11 +261,14 @@ $(function() {
 
     // 视频播放功能
     function initVideoPlayer() {
-        // 使用事件委托绑定，同时支持 click 和 touchend（移动端优先响应 touchend）
-        $(document).on('click touchend', '.play-btn', function(e) {
+        // 直接使用 click 事件
+        // 现代浏览器在有 viewport meta 的页面上已经没有 300ms 延迟
+        // 浏览器会自动区分点击和滚动，滚动时不会触发 click
+        
+        // 播放按钮
+        $(document).on('click', '.play-btn', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            if (e.type === 'touchend') e.stopImmediatePropagation(); // 阻止后续 click
             
             const wrapper = $(this).closest('.video-wrapper');
             const videoSrc = wrapper.data('video-src');
@@ -276,10 +279,9 @@ $(function() {
         });
 
         // 全屏按钮
-        $(document).on('click touchend', '.btn-fullscreen', function(e) {
+        $(document).on('click', '.btn-fullscreen', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            if (e.type === 'touchend') e.stopImmediatePropagation();
             
             const wrapper = $(this).closest('.video-wrapper');
             const videoSrc = wrapper.data('video-src');
@@ -290,7 +292,7 @@ $(function() {
         });
 
         // 封面图片
-        $(document).on('click touchend', '.video-poster', function(e) {
+        $(document).on('click', '.video-poster', function(e) {
             e.preventDefault();
             e.stopPropagation();
             
