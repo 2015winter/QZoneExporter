@@ -7,7 +7,7 @@ $(function() {
     window.album = albums[albumIndex];
 
     // 渲染导航相册名称
-    $(".breadcrumb-item.active").text(album.name);
+    $(".breadcrumb-item.active .album-name").text(album.name);
     // 导航栏数据加载完成，显示面包屑（防止闪烁）
     $(".breadcrumb").addClass('ready');
 
@@ -197,7 +197,8 @@ $(function() {
     // 预览状态管理
     const previewState = {
         currentIndex: 0,
-        isFullscreen: false
+        isFullscreen: false,
+        rotation: 0  // 旋转角度：0, 90, 180, 270
     };
 
     // 获取预览DOM元素
@@ -210,6 +211,7 @@ $(function() {
     const $btnNext = $('#btnNextPhoto');
     const $btnFullscreen = $('#btnFullscreen');
     const $btnClose = $('#btnClosePreview');
+    const $btnRotate = $('#btnRotate');
 
     // 获取当前 DOM 顺序的所有 lightbox 元素
     function getCurrentLightboxes() {
@@ -260,6 +262,10 @@ $(function() {
     // 打开预览弹窗
     function openPreview(index) {
         previewState.currentIndex = index;
+        previewState.rotation = 0;  // 重置旋转角度
+        // 先清除旧内容，避免显示上一个内容
+        $content.find('img, video').remove();
+        $loading.addClass('show');
         updatePreviewContent();
         $overlay.addClass('show');
         $('body').css('overflow', 'hidden');
@@ -288,15 +294,15 @@ $(function() {
         const photo = getPhotoFromLightbox(currentLightbox);
         if (!photo) return;
 
-        // 获取旧的媒体元素
+        // 获取旧的媒体元素并立即移除，避免显示上一个内容
         const $oldMedia = $content.find('img, video');
+        $oldMedia.remove();
         
-        // 记录旧媒体的尺寸，用于保持内容区域稳定
-        let oldWidth = 0, oldHeight = 0;
-        if ($oldMedia.length > 0) {
-            oldWidth = $oldMedia.outerWidth();
-            oldHeight = $oldMedia.outerHeight();
-        }
+        // 显示加载中
+        $loading.addClass('show');
+        
+        // 重置旋转角度
+        previewState.rotation = 0;
 
         // 设置标题
         const title = photo.name || API.Utils.formatDate(photo.uploadtime || photo.uploadTime) || '相片预览';
@@ -304,8 +310,7 @@ $(function() {
 
         // 创建加载完成后的处理函数
         const onMediaReady = function($newMedia) {
-            // 直接切换：移除旧的，显示新的
-            $oldMedia.remove();
+            // 直接显示新媒体
             $newMedia.css('opacity', 1);
             $loading.removeClass('show');
         };
@@ -321,35 +326,24 @@ $(function() {
                 poster: videoPoster,
                 preload: 'metadata',
                 css: { 
-                    opacity: 0,
-                    position: 'absolute'
+                    opacity: 0
                 }
-            }).append($('<source>', {
-                src: videoSrc,
-                type: 'video/mp4'
-            }));
+            }).attr('playsinline', '');
+            
+            // 直接设置 src（比 <source> 子元素更可靠）
+            $video[0].src = videoSrc;
 
             // 先添加到DOM
             $content.append($video);
-            
-            // 显示加载中（只在旧媒体存在时）
-            if ($oldMedia.length > 0) {
-                $loading.addClass('show');
-            }
 
             $video.on('loadeddata', function() {
-                // 恢复正常定位
-                $video.css('position', '');
                 onMediaReady($video);
             }).on('error', function() {
-                $video.css('position', '');
                 onMediaReady($video);
             });
             
-            // 如果没有旧媒体，立即显示
-            if ($oldMedia.length === 0) {
-                $video.css({ opacity: 1, position: '' });
-            }
+            // 自动播放视频（统一在这里调用，不依赖 loadeddata 事件）
+            $video[0].play().catch(err => console.warn('视频播放失败:', err));
         } else {
             // 图片类型
             const photoHref = API.Common.getMediaPath(photo.custom_url, photo.custom_filepath, true) || '../Common/images/loading.gif';
@@ -358,33 +352,19 @@ $(function() {
                 src: photoHref,
                 alt: title,
                 css: { 
-                    opacity: 0,
-                    position: 'absolute'
+                    opacity: 0
                 }
             });
 
             // 先添加到DOM
             $content.append($img);
-            
-            // 显示加载中（只在旧媒体存在时）
-            if ($oldMedia.length > 0) {
-                $loading.addClass('show');
-            }
 
             $img.on('load', function() {
-                // 恢复正常定位
-                $img.css('position', '');
                 onMediaReady($img);
             }).on('error', function() {
-                $img.css('position', '');
                 $(this).attr('src', '../Common/images/loading.gif');
                 onMediaReady($img);
             });
-            
-            // 如果没有旧媒体，立即显示
-            if ($oldMedia.length === 0) {
-                $img.css({ opacity: 1, position: '' });
-            }
         }
 
         // 更新底部信息
@@ -447,7 +427,11 @@ $(function() {
             $content.find('video').each(function() {
                 this.pause();
             });
+            // 清除旧内容，显示加载
+            $content.find('img, video').remove();
+            $loading.addClass('show');
             previewState.currentIndex--;
+            previewState.rotation = 0;  // 重置旋转角度
             updatePreviewContent();
             updateNavButtons();
         }
@@ -461,7 +445,11 @@ $(function() {
             $content.find('video').each(function() {
                 this.pause();
             });
+            // 清除旧内容，显示加载
+            $content.find('img, video').remove();
+            $loading.addClass('show');
             previewState.currentIndex++;
+            previewState.rotation = 0;  // 重置旋转角度
             updatePreviewContent();
             updateNavButtons();
         }
@@ -481,11 +469,34 @@ $(function() {
         }
     }
 
+    // 向左旋转功能
+    function rotateLeft() {
+        // 更新旋转角度（每次增加90度，0 -> 90 -> 180 -> 270 -> 0）
+        previewState.rotation = (previewState.rotation + 90) % 360;
+        
+        // 获取当前媒体元素
+        const $media = $content.find('img, video');
+        if ($media.length === 0) return;
+        
+        // 移除所有旋转类
+        $media.removeClass('rotate-90 rotate-180 rotate-270');
+        
+        // 添加对应的旋转类
+        if (previewState.rotation === 90) {
+            $media.addClass('rotate-90');
+        } else if (previewState.rotation === 180) {
+            $media.addClass('rotate-180');
+        } else if (previewState.rotation === 270) {
+            $media.addClass('rotate-270');
+        }
+    }
+
     // 绑定事件
     $btnClose.on('click', closePreview);
     $btnPrev.on('click', prevPhoto);
     $btnNext.on('click', nextPhoto);
     $btnFullscreen.on('click', toggleFullscreen);
+    $btnRotate.on('click', rotateLeft);
 
     // 点击遮罩层关闭
     $overlay.on('click', function(e) {
@@ -514,6 +525,9 @@ $(function() {
                 break;
             case 70: // F 全屏
                 toggleFullscreen();
+                break;
+            case 82: // R 旋转
+                rotateLeft();
                 break;
         }
     });

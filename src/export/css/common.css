@@ -2724,15 +2724,45 @@ blockquote.source {
 .photo-preview-overlay.fullscreen-mode .photo-preview-modal {
     max-width: 100vw;
     max-height: 100vh;
+    max-height: 100dvh; /* 动态视口高度，适配移动端地址栏 */
     width: 100vw;
     height: 100vh;
+    height: 100dvh;
     border-radius: 0;
+    box-sizing: border-box;
+    /* 关键：确保flex容器不超出视口 */
+    overflow: hidden;
+}
+
+.photo-preview-overlay.fullscreen-mode .photo-preview-header {
+    /* 适配移动端安全区域 - 顶部（刘海屏等） */
+    padding-top: max(14px, env(safe-area-inset-top, 14px));
+    /* 关键：固定高度，不被压缩也不被拉伸 */
+    flex-shrink: 0;
+    flex-grow: 0;
+}
+
+.photo-preview-overlay.fullscreen-mode .photo-preview-footer {
+    /* 适配移动端安全区域 - 底部（iPhone底部指示条等） */
+    padding-bottom: max(12px, env(safe-area-inset-bottom, 12px));
+    /* 关键：固定高度，不被压缩也不被拉伸 */
+    flex-shrink: 0;
+    flex-grow: 0;
+}
+
+.photo-preview-overlay.fullscreen-mode .photo-preview-content {
+    /* 全屏模式下：flex: 1 配合 min-height: 0 实现真正的自适应 */
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .photo-preview-overlay.fullscreen-mode .photo-preview-content img,
 .photo-preview-overlay.fullscreen-mode .photo-preview-content video {
+    /* 全屏模式下：相对于父容器 */
     max-width: 100%;
-    max-height: calc(100vh - 140px);
+    max-height: 100%;
+    object-fit: contain;
 }
 
 /* 预览弹窗头部工具栏 */
@@ -2798,27 +2828,38 @@ blockquote.source {
     background: rgba(100,200,255,0.6);
 }
 
+.photo-preview-btn.btn-rotate {
+    background: rgba(150,200,100,0.4);
+}
+
+.photo-preview-btn.btn-rotate:hover {
+    background: rgba(150,200,100,0.6);
+}
+
 /* 预览内容区域 */
 .photo-preview-content {
-    flex: 1;
+    /* flex: 1 让内容区占据剩余空间 */
+    flex: 1 1 auto;
+    /* 设置一个合理的最小高度，防止内容塌陷 */
+    min-height: 300px;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 24px;
     overflow: hidden;
-    min-height: 300px;
-    min-width: 400px;
+    min-width: 300px;
     background: radial-gradient(ellipse at center, #2a2a2a 0%, #1a1a1a 100%);
     position: relative;
 }
 
 .photo-preview-content img {
+    /* 相对于父容器 */
     max-width: 100%;
-    max-height: calc(80vh - 140px);
+    max-height: calc(85vh - 150px); /* 回退方案：视口高度减去头部和底部 */
     object-fit: contain;
     border-radius: 6px;
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
-    transition: opacity 0.15s ease;
+    transition: opacity 0.15s ease, transform 0.3s ease;
 }
 
 .photo-preview-content img:hover {
@@ -2826,10 +2867,29 @@ blockquote.source {
 }
 
 .photo-preview-content video {
+    /* 相对于父容器 */
     max-width: 100%;
-    max-height: calc(80vh - 140px);
+    max-height: calc(85vh - 150px); /* 回退方案：视口高度减去头部和底部 */
+    object-fit: contain;
     border-radius: 6px;
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+    transition: transform 0.3s ease;
+}
+
+/* 旋转变换类 */
+.photo-preview-content img.rotate-90,
+.photo-preview-content video.rotate-90 {
+    transform: rotate(-90deg);
+}
+
+.photo-preview-content img.rotate-180,
+.photo-preview-content video.rotate-180 {
+    transform: rotate(-180deg);
+}
+
+.photo-preview-content img.rotate-270,
+.photo-preview-content video.rotate-270 {
+    transform: rotate(-270deg);
 }
 
 /* 预览弹窗底部信息栏 */
@@ -2837,15 +2897,21 @@ blockquote.source {
     padding: 12px 20px;
     background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(30,30,30,0.85) 100%);
     border-top: 1px solid rgba(255,255,255,0.08);
+    flex-shrink: 0;
+    box-sizing: border-box;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .photo-preview-info {
     color: #aaa;
     font-size: 12px;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     flex-wrap: wrap;
     gap: 10px;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .photo-preview-info .info-item {
@@ -2972,13 +3038,11 @@ blockquote.source {
     .photo-preview-modal {
         max-width: 95vw;
         max-height: 90vh;
+        max-height: 90dvh; /* 动态视口高度 */
         border-radius: 16px;
     }
     
-    .photo-preview-content img,
-    .photo-preview-content video {
-        max-height: calc(85vh - 140px);
-    }
+    /* 移除硬编码的max-height，使用flex布局自动适配 */
     
     .photo-preview-title {
         max-width: 160px;
