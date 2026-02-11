@@ -212,6 +212,7 @@ $(function() {
     const $btnFullscreen = $('#btnFullscreen');
     const $btnClose = $('#btnClosePreview');
     const $btnRotate = $('#btnRotate');
+    const $btnDownload = $('#btnDownload');
 
     // 获取当前 DOM 顺序的所有 lightbox 元素
     function getCurrentLightboxes() {
@@ -307,6 +308,9 @@ $(function() {
         // 设置标题
         const title = photo.name || API.Utils.formatDate(photo.uploadtime || photo.uploadTime) || '相片预览';
         $title.text(title);
+
+        // 显示下载按钮
+        $btnDownload.show();
 
         // 创建加载完成后的处理函数
         const onMediaReady = function($newMedia) {
@@ -497,6 +501,35 @@ $(function() {
     $btnNext.on('click', nextPhoto);
     $btnFullscreen.on('click', toggleFullscreen);
     $btnRotate.on('click', rotateLeft);
+
+    // 下载按钮
+    $btnDownload.on('click', function() {
+        const lightboxes = getCurrentLightboxes();
+        const currentLightbox = lightboxes[previewState.currentIndex];
+        if (!currentLightbox) return;
+
+        const photo = getPhotoFromLightbox(currentLightbox);
+        if (!photo) return;
+
+        if (photo.is_video && photo.video_info) {
+            const videoSrc = API.Common.getMediaPath(photo.video_info.video_url, photo.custom_filepath, true);
+            if (!videoSrc) return;
+            const fileName = (photo.name || '视频').replace(/[\\/:*?"<>|]/g, '_') + '.mp4';
+            const link = document.createElement('a');
+            link.href = videoSrc;
+            link.download = fileName;
+            link.click();
+        } else {
+            const photoHref = API.Common.getMediaPath(photo.custom_url, photo.custom_filepath, true);
+            if (!photoHref) return;
+            const ext = API.Photos.getPhotoType(photo) || 'jpg';
+            const fileName = (photo.name || '相片').replace(/[\\/:*?"<>|]/g, '_') + '.' + ext.toLowerCase();
+            const link = document.createElement('a');
+            link.href = photoHref;
+            link.download = fileName;
+            link.click();
+        }
+    });
 
     // 点击遮罩层关闭
     $overlay.on('click', function(e) {

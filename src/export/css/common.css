@@ -2828,6 +2828,14 @@ blockquote.source {
     background: rgba(100,200,255,0.6);
 }
 
+.photo-preview-btn.btn-download-preview {
+    background: rgba(100,255,150,0.4);
+}
+
+.photo-preview-btn.btn-download-preview:hover {
+    background: rgba(100,255,150,0.6);
+}
+
 .photo-preview-btn.btn-rotate {
     background: rgba(150,200,100,0.4);
 }
