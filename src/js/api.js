@@ -607,6 +607,7 @@ API.Utils = {
             $.ajax({
                 url: url,
                 type: 'GET',
+                dataType: 'text',
                 data: params,
                 xhrFields: {
                     withCredentials: true
@@ -1242,6 +1243,12 @@ API.Utils = {
     toJson(json, jsonpKey) {
         // 前后去空格
         json = json.trim();
+
+        // HTML响应无法解析为JSON，直接返回空对象（与原JSON.parse失败行为一致）
+        if (json.charAt(0) === '<') {
+            console.warn('toJson收到HTML响应，跳过JSON解析');
+            return {};
+        }
 
         if (jsonpKey && json.match(jsonpKey)) {
             //JSONP转换
