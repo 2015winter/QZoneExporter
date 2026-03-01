@@ -324,7 +324,7 @@ API.Friends.exportToHtml = async(friends) => {
         await API.Common.writeHtmlofTpl('friends', null, moduleFolder + "/index.html");
 
     } catch (error) {
-        console.error('导出好友到HTML异常', error, favorites);
+        console.error('导出好友到HTML异常', error, friends);
     }
 
     // 更新完成信息

@@ -212,7 +212,7 @@ API.Utils = {
             results.push(promise);
             
             if (concurrency <= items.length) {
-                const e = promise.then(() => executing.splice(executing.indexOf(e), 1));
+                const e = promise.finally(() => executing.splice(executing.indexOf(e), 1));
                 executing.push(e);
                 if (executing.length >= concurrency) {
                     await Promise.race(executing);

@@ -1211,17 +1211,6 @@ body.messages-page {
     box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
 }
 
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
 /* 说说头像区域 */
 .messages-page .message-avatar-img {
     width: 50px;
@@ -3132,7 +3121,6 @@ body.blogs-page {
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
     padding: 40px;
     margin-top: 20px;
-    animation: fadeInUp 0.6s ease-out;
 }
 
 /* 页面标题区域 */

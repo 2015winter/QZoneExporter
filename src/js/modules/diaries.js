@@ -630,7 +630,7 @@ API.Diaries.exportToHtml = async(items) => {
         }
 
     } catch (error) {
-        console.error('导出日记到HTML异常', error, boardInfo);
+        console.error('导出日记到HTML异常', error, items);
     }
 
     // 更新完成信息

@@ -233,7 +233,7 @@ API.Favorites.exportToMarkdown = async(favorites) => {
         // 生成汇总文件
         await API.Utils.writeText(allYearContents.join('\r\n'), API.Common.getModuleRoot('Favorites') + '/Favorites.md');
     } catch (error) {
-        console.error('导出收藏到Markdown文件异常', error, videos);
+        console.error('导出收藏到Markdown文件异常', error, favorites);
     }
 
     // 完成
@@ -395,7 +395,7 @@ API.Favorites.getMarkdown = (favorite) => {
 API.Favorites.exportToJson = async(favorites) => {
     // 进度更新器
     const indicator = new StatusIndicator('Favorites_Export_Other');
-    indicator.setIndex(year);
+    indicator.setIndex('JSON');
     // 收藏根据年份分组
     let yearDataMap = API.Utils.groupedByTime(favorites, "create_time");
     for (let yearEntry of yearDataMap) {

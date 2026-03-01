@@ -834,7 +834,7 @@ class StatusIndicator {
      */
     setSkip(count) {
         if (Array.isArray(count)) {
-            count = item.length
+            count = count.length
         }
         this.skip = count
         this.print()
@@ -1686,7 +1686,6 @@ API.Utils.newDownloadTask = (module, url, folder, name, source, makeOrg) => {
 
     // 因为视频存在有效期，所以尽量将MP4文件前置，尽早下载
     if (name && name.indexOf('mp4') > -1) {
-        downloadTasks.unshift();
         downloadTasks.unshift(ajax_down);
         browserTasks.unshift(browser_down);
         thunderInfo.addTask(thunder_down);
