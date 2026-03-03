@@ -762,8 +762,11 @@ API.Videos.addDownloadEmoticonTasks = (items) => {
             continue;
         }
 
-        // 视频描述
+        // 视频名称
         item.name && API.Common.formatContent(item.name, 'HTML', false, false, false, true, false);
+
+        // 视频描述
+        item.desc && API.Common.formatContent(item.desc, 'HTML', false, false, false, true, false);
 
         // 添加评论的表情下载任务
         API.Common.addCommentEmoticonDownloadTasks(item);

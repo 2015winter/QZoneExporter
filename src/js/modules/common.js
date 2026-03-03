@@ -1168,6 +1168,20 @@ API.Common.downloadByAria2 = async(tasks) => {
         }
     }
 
+    // 循环结束后，若开启了导出任务清单，从已完成的任务中生成清单文件
+    if (aria2Config.exportTaskList && QZone.Common.Filer) {
+        const addedLines = supportedTasks
+            .filter(t => t.downloadState === 'complete')
+            .map(t => API.Utils.getAria2TaskFullPath(t) + '\t' + (t.url || ''));
+        if (addedLines.length > 0) {
+            try {
+                await API.Utils.writeText(addedLines.join('\r\n'), API.Common.getRootFolder() + '/已添加的下载任务清单.txt');
+            } catch (e) {
+                console.warn('[Aria2] 写入已添加任务清单失败', e);
+            }
+        }
+    }
+
     // 完成
     indicator.complete();
 

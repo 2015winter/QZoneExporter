@@ -32,7 +32,9 @@ const Default_Config = {
             // 是否自动清理卡住的任务
             autoCleanStuck: true,
             // 卡住任务检查间隔（每添加多少批任务检查一次）
-            stuckCheckInterval: 5
+            stuckCheckInterval: 5,
+            // 是否生成已添加的下载任务清单文件
+            exportTaskList: false
         },
         // 是否跳过已知失效的CDN域名
         skipDeprecatedUrls: true,

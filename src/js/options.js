@@ -248,6 +248,7 @@
         const $common_aria2_max_waiting_row = $('#common_aria2_max_waiting_row');
         const $common_aria2_check_interval_row = $('#common_aria2_check_interval_row');
         const $common_aria2_auto_clean_row = $('#common_aria2_auto_clean_row');
+        const $common_aria2_export_task_list_row = $('#common_aria2_export_task_list_row');
 
         // 提示信息
         const $download_type_help = $('#common_download_type_help');
@@ -264,6 +265,7 @@
                 $common_aria2_max_waiting_row.hide();
                 $common_aria2_check_interval_row.hide();
                 $common_aria2_auto_clean_row.hide();
+                $common_aria2_export_task_list_row.hide();
 
                 $file_suffix_row.show();
                 $suffix_timeout_row.show();
@@ -290,6 +292,7 @@
                 $common_aria2_max_waiting_row.show();
                 $common_aria2_check_interval_row.show();
                 $common_aria2_auto_clean_row.show();
+                $common_aria2_export_task_list_row.show();
                 $file_suffix_row.show();
                 $suffix_timeout_row.show();
 
@@ -304,6 +307,7 @@
                 $common_aria2_max_waiting_row.hide();
                 $common_aria2_check_interval_row.hide();
                 $common_aria2_auto_clean_row.hide();
+                $common_aria2_export_task_list_row.hide();
                 $common_refererUrls.hide();
                 $download_sleep_row.hide();
 
@@ -344,6 +348,7 @@
                 $common_aria2_max_waiting_row.hide();
                 $common_aria2_check_interval_row.hide();
                 $common_aria2_auto_clean_row.hide();
+                $common_aria2_export_task_list_row.hide();
                 $common_refererUrls.hide();
 
                 $task_count_row.show();
@@ -365,6 +370,7 @@
                 $common_aria2_max_waiting_row.hide();
                 $common_aria2_check_interval_row.hide();
                 $common_aria2_auto_clean_row.hide();
+                $common_aria2_export_task_list_row.hide();
 
                 $download_status_row.show();
                 $file_suffix_row.show();
@@ -391,6 +397,7 @@
                 $common_aria2_max_waiting_row.hide();
                 $common_aria2_check_interval_row.hide();
                 $common_aria2_auto_clean_row.hide();
+                $common_aria2_export_task_list_row.hide();
 
                 $download_type_help.html('不下载图片，直接使用QQ空间的图片地址，<span style="color:red">不推荐使用，可能会存在图片过期、禁止访问等问题</span>');
                 break;
@@ -868,6 +875,7 @@
         $("#common_aria2_max_waiting").val(options.Common.Aria2.maxWaiting || 100);
         $("#common_aria2_check_interval").val(options.Common.Aria2.checkInterval || 3);
         $('#common_aria2_auto_clean').prop("checked", options.Common.Aria2.autoCleanStuck !== false);
+        $('#common_aria2_export_task_list').prop("checked", options.Common.Aria2.exportTaskList === true);
         // 失效URL处理
         $('#common_skip_deprecated_urls').prop("checked", options.Common.skipDeprecatedUrls !== false);
         $('#common_try_fix_deprecated_urls').prop("checked", options.Common.tryFixDeprecatedUrls === true);
@@ -1173,6 +1181,7 @@
         QZone_Config.Common.Aria2.maxWaiting = $("#common_aria2_max_waiting").val() * 1;
         QZone_Config.Common.Aria2.checkInterval = $("#common_aria2_check_interval").val() * 1;
         QZone_Config.Common.Aria2.autoCleanStuck = $('#common_aria2_auto_clean').prop("checked");
+        QZone_Config.Common.Aria2.exportTaskList = $('#common_aria2_export_task_list').prop("checked");
         // 失效URL处理
         QZone_Config.Common.skipDeprecatedUrls = $('#common_skip_deprecated_urls').prop("checked");
         QZone_Config.Common.tryFixDeprecatedUrls = $('#common_try_fix_deprecated_urls').prop("checked");

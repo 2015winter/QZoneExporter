@@ -2137,6 +2137,18 @@
                                         <small id="common_aria2_auto_clean_help" class="text-muted">自动检测并移除卡住的下载任务（下载速度为0且无连接），<span style="color: green;">解决失效链接导致下载卡死的问题</span></small>
                                     </div>
                                 </div>
+                                <div id="common_aria2_export_task_list_row" class="form-group row" style="display: none;">
+                                    <div class="col-sm-auto">导出任务清单：</div>
+                                    <div class="col-sm-2">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="common_aria2_export_task_list">
+                                            <label class="custom-control-label" for="common_aria2_export_task_list"></label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-auto">
+                                        <small class="text-muted">开启后，下载完成时在导出目录生成<span style="color: green;">「已添加的下载任务清单.txt」</span>，记录所有提交到Aria2的文件全路径，方便核对</small>
+                                    </div>
+                                </div>
                                 <!-- 失效URL处理 -->
                                 <div class="form-group row">
                                     <div class="col-sm-auto">跳过失效CDN链接：</div>

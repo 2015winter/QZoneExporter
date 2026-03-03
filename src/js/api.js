@@ -1668,8 +1668,20 @@ API.Utils = {
                 options
             ]
         };
-        // 添加下载任务到Aria2
+        // 添加下载任务到Aria2，返回的 result.result 为 gid
         return API.Utils.post(Aria2Setting.rpc, JSON.stringify(data));
+    },
+
+    /**
+     * 获取 Aria2 下载任务对应的本地全路径（用于写入清单）
+     * @param {DownloadTask} task
+     * @returns {string}
+     */
+    getAria2TaskFullPath(task) {
+        const Aria2Setting = QZone_Config.Common.Aria2;
+        const base = API.Common.getRootFolderName() + '/' + task.dir + "/" + task.name;
+        const dir = Aria2Setting.dir && String(Aria2Setting.dir).trim();
+        return dir ? dir.replace(/\/+$/, '') + '/' + base : base;
     },
 
     /**
