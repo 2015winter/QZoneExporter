@@ -1575,19 +1575,38 @@ API.Utils = {
     },
 
     /**
-     * 迅雷下载
+     * 探测迅雷SDK是否可用（通过background在页面主世界检测）
+     * @returns {Promise<boolean>}
+     */
+    probeThunderSdk() {
+        return new Promise(function(resolve) {
+            chrome.runtime.sendMessage({
+                from: 'content',
+                type: 'probe_thunder'
+            }, function(response) {
+                resolve(chrome.runtime.lastError ? false : !!response);
+            });
+        });
+    },
+
+    /**
+     * 通过迅雷SDK下载（通过background在页面主世界调用）
      * @param {ThunderInfo} taskInfo
+     * @returns {Promise<void>}
      */
     downloadByThunder(taskInfo) {
-        // Manifest V3 中迅雷SDK不可用，使用thunderx协议唤起
-        if (typeof thunderLink !== 'undefined' && thunderLink.newTask) {
-            thunderLink.newTask(taskInfo);
-        } else {
-            // 使用 thunderx:// 协议唤起迅雷
-            const thunderUrl = 'thunderx://' + JSON.stringify(taskInfo);
-            window.open(thunderUrl, '_blank');
-            console.warn('迅雷SDK不可用，尝试使用thunderx协议唤起');
-        }
+        return new Promise(function(resolve) {
+            chrome.runtime.sendMessage({
+                from: 'content',
+                type: 'invoke_thunder',
+                taskInfoJson: JSON.stringify(taskInfo)
+            }, function() {
+                if (chrome.runtime.lastError) {
+                    console.warn('迅雷SDK调用异常', chrome.runtime.lastError);
+                }
+                resolve();
+            });
+        });
     },
 
     /**

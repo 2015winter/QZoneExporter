@@ -78,6 +78,7 @@
     ],
     "permissions": [
         "activeTab",
+        "scripting",
         "cookies",
         "notifications",
         "storage",

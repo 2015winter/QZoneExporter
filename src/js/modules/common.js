@@ -1197,7 +1197,19 @@ API.Common.invokeThunder = async(thunderInfo) => {
     const indicator = new StatusIndicator('Common_Thunder');
     indicator.setTotal(thunderInfo.tasks.length);
 
-    // 处理迅雷下载信息
+    // 通过background在页面主世界探测SDK，迅雷扩展注入可能有延迟，最多重试3次
+    let sdkAvailable = false;
+    for (let attempt = 0; attempt < 3; attempt++) {
+        sdkAvailable = await API.Utils.probeThunderSdk();
+        if (sdkAvailable) break;
+        if (attempt < 2) await API.Utils.sleep(1000);
+    }
+    if (!sdkAvailable) {
+        indicator.complete();
+        alert('迅雷SDK不可用，请安装迅雷浏览器扩展或切换为其他下载方式（浏览器下载、Aria2等）');
+        return;
+    }
+
     const _thunderInfo = API.Common.handerThunderInfo(thunderInfo);
 
     // 通过迅雷任务数将任务分组，任务太大时无法唤起迅雷

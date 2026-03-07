@@ -158,6 +158,26 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
                     });
                     sendResponse(true);
                     break;
+                case 'probe_thunder':
+                    chrome.scripting.executeScript({
+                        target: { tabId: sender.tab.id },
+                        world: 'MAIN',
+                        func: () => typeof thunderLink !== 'undefined' && typeof thunderLink.newTask === 'function'
+                    }).then(results => sendResponse(!!results[0]?.result))
+                    .catch(() => sendResponse(false));
+                    return true;
+                case 'invoke_thunder':
+                    chrome.scripting.executeScript({
+                        target: { tabId: sender.tab.id },
+                        world: 'MAIN',
+                        func: (json) => { thunderLink.newTask(JSON.parse(json)); },
+                        args: [request.taskInfoJson]
+                    }).then(() => sendResponse(true))
+                    .catch(e => {
+                        console.error('[QZone] 迅雷SDK调用失败:', e);
+                        sendResponse(false);
+                    });
+                    return true;
                 case 'getMimeType':
                     getMimeType(request.url, request.timeout).then((data) => {
                         sendResponse(data);
