@@ -24,6 +24,7 @@
 - **Content Filtering** - Keyword blocking, time range
 - **Data Statistics** - Visual reports
 - **Offline Viewing** - Browse without network
+- **Light / Dark Theme** - Toggle on exported pages, preference is remembered
 
 </details>
 
@@ -45,6 +46,7 @@
 - 🔍 **内容过滤** - 关键词屏蔽、时间范围
 - 📊 **数据统计** - 可视化报告
 - 📴 **离线查看** - 断网可浏览
+- 🎨 **浅色 / 深色** - 备份页右下角切换，选择会记住
 
 ## 🚀 快速开始 | Quick Start
 
@@ -61,7 +63,7 @@
 3. 点击扩展图标开始备份（主号建议睡前）
 4. 点击 **打包下载** 获取文案压缩包
 5. 等待多媒体下载完成后，合并到同一目录
-6. 打开 `index.html` 查看备份
+6. 打开 `index.html` 查看备份（右下角可切换浅色 / 深色）
 
 ## 📖 帮助文档 | Documentation
 
@@ -74,6 +76,8 @@
 ## 🖼 备份预览 | Preview
 
 [👉 点击查看在线演示](https://demo.laxdu.com/qzone/index.html)
+
+本地预览：在仓库根目录执行 `python3 -m http.server 8080 --directory demo`，浏览器打开 `http://127.0.0.1:8080/`。
 
 <details open>
 <summary>展开查看截图</summary>
@@ -110,11 +114,23 @@ src/
 │   ├── api.js                 # API 封装
 │   ├── config.js              # 配置管理
 │   └── modules/               # 功能模块 (说说/日志/相册等)
-├── html/                      # 页面文件
-├── css/                       # 样式文件
-├── templates/                 # 导出模板
+├── html/                      # 扩展页面
+├── css/                       # 扩展样式
+├── templates/                 # 导出 HTML 模板
+├── export/                    # 导出静态资源（随备份一起复制）
+│   ├── css/
+│   │   ├── common.css         # 公共基础、侧边栏、画廊
+│   │   ├── theme.css          # 设计令牌、浅色/深色
+│   │   ├── components.css     # 跨页组件（页脚、灯箱等）
+│   │   └── pages/             # 模块专属（说说/日志/视频/相册）
+│   └── js/
+│       ├── common.js
+│       ├── sidebar.js
+│       └── theme.js           # 主题切换
 └── vendor/                    # 第三方库
 ```
+
+备份目录中对应为 `Common/css/`、`Common/js/`。打开任意备份页即可使用右下角主题按钮。
 
 </details>
 
@@ -128,6 +144,7 @@ src/
 | 文件处理 | JSZip、FileSaver.js、Filer |
 | 格式转换 | Turndown (HTML→MD)、SheetJS (Excel) |
 | 其他 | Template.js、lightGallery、Lodash、Moment.js |
+| 导出页主题 | CSS 变量 + `localStorage` 记忆浅色/深色 |
 
 </details>
 
