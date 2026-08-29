@@ -28,16 +28,11 @@
 		body {
 			background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 50%, #feca57 100%) !important;
 			min-height: 100vh;
-			padding-top: 70px;
-			padding-bottom: 80px;
+
+			padding-bottom: 24px;
 		}
 		
 		/* 顶部导航 - 与索引页一致 */
-		.videos-navbar {
-			background: linear-gradient(135deg, rgba(255, 107, 107, 0.95), rgba(238, 90, 36, 0.95)) !important;
-			backdrop-filter: blur(10px);
-		}
-		
 		/* 隐藏侧边栏 */
 		#BlogAnchor {
 			display: none !important;
@@ -228,22 +223,17 @@
 
 <body>
 	<header>
-		<nav class="navbar navbar-expand-lg navbar-dark fixed-top videos-navbar">
+		<nav class="navbar navbar-dark page-navbar videos-navbar">
 			<a class="navbar-brand" target="_blank" href="https://github.com/2015winter/QZoneExporter">
 				<i class="fa fa-cloud-download mr-2"></i>QQ空间导出助手
 			</a>
-			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-				<span class="navbar-toggler-icon"></span>
-			</button>
-			<div class="collapse navbar-collapse" id="navbarSupportedContent">
-				<nav aria-label="breadcrumb">
+			<nav aria-label="breadcrumb">
 					<ol class="breadcrumb" style="background: transparent;">
 						<li class="breadcrumb-item"><a href="../index.html" style="color: rgba(255,255,255,0.8);"><i class="fa fa-home mr-1"></i>个人中心</a></li>
 						<li class="breadcrumb-item"><a href="index.html" style="color: rgba(255,255,255,0.8);"><i class="fa fa-play-circle mr-1"></i>视频</a></li>
 						<li class="breadcrumb-item active" aria-current="page" style="color: rgba(255,255,255,0.95);"><i class="fa fa-calendar mr-1"></i><%:=targetYear%></li>
 					</ol>
 				</nav>
-			</div>
 		</nav>
 	</header>
 	<main role="main" class="flex-shrink-0">

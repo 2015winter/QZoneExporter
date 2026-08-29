@@ -32,12 +32,8 @@
 		body {
 			background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 50%, #093637 100%);
 			min-height: 100vh;
-			padding-top: 70px;
-			padding-bottom: 80px;
-		}
-		
-		.navbar-boards {
-			background: linear-gradient(135deg, rgba(78, 205, 196, 0.95), rgba(68, 160, 141, 0.95)) !important;
+
+			padding-bottom: 24px;
 		}
 		
 		.main-card {
@@ -355,16 +351,7 @@
 			color: #a0aec0;
 		}
 		
-		/* 底部样式 */
-		.boards-footer {
-			background: var(--qz-grad-boards);
-			backdrop-filter: blur(10px);
-			position: fixed;
-			bottom: 0;
-			left: 0;
-			right: 0;
-			z-index: 1000;
-		}
+		/* 页尾签名见 components.css */
 		
 		/* 响应式 */
 		@media (max-width: 768px) {
@@ -394,18 +381,16 @@
 
 <body>
 	<header>
-		<nav class="navbar navbar-expand-lg navbar-dark fixed-top navbar-boards">
+		<nav class="navbar navbar-dark page-navbar navbar-boards">
 			<a class="navbar-brand" href="../index.html">
 				<i class="fa fa-cloud-download mr-2"></i>QQ空间导出助手
 			</a>
-			<div class="collapse navbar-collapse">
-				<nav aria-label="breadcrumb">
+			<nav aria-label="breadcrumb">
 					<ol class="breadcrumb" style="background: transparent;">
 						<li class="breadcrumb-item"><a href="../index.html" style="color: rgba(255,255,255,0.85);"><i class="fa fa-home mr-1"></i>个人中心</a></li>
 						<li class="breadcrumb-item active" style="color: rgba(255,255,255,0.9);"><i class="fa fa-envelope-o mr-1"></i>留言板</li>
 					</ol>
 				</nav>
-			</div>
 		</nav>
 	</header>
 	
@@ -486,7 +471,7 @@
 		</div>
 	</main>
 	
-	<footer class="footer mt-auto py-3 boards-footer">
+	<footer class="footer mt-auto py-3 page-footer boards-footer">
 		<div class="container text-center">
 			<span class="text-white footer-text">
 				<i class="fa fa-envelope-o mr-2"></i>留言如信，字字珍贵

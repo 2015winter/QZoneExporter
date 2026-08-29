@@ -30,8 +30,8 @@
 		body.visitors-page {
 			background: linear-gradient(135deg, #fd79a8 0%, #e84393 50%, #a29bfe 100%);
 			min-height: 100vh;
-			padding-top: 70px;
-			padding-bottom: 80px;
+
+			padding-bottom: 24px;
 		}
 		
 		/* 主卡片容器 */
@@ -340,17 +340,7 @@
 			color: #a0aec0;
 		}
 		
-		/* 导航栏样式 */
-		.navbar-visitors {
-			background: linear-gradient(135deg, rgba(253, 121, 168, 0.95), rgba(232, 67, 147, 0.95)) !important;
-			backdrop-filter: blur(10px);
-		}
-		
-		/* 底部样式 */
-		.visitors-footer {
-			background: var(--qz-grad-visitors);
-			backdrop-filter: blur(10px);
-		}
+		/* 页尾签名见 components.css */
 		
 		/* 响应式 */
 		@media (max-width: 768px) {
@@ -405,21 +395,16 @@
 
 <body class="visitors-page">
 	<header>
-		<nav class="navbar navbar-expand-lg navbar-dark fixed-top navbar-visitors">
+		<nav class="navbar navbar-dark page-navbar navbar-visitors">
 			<a class="navbar-brand" target="_blank" href="https://github.com/2015winter/QZoneExporter">
 				<i class="fa fa-cloud-download mr-2"></i>QQ空间导出助手
 			</a>
-			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-				<span class="navbar-toggler-icon"></span>
-			</button>
-			<div class="collapse navbar-collapse" id="navbarSupportedContent">
-				<nav aria-label="breadcrumb">
+			<nav aria-label="breadcrumb">
 					<ol class="breadcrumb" style="background: transparent;">
 						<li class="breadcrumb-item"><a href="../index.html" style="color: rgba(255,255,255,0.8);"><i class="fa fa-home mr-1"></i>个人中心</a></li>
 						<li class="breadcrumb-item active" aria-current="page" style="color: rgba(255,255,255,0.9);">访客</li>
 					</ol>
 				</nav>
-			</div>
 		</nav>
 	</header>
 	
@@ -560,7 +545,7 @@
 		</div>
 	</main>
 	
-	<footer class="footer mt-auto py-3 fixed-bottom visitors-footer">
+	<footer class="footer mt-auto py-3 page-footer visitors-footer">
 		<div class="container text-center">
 			<span class="text-white" style="font-size: 14px; letter-spacing: 1px;">
 				<i class="fa fa-eye mr-2"></i>每一次访问，都是一份牵挂

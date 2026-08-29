@@ -52,14 +52,8 @@
 		body {
 			background: linear-gradient(135deg, #11998e 0%, #38ef7d 50%, #96fbc4 100%);
 			min-height: 100vh;
-			padding-top: 70px;
+
 			padding-bottom: 40px;
-		}
-		
-		/* 导航栏样式 - 与Albums保持一致 */
-		.navbar-albums {
-			background: linear-gradient(135deg, rgba(17, 153, 142, 0.95), rgba(56, 239, 125, 0.95)) !important;
-			backdrop-filter: blur(10px);
 		}
 		
 		/* 主卡片容器 - 与Albums保持一致 */
@@ -254,22 +248,17 @@
 
 <body>
 	<header>
-		<nav class="navbar navbar-expand-lg navbar-dark fixed-top navbar-albums">
+		<nav class="navbar navbar-dark page-navbar navbar-albums">
 			<a class="navbar-brand" href="../index.html">
 				<i class="fa fa-cloud-download mr-2"></i>QQ空间导出助手
 			</a>
-			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-				<span class="navbar-toggler-icon"></span>
-			</button>
-			<div class="collapse navbar-collapse" id="navbarSupportedContent">
-				<nav aria-label="breadcrumb">
+			<nav aria-label="breadcrumb">
 					<ol class="breadcrumb" style="background: transparent; margin-bottom: 0;">
 						<li class="breadcrumb-item"><a href="../index.html" style="color: rgba(255,255,255,0.85);"><i class="fa fa-home mr-1"></i>个人中心</a></li>
 						<li class="breadcrumb-item"><a href="index.html" style="color: rgba(255,255,255,0.85);"><i class="fa fa-picture-o mr-1"></i>相册</a></li>
 						<li class="breadcrumb-item active" aria-current="page" style="color: rgba(255,255,255,0.95);"><i class="fa fa-folder-open mr-1"></i><span class="album-name">相册名称</span></li>
 					</ol>
 				</nav>
-			</div>
 		</nav>
 	</header>
 	<main role="main" class="flex-shrink-0">

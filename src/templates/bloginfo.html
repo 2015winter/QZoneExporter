@@ -38,14 +38,8 @@
 		body.bloginfo-page {
 			background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
 			min-height: 100vh;
-			padding-top: 70px;
-			padding-bottom: 80px;
-		}
-		
-		/* 导航栏样式 */
-		.bloginfo-navbar {
-			background: linear-gradient(135deg, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.95)) !important;
-			backdrop-filter: blur(10px);
+
+			padding-bottom: 24px;
 		}
 		
 		.bloginfo-breadcrumb {
@@ -395,16 +389,7 @@
 			font-size: 14px;
 		}
 		
-		/* 底部 */
-		.bloginfo-footer {
-			background: var(--qz-grad-blogs);
-			backdrop-filter: blur(10px);
-			position: fixed;
-			bottom: 0;
-			left: 0;
-			right: 0;
-			z-index: 1000;
-		}
+		/* 页尾签名见 components.css */
 		
 		/* 空评论状态 */
 		.no-comments {
@@ -462,22 +447,17 @@
 
 <body class="bloginfo-page">
 	<header>
-		<nav class="navbar navbar-expand-lg navbar-dark fixed-top bloginfo-navbar">
+		<nav class="navbar navbar-dark page-navbar bloginfo-navbar">
 			<a class="navbar-brand" target="_blank" href="https://github.com/2015winter/QZoneExporter">
 				<i class="fa fa-cloud-download mr-2"></i>QQ空间导出助手
 			</a>
-			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-				<span class="navbar-toggler-icon"></span>
-			</button>
-			<div class="collapse navbar-collapse" id="navbarSupportedContent">
-				<nav aria-label="breadcrumb">
+			<nav aria-label="breadcrumb">
 					<ol class="breadcrumb bloginfo-breadcrumb">
 						<li class="breadcrumb-item"><a href="../index.html"><i class="fa fa-home mr-1"></i>个人中心</a></li>
 						<li class="breadcrumb-item"><a href="index.html"><i class="fa fa-book mr-1"></i>日志</a></li>
 						<li class="breadcrumb-item active" aria-current="page">日志详情</li>
 					</ol>
 				</nav>
-			</div>
 		</nav>
 	</header>
 	
@@ -622,10 +602,10 @@
 		</div>
 	</main>
 	
-	<footer class="footer mt-auto py-3 bloginfo-footer">
+	<footer class="footer mt-auto py-3 page-footer bloginfo-footer">
 		<div class="container text-center">
 			<span class="text-white footer-text">
-				<i class="fa fa-leaf mr-2"></i>落叶随风，青春，稀纵即逝
+				<i class="fa fa-leaf mr-2"></i>落叶随风，青春，稍纵即逝
 			</span>
 		</div>
 	</footer>

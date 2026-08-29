@@ -1,7 +1,7 @@
 /*
  * theme.css — 设计令牌与主题
  * 亮色令牌与现网配色一致；暗色仅在 html[data-theme="dark"] 下生效。
- * 模块主题色通过 --qz-grad-* 提供，供页脚等组件引用。
+ * 模块主题色通过 --qz-grad-* 提供，供导航栏等组件引用。
  */
 
 :root {
@@ -19,18 +19,17 @@
     --qz-radius: 16px;
     --qz-radius-lg: 24px;
 
-    /* 模块主题渐变（供后续 components 层的导航栏/页脚统一引用，
-       当前各页仍各自内联，迁移时逐步切换到这些变量） */
-    --qz-grad-messages: linear-gradient(135deg, rgba(240, 147, 251, 0.95), rgba(245, 87, 108, 0.95));
-    --qz-grad-index: linear-gradient(135deg, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.95));
-    --qz-grad-blogs: linear-gradient(135deg, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.95));
-    --qz-grad-boards: linear-gradient(135deg, rgba(78, 205, 196, 0.95), rgba(68, 160, 141, 0.95));
-    --qz-grad-shares: linear-gradient(135deg, rgba(162, 155, 254, 0.95), rgba(108, 92, 231, 0.95));
-    --qz-grad-favorites: linear-gradient(135deg, rgba(254, 202, 87, 0.95), rgba(255, 159, 67, 0.95));
-    --qz-grad-friends: linear-gradient(135deg, rgba(0, 206, 201, 0.95), rgba(9, 132, 227, 0.95));
-    --qz-grad-visitors: linear-gradient(135deg, rgba(253, 121, 168, 0.95), rgba(232, 67, 147, 0.95));
-    --qz-grad-albums: linear-gradient(135deg, rgba(17, 153, 142, 0.95), rgba(56, 239, 125, 0.95));
-    --qz-grad-videos: linear-gradient(135deg, rgba(255, 107, 107, 0.95), rgba(238, 90, 36, 0.95));
+    /* 模块主题渐变（导航栏半透明毛玻璃） */
+    --qz-grad-messages: linear-gradient(135deg, rgba(240, 147, 251, 0.72), rgba(245, 87, 108, 0.72));
+    --qz-grad-index: linear-gradient(135deg, rgba(102, 126, 234, 0.72), rgba(118, 75, 162, 0.72));
+    --qz-grad-blogs: linear-gradient(135deg, rgba(102, 126, 234, 0.72), rgba(118, 75, 162, 0.72));
+    --qz-grad-boards: linear-gradient(135deg, rgba(78, 205, 196, 0.72), rgba(68, 160, 141, 0.72));
+    --qz-grad-shares: linear-gradient(135deg, rgba(162, 155, 254, 0.72), rgba(108, 92, 231, 0.72));
+    --qz-grad-favorites: linear-gradient(135deg, rgba(254, 202, 87, 0.72), rgba(255, 159, 67, 0.72));
+    --qz-grad-friends: linear-gradient(135deg, rgba(0, 206, 201, 0.72), rgba(9, 132, 227, 0.72));
+    --qz-grad-visitors: linear-gradient(135deg, rgba(253, 121, 168, 0.72), rgba(232, 67, 147, 0.72));
+    --qz-grad-albums: linear-gradient(135deg, rgba(17, 153, 142, 0.72), rgba(56, 239, 125, 0.72));
+    --qz-grad-videos: linear-gradient(135deg, rgba(255, 107, 107, 0.72), rgba(238, 90, 36, 0.72));
 }
 
 /* 暗色模式令牌 */
@@ -118,7 +117,7 @@ html[data-theme="dark"] #BlogAnchor {
 #qz-theme-toggle {
     position: fixed;
     right: 20px;
-    bottom: 90px;
+    bottom: 24px;
     z-index: 2000;
     width: 44px;
     height: 44px;
@@ -136,11 +135,43 @@ html[data-theme="dark"] #BlogAnchor {
     transition: transform 0.2s ease, background 0.3s ease, color 0.3s ease;
 }
 
-#qz-theme-toggle:hover {
+#qz-theme-toggle:hover,
+#qz-back-to-top:hover {
     transform: scale(1.08);
 }
 
-html[data-theme="dark"] #qz-theme-toggle {
+#qz-back-to-top {
+    position: fixed;
+    right: 20px;
+    bottom: 76px;
+    z-index: 2000;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 44px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: transform 0.2s ease, background 0.3s ease, color 0.3s ease, opacity 0.2s ease, visibility 0.2s ease;
+}
+
+#qz-back-to-top.is-visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+html[data-theme="dark"] #qz-theme-toggle,
+html[data-theme="dark"] #qz-back-to-top {
     background: rgba(40, 44, 56, 0.92);
     color: #ffd76a;
 }
