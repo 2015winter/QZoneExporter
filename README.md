@@ -126,7 +126,7 @@ src/
 │   └── js/
 │       ├── common.js
 │       ├── sidebar.js
-│       └── theme.js           # 主题切换
+│       └── theme.js           # 主题切换、回到顶部
 └── vendor/                    # 第三方库
 ```
 
