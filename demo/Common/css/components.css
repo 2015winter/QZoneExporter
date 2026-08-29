@@ -4,10 +4,119 @@
  * 模块专属样式见 pages/*.css。加载顺序：common.css → theme.css → components.css。
  */
 
-/* 页脚文案 */
-.footer-text {
-    font-size: 14px;
-    letter-spacing: 1px;
+/* 顶栏：文档流页头，背景透明，与页面渐变一体 */
+.page-navbar.navbar {
+    position: static;
+    min-height: 56px;
+    padding: 12px 20px;
+    flex-wrap: nowrap;
+    align-items: center;
+    background: transparent !important;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: none;
+}
+
+.page-navbar .navbar-brand {
+    font-size: 1.25rem;
+    font-weight: 500;
+    line-height: 1.4;
+    padding: 0;
+    margin-right: 16px;
+    white-space: nowrap;
+}
+
+.page-navbar .page-breadcrumb,
+.page-navbar > [aria-label="breadcrumb"] {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+}
+
+.page-navbar .breadcrumb {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+}
+
+.page-navbar .breadcrumb-item,
+.page-navbar .breadcrumb-item a,
+.page-navbar .breadcrumb-item.active {
+    color: rgba(255, 255, 255, 0.92);
+    font-size: 1rem;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+.page-navbar .breadcrumb-item a:hover {
+    color: #fff;
+    text-decoration: none;
+}
+
+.page-navbar .breadcrumb-item + .breadcrumb-item::before {
+    color: rgba(255, 255, 255, 0.45);
+}
+
+/* 未换肤的旧页（日记等）仍用深色条，避免白字落在浅底上 */
+
+@media (max-width: 576px) {
+    .page-navbar .navbar-brand {
+        font-size: 1.1rem;
+    }
+
+    .page-navbar .breadcrumb-item,
+    .page-navbar .breadcrumb-item a,
+    .page-navbar .breadcrumb-item.active {
+        font-size: 0.95rem;
+    }
+}
+
+/* 页尾签名：跟在正文后面，不再钉在视口底 */
+.page-footer,
+.index-footer,
+.messages-footer,
+.footer-messages,
+.blogs-footer,
+.bloginfo-footer,
+.footer-boards,
+.boards-footer,
+.shares-footer,
+.favorites-footer,
+.friends-footer,
+.visitors-footer,
+.footer-albums,
+.footer-videos,
+.footer-diaries {
+    position: static;
+    background: transparent;
+    backdrop-filter: none;
+    padding: 28px 16px 20px;
+    text-align: center;
+    z-index: auto;
+}
+
+.footer-text,
+.page-footer .text-white,
+.index-footer .text-white,
+.messages-footer .text-white,
+.footer-messages .text-white,
+.blogs-footer .text-white,
+.bloginfo-footer .text-white,
+.footer-boards .text-white,
+.boards-footer .text-white,
+.favorites-footer .text-white,
+.friends-footer .text-white,
+.visitors-footer .text-white,
+.footer-albums .text-white,
+.footer-videos .text-white,
+.footer-diaries .text-white {
+    font-size: 13px;
+    letter-spacing: 0.4px;
+    color: rgba(255, 255, 255, 0.78);
 }
 
 /* 排序 / 视图切换（说说、日志、相册、好友共用） */

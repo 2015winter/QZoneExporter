@@ -23,13 +23,8 @@
 		body {
 			background: linear-gradient(135deg, #f6d365 0%, #fda085 50%, #f093fb 100%);
 			min-height: 100vh;
-			padding-top: 70px;
-			padding-bottom: 80px;
-		}
-		
-		.navbar-diaries {
-			background: linear-gradient(135deg, rgba(246, 211, 101, 0.95), rgba(253, 160, 133, 0.95)) !important;
-			backdrop-filter: blur(10px);
+
+			padding-bottom: 24px;
 		}
 		
 		.main-card {
@@ -154,9 +149,7 @@
 			z-index: 1000;
 		}
 		
-		.footer-diaries {
-			background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.9));
-		}
+		/* 页尾签名见 components.css */
 	</style>
 </head>
 
@@ -167,21 +160,16 @@
 	</div>
 	
 	<header>
-		<nav class="navbar navbar-expand-lg navbar-dark fixed-top navbar-diaries">
+		<nav class="navbar navbar-dark page-navbar navbar-diaries">
 			<a class="navbar-brand" href="../index.html">
 				<i class="fa fa-cloud-download mr-2"></i>QQ空间导出助手
 			</a>
-			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
-				<span class="navbar-toggler-icon"></span>
-			</button>
-			<div class="collapse navbar-collapse" id="navbarSupportedContent">
-				<nav aria-label="breadcrumb">
+			<nav aria-label="breadcrumb">
 					<ol class="breadcrumb" style="background: transparent;">
 						<li class="breadcrumb-item"><a href="../index.html" style="color: rgba(255,255,255,0.85);"><i class="fa fa-home mr-1"></i>个人中心</a></li>
 						<li class="breadcrumb-item active" style="color: rgba(255,255,255,0.9);"><i class="fa fa-calendar mr-1"></i>日记</li>
 					</ol>
 				</nav>
-			</div>
 		</nav>
 	</header>
 	
@@ -222,10 +210,10 @@
 		</div>
 	</div>
 	
-	<footer class="footer mt-auto py-3 fixed-bottom footer-diaries">
+	<footer class="footer mt-auto py-3 page-footer footer-diaries">
 		<div class="container text-center">
 			<span class="text-white">
-				<i class="fa fa-leaf mr-2"></i>落叶随风，青春，稀纵即逝
+				<i class="fa fa-leaf mr-2"></i>落叶随风，青春，稍纵即逝
 			</span>
 		</div>
 	</footer>

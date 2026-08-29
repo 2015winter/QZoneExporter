@@ -24,13 +24,8 @@
 		body {
 			background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 50%, #feca57 100%);
 			min-height: 100vh;
-			padding-top: 70px;
-			padding-bottom: 80px;
-		}
-		
-		.navbar-videos {
-			background: linear-gradient(135deg, rgba(255, 107, 107, 0.95), rgba(238, 90, 36, 0.95)) !important;
-			backdrop-filter: blur(10px);
+
+			padding-bottom: 24px;
 		}
 		
 		.main-card {
@@ -184,9 +179,7 @@
 			z-index: 1000;
 		}
 		
-		.footer-videos {
-			background: var(--qz-grad-videos);
-		}
+		/* 页尾签名见 components.css */
 		
 		/* 视频播放弹窗 */
 		.video-modal {
@@ -321,22 +314,17 @@
 	</div>
 	
 	<header>
-		<nav class="navbar navbar-expand-lg navbar-dark fixed-top navbar-videos">
+		<nav class="navbar navbar-dark page-navbar navbar-videos">
 			<a class="navbar-brand" href="../index.html">
 				<i class="fa fa-cloud-download mr-2"></i>QQ空间导出助手
 			</a>
-			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
-				<span class="navbar-toggler-icon"></span>
-			</button>
-			<div class="collapse navbar-collapse" id="navbarSupportedContent">
-				<nav aria-label="breadcrumb">
+			<nav aria-label="breadcrumb">
 					<ol class="breadcrumb" style="background: transparent;">
 						<li class="breadcrumb-item"><a href="../index.html" style="color: rgba(255,255,255,0.85);"><i class="fa fa-home mr-1"></i>个人中心</a></li>
 						<li class="breadcrumb-item"><a href="index.html" style="color: rgba(255,255,255,0.85);"><i class="fa fa-play-circle mr-1"></i>视频</a></li>
 						<li class="breadcrumb-item active" style="color: rgba(255,255,255,0.9);"><i class="fa fa-calendar mr-1"></i>2022</li>
 					</ol>
 				</nav>
-			</div>
 		</nav>
 	</header>
 	
@@ -384,10 +372,10 @@
 		</button>
 	</div>
 	
-	<footer class="footer mt-auto py-3 fixed-bottom footer-videos">
+	<footer class="footer mt-auto py-3 page-footer footer-videos">
 		<div class="container text-center">
 			<span class="text-white">
-				<i class="fa fa-leaf mr-2"></i>落叶随风，青春，稀纵即逝
+				<i class="fa fa-leaf mr-2"></i>落叶随风，青春，稍纵即逝
 			</span>
 		</div>
 	</footer>

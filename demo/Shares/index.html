@@ -39,14 +39,8 @@
 			background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
 			min-height: 100vh;
 			padding: 20px;
-			padding-top: 80px;
-			padding-bottom: 80px;
-		}
-		
-		/* 导航栏样式 */
-		.shares-navbar {
-			background: var(--primary-gradient) !important;
-			backdrop-filter: blur(10px);
+			padding-top: 0;
+			padding-bottom: 24px;
 		}
 		
 		.shares-breadcrumb {
@@ -316,23 +310,8 @@
 		}
 		
 		/* 底部页脚 */
-		.shares-footer {
-			background: var(--qz-grad-shares);
-			backdrop-filter: blur(10px);
-			position: fixed;
-			bottom: 0;
-			left: 0;
-			right: 0;
-			z-index: 1000;
-			padding: 15px;
-			text-align: center;
-		}
+		/* 页尾签名见 components.css */
 		
-		.footer-text {
-			font-size: 14px;
-			letter-spacing: 1px;
-			color: #fff;
-		}
 		
 		/* ========== 侧边滑出面板样式 ========== */
 		
@@ -728,21 +707,16 @@
 	</div>
 	
 	<header>
-		<nav class="navbar navbar-expand-lg navbar-dark fixed-top shares-navbar">
+		<nav class="navbar navbar-dark page-navbar shares-navbar">
 			<a class="navbar-brand" target="_blank" href="https://github.com/2015winter/QZoneExporter">
 				<i class="fa fa-cloud-download mr-2"></i>QQ空间导出助手
 			</a>
-			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-				<span class="navbar-toggler-icon"></span>
-			</button>
-			<div class="collapse navbar-collapse" id="navbarSupportedContent">
-				<nav aria-label="breadcrumb">
+			<nav aria-label="breadcrumb">
 					<ol class="breadcrumb shares-breadcrumb">
 						<li class="breadcrumb-item"><a href="../index.html"><i class="fa fa-home mr-1"></i>个人中心</a></li>
 						<li class="breadcrumb-item active" aria-current="page"><i class="fa fa-share-alt mr-1"></i>分享</li>
 					</ol>
 				</nav>
-			</div>
 		</nav>
 	</header>
 	
@@ -791,7 +765,7 @@
 	</div>
 	
 	<!-- 底部 -->
-	<footer class="shares-footer">
+	<footer class="page-footer shares-footer">
 		<span class="footer-text">
 			<i class="fa fa-share-alt"></i> 分享美好，记录精彩
 		</span>

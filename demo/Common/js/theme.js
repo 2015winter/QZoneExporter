@@ -1,9 +1,11 @@
-/* theme.js — 导出页浅色/深色切换。依据 localStorage('qz-theme') 设置
-   html[data-theme]，并注入右下角切换按钮。不依赖 jQuery。 */
+/* theme.js — 导出页浅色 / 深色切换，以及长页回到顶部。
+   依据 localStorage('qz-theme') 设置 html[data-theme]，注入右下角按钮。
+   不依赖 jQuery。 */
 (function () {
     var STORAGE_KEY = 'qz-theme';
     var ICON_LIGHT = '\u263D'; // ☽ 当前浅色，点击切到深色
     var ICON_DARK = '\u2600';  // ☀ 当前深色，点击切到浅色
+    var BACK_TOP_AFTER = 320;
 
     function getStored() {
         try {
@@ -53,9 +55,50 @@
         document.body.appendChild(btn);
     }
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initToggle);
-    } else {
+    function initBackToTop() {
+        if (document.getElementById('qz-back-to-top') || !document.body) {
+            return;
+        }
+        var btn = document.createElement('button');
+        btn.id = 'qz-back-to-top';
+        btn.type = 'button';
+        btn.title = '回到顶部';
+        btn.setAttribute('aria-label', '回到顶部');
+        btn.textContent = '\u2191';
+        btn.addEventListener('click', function () {
+            var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+        });
+        document.body.appendChild(btn);
+
+        var ticking = false;
+        function update() {
+            ticking = false;
+            var y = window.pageYOffset || document.documentElement.scrollTop || 0;
+            if (y > BACK_TOP_AFTER) {
+                btn.classList.add('is-visible');
+            } else {
+                btn.classList.remove('is-visible');
+            }
+        }
+
+        window.addEventListener('scroll', function () {
+            if (!ticking) {
+                ticking = true;
+                window.requestAnimationFrame(update);
+            }
+        }, { passive: true });
+        update();
+    }
+
+    function initChrome() {
         initToggle();
+        initBackToTop();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initChrome);
+    } else {
+        initChrome();
     }
 })();

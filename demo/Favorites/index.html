@@ -18,15 +18,12 @@
         body {
             background: linear-gradient(135deg, #feca57 0%, #ff9f43 50%, #f093fb 100%);
             min-height: 100vh;
-            padding-top: 70px;
-            padding-bottom: 80px;
+
+            padding-bottom: 24px;
         }
         
         /* 导航栏样式 */
-        .favorites-navbar {
-            background: linear-gradient(135deg, rgba(254, 202, 87, 0.95), rgba(255, 159, 67, 0.95)) !important;
-            backdrop-filter: blur(10px);
-        }
+        /* 页头背景透明，见 components.css */
         
         .favorites-breadcrumb {
             background: transparent !important;
@@ -285,24 +282,8 @@
             font-size: 16px;
         }
         
-        /* 底部 */
-        .favorites-footer {
-            background: var(--qz-grad-favorites);
-            backdrop-filter: blur(10px);
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            padding: 15px;
-            text-align: center;
-        }
+        /* 页尾签名见 components.css */
         
-        .footer-text {
-            font-size: 14px;
-            letter-spacing: 1px;
-            color: #fff;
-        }
         
         /* ========== 侧边滑出面板样式 ========== */
         
@@ -707,21 +688,16 @@
     
     <!-- 导航栏 - 使用Bootstrap navbar -->
     <header>
-        <nav class="navbar navbar-expand-lg navbar-dark fixed-top favorites-navbar">
+        <nav class="navbar navbar-dark page-navbar favorites-navbar">
             <a class="navbar-brand" href="https://github.com/2015winter/QZoneExporter" target="_blank">
                 <i class="fa fa-cloud-download mr-2"></i>QQ空间导出助手
             </a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <nav aria-label="breadcrumb">
+            <nav aria-label="breadcrumb">
                     <ol class="breadcrumb favorites-breadcrumb">
                         <li class="breadcrumb-item"><a href="../index.html"><i class="fa fa-home mr-1"></i>个人中心</a></li>
                         <li class="breadcrumb-item active"><i class="fa fa-star mr-1"></i>收藏</li>
                     </ol>
                 </nav>
-            </div>
         </nav>
     </header>
     
@@ -755,7 +731,7 @@
     </main>
     
     <!-- 底部 -->
-    <footer class="favorites-footer">
+    <footer class="page-footer favorites-footer">
         <span class="footer-text">
             <i class="fa fa-star"></i> 收藏美好，珍藏回忆
         </span>

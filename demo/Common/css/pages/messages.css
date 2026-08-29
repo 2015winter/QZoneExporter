@@ -4,9 +4,9 @@
  */
 
 .messages {
-    top: 57px;
+    top: 0;
     position: relative;
-    padding-bottom: 80px;
+    padding-bottom: 24px;
 }
 
 /* ==================== 说说页面美化样式 - 粉紫色主题 #f093fb ==================== */
@@ -17,11 +17,7 @@ body.messages-page {
     min-height: 100vh;
 }
 
-/* 说说页面导航栏 */
-.messages-navbar {
-    background: linear-gradient(135deg, rgba(240, 147, 251, 0.95), rgba(245, 87, 108, 0.95)) !important;
-    backdrop-filter: blur(10px);
-}
+/* 说说页头：背景透明，见 components.css */
 
 .messages-breadcrumb {
     background: transparent !important;
@@ -45,16 +41,7 @@ body.messages-page {
     color: rgba(255, 255, 255, 0.5);
 }
 
-/* 说说页面底部 */
-.messages-footer {
-    background: var(--qz-grad-messages);
-    backdrop-filter: blur(10px);
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-}
+/* 说说页尾签名：随内容滚动，样式见 components.css */
 
 /* 说说年份标题样式 */
 .messages-page .sidebar-h1 {

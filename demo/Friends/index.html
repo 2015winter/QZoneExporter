@@ -32,14 +32,8 @@
 		body.friends-page {
 			background: linear-gradient(135deg, #00cec9 0%, #0984e3 50%, #6c5ce7 100%);
 			min-height: 100vh;
-			padding-top: 70px;
-			padding-bottom: 80px;
-		}
-		
-		/* 导航栏样式 */
-		.friends-navbar {
-			background: linear-gradient(135deg, rgba(0, 206, 201, 0.95), rgba(9, 132, 227, 0.95)) !important;
-			backdrop-filter: blur(10px);
+
+			padding-bottom: 24px;
 		}
 		
 		.friends-breadcrumb {
@@ -483,20 +477,8 @@
 		}
 		
 		/* 底部 */
-		.friends-footer {
-			background: var(--qz-grad-friends);
-			backdrop-filter: blur(10px);
-			position: fixed;
-			bottom: 0;
-			left: 0;
-			right: 0;
-			z-index: 1000;
-		}
+		/* 页尾签名见 components.css */
 		
-		.footer-text {
-			font-size: 14px;
-			letter-spacing: 1px;
-		}
 		
 		/* Demo标记 */
 		.demo-badge {
@@ -555,21 +537,16 @@
 	<div class="demo-badge"><i class="fa fa-star mr-1"></i>Demo 演示</div>
 	
 	<header>
-		<nav class="navbar navbar-expand-lg navbar-dark fixed-top friends-navbar">
+		<nav class="navbar navbar-dark page-navbar friends-navbar">
 			<a class="navbar-brand" target="_blank" href="https://github.com/2015winter/QZoneExporter">
 				<i class="fa fa-cloud-download mr-2"></i>QQ空间导出助手
 			</a>
-			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-				<span class="navbar-toggler-icon"></span>
-			</button>
-			<div class="collapse navbar-collapse" id="navbarSupportedContent">
-				<nav aria-label="breadcrumb">
+			<nav aria-label="breadcrumb">
 					<ol class="breadcrumb friends-breadcrumb">
 						<li class="breadcrumb-item"><a href="../index.html"><i class="fa fa-home mr-1"></i>个人中心</a></li>
 						<li class="breadcrumb-item active" aria-current="page"><i class="fa fa-users mr-1"></i>好友</li>
 					</ol>
 				</nav>
-			</div>
 		</nav>
 	</header>
 	
@@ -656,7 +633,7 @@
 		</div>
 	</main>
 	
-	<footer class="footer mt-auto py-3 friends-footer">
+	<footer class="footer mt-auto py-3 page-footer friends-footer">
 		<div class="container text-center">
 			<span class="text-white footer-text">
 				<i class="fa fa-users mr-2"></i>友谊万岁，青春不散
