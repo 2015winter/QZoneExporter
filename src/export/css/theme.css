@@ -1,0 +1,146 @@
+/*
+ * theme.css — 设计令牌与主题
+ * 亮色令牌与现网配色一致；暗色仅在 html[data-theme="dark"] 下生效。
+ * 模块主题色通过 --qz-grad-* 提供，供页脚等组件引用。
+ */
+
+:root {
+    /* 表面与文字 */
+    --qz-surface: rgba(255, 255, 255, 0.95);
+    --qz-surface-solid: #ffffff;
+    --qz-surface-2: #f8fafc;
+    --qz-text: #333333;
+    --qz-text-muted: #718096;
+    --qz-border: rgba(0, 0, 0, 0.08);
+    --qz-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+
+    /* 圆角标度 */
+    --qz-radius-sm: 12px;
+    --qz-radius: 16px;
+    --qz-radius-lg: 24px;
+
+    /* 模块主题渐变（供后续 components 层的导航栏/页脚统一引用，
+       当前各页仍各自内联，迁移时逐步切换到这些变量） */
+    --qz-grad-messages: linear-gradient(135deg, rgba(240, 147, 251, 0.95), rgba(245, 87, 108, 0.95));
+    --qz-grad-index: linear-gradient(135deg, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.95));
+    --qz-grad-blogs: linear-gradient(135deg, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.95));
+    --qz-grad-boards: linear-gradient(135deg, rgba(78, 205, 196, 0.95), rgba(68, 160, 141, 0.95));
+    --qz-grad-shares: linear-gradient(135deg, rgba(162, 155, 254, 0.95), rgba(108, 92, 231, 0.95));
+    --qz-grad-favorites: linear-gradient(135deg, rgba(254, 202, 87, 0.95), rgba(255, 159, 67, 0.95));
+    --qz-grad-friends: linear-gradient(135deg, rgba(0, 206, 201, 0.95), rgba(9, 132, 227, 0.95));
+    --qz-grad-visitors: linear-gradient(135deg, rgba(253, 121, 168, 0.95), rgba(232, 67, 147, 0.95));
+    --qz-grad-albums: linear-gradient(135deg, rgba(17, 153, 142, 0.95), rgba(56, 239, 125, 0.95));
+    --qz-grad-videos: linear-gradient(135deg, rgba(255, 107, 107, 0.95), rgba(238, 90, 36, 0.95));
+}
+
+/* 暗色模式令牌 */
+html[data-theme="dark"] {
+    --qz-surface: rgba(30, 33, 43, 0.92);
+    --qz-surface-solid: #1e212b;
+    --qz-surface-2: #262a36;
+    --qz-text: #e6e8ee;
+    --qz-text-muted: #9aa3b2;
+    --qz-border: rgba(255, 255, 255, 0.10);
+    --qz-shadow: 0 10px 40px rgba(0, 0, 0, 0.55);
+}
+
+/* ============================================================
+   暗色模式 — 共享层覆盖
+   仅在 html[data-theme="dark"] 下生效，浅色模式完全不受影响。
+   高特异性 + !important 以覆盖各页内联的硬编码亮色。
+   模块专属强调色(导航栏/页脚渐变、图标色)将在后续步骤迁移到令牌，
+   本步先保证「背景/卡片/文字/边框/表格」等主体在暗色下可读。
+   ============================================================ */
+
+/* 页面背景整体压暗 */
+html[data-theme="dark"] body {
+    background: linear-gradient(135deg, #0f1220 0%, #171a2b 55%, #241a35 100%) !important;
+}
+
+/* 通用内容卡片/容器 → 暗色表面 + 亮字 */
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .main-card,
+html[data-theme="dark"] .index-main-card,
+html[data-theme="dark"] .bloginfo-main-card,
+html[data-theme="dark"] .visitors-main-card,
+html[data-theme="dark"] .board-card,
+html[data-theme="dark"] .reply-item,
+html[data-theme="dark"] .stat-card,
+html[data-theme="dark"] .messages-page .card {
+    background: var(--qz-surface) !important;
+    color: var(--qz-text) !important;
+    border-color: var(--qz-border) !important;
+    box-shadow: var(--qz-shadow) !important;
+}
+
+/* 次级表面（浅灰底块在暗色下变深） */
+html[data-theme="dark"] .reply-item {
+    background: var(--qz-surface-2) !important;
+}
+
+/* 文本可读性 */
+html[data-theme="dark"] body,
+html[data-theme="dark"] .card-body,
+html[data-theme="dark"] .board-content,
+html[data-theme="dark"] .reply-content,
+html[data-theme="dark"] .messageText,
+html[data-theme="dark"] .messageText .content {
+    color: var(--qz-text) !important;
+}
+
+html[data-theme="dark"] .text-muted,
+html[data-theme="dark"] .card-footer.text-muted,
+html[data-theme="dark"] small {
+    color: var(--qz-text-muted) !important;
+}
+
+/* 表格（好友 / 日记等 bootstrap-table） */
+html[data-theme="dark"] .table,
+html[data-theme="dark"] table {
+    color: var(--qz-text) !important;
+}
+
+html[data-theme="dark"] .table td,
+html[data-theme="dark"] .table th {
+    border-color: var(--qz-border) !important;
+}
+
+/* 侧边栏目录 */
+html[data-theme="dark"] #BlogAnchor {
+    background: var(--qz-surface-solid) !important;
+    color: var(--qz-text) !important;
+    border-color: var(--qz-border) !important;
+}
+
+/* ============================================================
+   主题切换按钮（由 theme.js 注入到每个页面）
+   ============================================================ */
+#qz-theme-toggle {
+    position: fixed;
+    right: 20px;
+    bottom: 90px;
+    z-index: 2000;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 44px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(8px);
+    transition: transform 0.2s ease, background 0.3s ease, color 0.3s ease;
+}
+
+#qz-theme-toggle:hover {
+    transform: scale(1.08);
+}
+
+html[data-theme="dark"] #qz-theme-toggle {
+    background: rgba(40, 44, 56, 0.92);
+    color: #ffd76a;
+}

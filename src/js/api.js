@@ -641,7 +641,8 @@ API.Utils = {
                         }
                     } catch (error) {
                         $('#errorTips').hide();
-                        // 转换JSON错误时，当作成功返回
+                        // 无法解析时按成功返回，避免对空响应误触发重试
+                        console.warn('GET响应无法解析为JSON:', this.url, error);
                         resolve(result);
                         return;
                     }
@@ -2262,8 +2263,8 @@ API.Common = {
         }
         for (const item of items) {
             if (!API.Common.isNewItem(item)) {
-                // QQ空间外链或已备份项，跳过
-                return;
+                // 已备份项，跳过当前项，继续处理后续新项
+                continue;
             }
             this.addCommentEmoticonDownloadTasks(item);
         }
@@ -3386,7 +3387,7 @@ API.Messages = {
      * @param {Array} items 说说列表
      */
     getMoreCount(items) {
-        return getMoreItems(items).length
+        return API.Messages.getMoreItems(items).length
     },
 
     /**

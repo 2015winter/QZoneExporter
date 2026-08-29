@@ -653,6 +653,27 @@ const ExportFiles = [{
     original: 'export/css/common.css',
     target: 'Common/css/common.css'
 }, {
+    original: 'export/css/theme.css',
+    target: 'Common/css/theme.css'
+}, {
+    original: 'export/css/components.css',
+    target: 'Common/css/components.css'
+}, {
+    original: 'export/css/pages/messages.css',
+    target: 'Common/css/pages/messages.css'
+}, {
+    original: 'export/css/pages/blogs.css',
+    target: 'Common/css/pages/blogs.css'
+}, {
+    original: 'export/css/pages/videos.css',
+    target: 'Common/css/pages/videos.css'
+}, {
+    original: 'export/css/pages/photos.css',
+    target: 'Common/css/pages/photos.css'
+}, {
+    original: 'export/js/theme.js',
+    target: 'Common/js/theme.js'
+}, {
     original: 'export/js/sidebar.js',
     target: 'Common/js/sidebar.js'
 }, {

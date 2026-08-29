@@ -9,6 +9,10 @@
 	<link rel="stylesheet" href="../Common/vendor/css/bootstrap.min.css">
 	<link rel="stylesheet" href="../Common/vendor/css/bootstrap-table.min.css">
 	<link rel="stylesheet" type="text/css" href="../Common/css/common.css">
+	<link rel="stylesheet" type="text/css" href="../Common/css/theme.css">
+	<link rel="stylesheet" type="text/css" href="../Common/css/components.css">
+	<link rel="stylesheet" type="text/css" href="../Common/css/pages/blogs.css">
+	<script src="../Common/js/theme.js"></script>
 	<script src="../Common/vendor/js/jquery.min.js"></script>
 	<script src="../Common/vendor/js/bootstrap.bundle.min.js"></script>
 	<script src="../Common/vendor/js/bootstrap-table.min.js"></script>
@@ -328,18 +332,13 @@
 		
 		/* 底部 */
 		.blogs-footer {
-			background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.9));
+			background: var(--qz-grad-blogs);
 			backdrop-filter: blur(10px);
 			position: fixed;
 			bottom: 0;
 			left: 0;
 			right: 0;
 			z-index: 1000;
-		}
-		
-		.footer-text {
-			font-size: 14px;
-			letter-spacing: 1px;
 		}
 		
 		/* 搜索和筛选区 */
