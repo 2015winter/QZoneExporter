@@ -41,8 +41,14 @@ const downloadByBrowser = function(request) {
             }
         }, async function(options) {
 
-            // 是否需要添加引用页
-            const isMatch = options.Common.refererUrls.filter(item => task.url.includes(item)).length > 0;
+            // 是否需要添加引用页（严格校验主机名，避免子串匹配被绕过导致凭证泄露）
+            let isMatch = false;
+            try {
+                const hostname = new URL(task.url).hostname;
+                isMatch = options.Common.refererUrls.some(item => hostname === item || hostname.endsWith('.' + item));
+            } catch (e) {
+                isMatch = false;
+            }
 
             if (isMatch) {
                 // 通过fetch下载视频文件
