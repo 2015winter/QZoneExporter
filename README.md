@@ -84,19 +84,19 @@
 
 | 首页 | 说说 |
 |:----:|:----:|
-| <img src="https://media.githubusercontent.com/media/2015winter/ImageHosting/refs/heads/main/Q/QZone/首页.png" width="400"> | <img src="https://media.githubusercontent.com/media/2015winter/ImageHosting/refs/heads/main/Q/QZone/说说.png" width="400"> |
+| <img src="docs/preview/index.png" width="400" alt="首页"> | <img src="docs/preview/messages.png" width="400" alt="说说"> |
 
 | 日志 | 相册 |
 |:----:|:----:|
-| <img src="https://media.githubusercontent.com/media/2015winter/ImageHosting/refs/heads/main/Q/QZone/日志.png" width="400"> | <img src="https://media.githubusercontent.com/media/2015winter/ImageHosting/refs/heads/main/Q/QZone/相册.png" width="400"> |
+| <img src="docs/preview/blogs.png" width="400" alt="日志"> | <img src="docs/preview/albums.png" width="400" alt="相册"> |
 
 | 留言 | 好友 |
 |:----:|:----:|
-| <img src="https://media.githubusercontent.com/media/2015winter/ImageHosting/refs/heads/main/Q/QZone/留言.png" width="400"> | <img src="https://media.githubusercontent.com/media/2015winter/ImageHosting/refs/heads/main/Q/QZone/好友.png" width="400"> |
+| <img src="docs/preview/boards.png" width="400" alt="留言"> | <img src="docs/preview/friends.png" width="400" alt="好友"> |
 
 | 收藏 | 视频 |
 |:----:|:----:|
-| <img src="https://media.githubusercontent.com/media/2015winter/ImageHosting/refs/heads/main/Q/QZone/收藏.png" width="400"> | <img src="https://media.githubusercontent.com/media/2015winter/ImageHosting/refs/heads/main/Q/QZone/视频.png" width="400"> |
+| <img src="docs/preview/favorites.png" width="400" alt="收藏"> | <img src="docs/preview/videos.png" width="400" alt="视频"> |
 
 </details>
 
