@@ -10,6 +10,10 @@
 	<link rel="stylesheet" href="../Common/vendor/css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="../Common/css/common.css">
 	
+	
+	<link rel="stylesheet" type="text/css" href="../Common/css/theme.css">
+	<link rel="stylesheet" type="text/css" href="../Common/css/components.css">
+	<script src="../Common/js/theme.js"></script>
 	<style>
 		/* 分享页面专属样式 - 浅紫色主题 #a29bfe */
 		:root {
@@ -313,7 +317,7 @@
 		
 		/* 底部页脚 */
 		.shares-footer {
-			background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.9));
+			background: var(--qz-grad-shares);
 			backdrop-filter: blur(10px);
 			position: fixed;
 			bottom: 0;
@@ -795,6 +799,7 @@
 	
 	<script src="../Common/vendor/js/jquery.min.js"></script>
 	<script src="../Common/vendor/js/bootstrap.bundle.min.js"></script>
+	<script src="../Common/js/sidebar.js"></script>
 	<script src="json/shares.js"></script>
 	<script>
 		// 当前筛选类型
