@@ -1043,6 +1043,10 @@ API.Common.downloadsByBrowser = async(tasks) => {
             const task = list[j];
             // 添加任务到下载器的时候，可能存在一直无返回的情况，问题暂未定位，先临时添加超时秒数逻辑
             await API.Utils.timeoutPromise(API.Utils.downloadByBrowser(task), 60 * 1000 * 5).then((downloadTask) => {
+                if (downloadTask.downloadState === 'skipped') {
+                    indicator.addSkip(task);
+                    return;
+                }
                 if (downloadTask.id > 0) {
                     task.setState('complete');
                     indicator.addSuccess(task);

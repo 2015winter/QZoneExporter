@@ -1,6 +1,56 @@
-// 浏览器下载信息，用于更改文件名
+/** 浏览器下载任务，用于指定保存路径 */
 const BrowseDownloads = new Map();
+/** 当前批次已处理的相对路径 */
+const QueuedDownloadPaths = new Set();
 let QZoneDownloadId = 0;
+
+/**
+ * 转义正则特殊字符
+ * @param {string} value
+ */
+const escapeRegExp = function(value) {
+    return String(value || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+};
+
+/**
+ * 规范化为相对路径
+ * @param {string} path
+ */
+const normalizeRelativePath = function(path) {
+    return String(path || '').replace(/\\/g, '/').replace(/^\/+/, '');
+};
+
+/**
+ * 查询本机已完成且文件仍存在的同路径下载项
+ * @param {string} relativePath 相对默认下载目录的保存路径
+ * @returns {Promise<object|null>}
+ */
+const findExistingCompleteDownload = function(relativePath) {
+    return new Promise((resolve) => {
+        const relative = normalizeRelativePath(relativePath);
+        if (!relative) {
+            resolve(null);
+            return;
+        }
+        const filenameRegex = escapeRegExp(relative).replace(/\//g, '[/\\\\]') + '$';
+        chrome.downloads.search({
+            filenameRegex: filenameRegex,
+            exists: true,
+            state: 'complete',
+            limit: 20
+        }, (items) => {
+            if (chrome.runtime.lastError || !items || !items.length) {
+                resolve(null);
+                return;
+            }
+            const hit = items.find((item) => {
+                const localPath = normalizeRelativePath(item.filename);
+                return localPath === relative || localPath.endsWith('/' + relative);
+            });
+            resolve(hit || null);
+        });
+    });
+};
 
 /**
  * 获取当前任务下载数
@@ -17,6 +67,7 @@ const getInProgressTask = () => {
 
 /**
  * 浏览器下载
+ * 相同路径去重；已完成文件跳过；其余按指定文件名保存，同名覆盖。
  * @param {object} request
  */
 const downloadByBrowser = function(request) {
@@ -58,16 +109,40 @@ const downloadByBrowser = function(request) {
                 }
             }
 
-            // 添加下载任务
-            chrome.downloads.download(task, function(downloadId) {
+            const relativePath = normalizeRelativePath(task.filename);
+            if (relativePath && QueuedDownloadPaths.has(relativePath)) {
+                resolve({ id: 0, skipped: true, reason: '相同路径任务已在队列中' });
+                return;
+            }
+
+            const existing = await findExistingCompleteDownload(relativePath);
+            if (existing) {
+                if (relativePath) {
+                    QueuedDownloadPaths.add(relativePath);
+                }
+                BrowseDownloads.set(existing.id, task);
+                resolve({ id: existing.id, skipped: true, reason: '目标文件已存在' });
+                return;
+            }
+
+            const downloadOptions = {
+                url: task.url,
+                filename: task.filename,
+                saveAs: false,
+                conflictAction: 'overwrite'
+            };
+
+            chrome.downloads.download(downloadOptions, function(downloadId) {
                 if (chrome.runtime.lastError) {
                     console.error(`添加任务到浏览器失败，请求参数：${JSON.stringify(request)}，错误信息：${chrome.runtime.lastError}`);
-                    // 返回失败标识
                     resolve(0);
                     return;
                 }
-                BrowseDownloads.set(downloadId, task)
-                resolve(downloadId);
+                if (relativePath) {
+                    QueuedDownloadPaths.add(relativePath);
+                }
+                BrowseDownloads.set(downloadId, task);
+                resolve({ id: downloadId, skipped: false });
             });
 
         })
@@ -121,6 +196,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
                 case 'reset':
                     // 重置数据
                     BrowseDownloads.clear();
+                    QueuedDownloadPaths.clear();
                     sendResponse(true);
                     break;
                 case 'download_browser':
@@ -155,6 +231,12 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
                 case 'skipLink':
                     chrome.tabs.create({
                         url: request.url
+                    });
+                    sendResponse(true);
+                    break;
+                case 'open_download_settings':
+                    chrome.tabs.create({
+                        url: 'chrome://settings/downloads'
                     });
                     sendResponse(true);
                     break;
@@ -209,24 +291,21 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
 
 /**
- * 下载管理器重命名监听器
+ * 指定下载保存路径；同名文件覆盖
  */
 chrome.downloads.onDeterminingFilename.addListener(function(item, __suggest) {
-    function suggest(filename) {
-        __suggest({
-            filename: filename
-        });
-    }
     let filename = item.filename;
-    let downloadInfo = BrowseDownloads.get(item.id);
-    if (downloadInfo) {
-        filename = downloadInfo['filename'];
+    const downloadInfo = BrowseDownloads.get(item.id);
+    if (downloadInfo && downloadInfo.filename) {
+        filename = downloadInfo.filename;
     }
     if (filename.startsWith('QQ空间备份') && filename.endsWith('.zip')) {
-        // 备份文件
         QZoneDownloadId = item.id;
     }
-    suggest(filename);
+    __suggest({
+        filename: filename,
+        conflictAction: 'overwrite'
+    });
 });
 
 // 扩展安装时

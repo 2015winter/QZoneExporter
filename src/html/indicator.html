@@ -149,52 +149,83 @@
         </div>
     </div>
 </div>
-<div id="modalTable" data-backdrop="static" data-keyboard="false" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="file-list-lable" aria-hidden="true">
+<div id="modalTable" data-backdrop="static" data-keyboard="false" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="file-list-label" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">文件列表</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <div class="download-header-title">
+                    <h5 class="modal-title" id="file-list-label">
+                        下载管理
+                        <span class="download-type-badge" id="downloadTypeLabel">-</span>
+                    </h5>
+                    <p class="download-header-desc">查看任务状态、重试失败项，或换用其他下载工具</p>
+                </div>
+                <button type="button" class="close" data-dismiss="modal" aria-label="关闭">
 					<span aria-hidden="true">&times;</span>
 				</button>
             </div>
             <div class="modal-body">
-                <div id="toolbar">
-                    <div class="form-inline" role="form">
-                        <div class="form-group">
-                            <select id="moduleFilter" class="form-control" name="moduleFilter" style="display: inline-block;width: 100px;">
-								<option value="all" selected>全部</option>
-								<option value="Messages">说说</option>
-								<option value="Blogs">日志</option>
-								<option value="Diaries">私密日志</option>
-								<option value="Photos">相册</option>
-								<option value="Videos">视频</option>
-								<option value="Boards">留言</option>
-								<option value="Friends">好友</option>
-								<option value="Favorites">收藏</option>
-								<option value="Shares">分享</option>
-								<option value="Visitors">访客</option>
-								<option value="Others">其它</option>
-							</select>
-                            <select id="statusFilter" class="form-control" name="statusFilter" style="display: inline-block;width: 100px;">
-								<option value="all">全部</option>
-								<option value="interrupted" selected>已失败</option>
-								<option value="complete">已完成</option>
-								<option value="in_progress">下载中</option>
-								<option value="skipped">已跳过</option>
-							</select>
+                <div id="downloadStats" class="download-stats">
+                    <button type="button" class="download-stat" data-status="all">
+                        <span class="download-stat-label">全部</span>
+                        <span class="download-stat-value" id="stat-all">0</span>
+                    </button>
+                    <button type="button" class="download-stat is-complete" data-status="complete">
+                        <span class="download-stat-label">已完成</span>
+                        <span class="download-stat-value" id="stat-complete">0</span>
+                    </button>
+                    <button type="button" class="download-stat is-failed is-active" data-status="interrupted">
+                        <span class="download-stat-label">已失败</span>
+                        <span class="download-stat-value" id="stat-interrupted">0</span>
+                    </button>
+                    <button type="button" class="download-stat is-progress" data-status="in_progress">
+                        <span class="download-stat-label">下载中</span>
+                        <span class="download-stat-value" id="stat-in_progress">0</span>
+                    </button>
+                    <button type="button" class="download-stat is-skipped" data-status="skipped">
+                        <span class="download-stat-label">已跳过</span>
+                        <span class="download-stat-value" id="stat-skipped">0</span>
+                    </button>
+                </div>
+                <p id="downloadFilterHint" class="download-filter-hint">默认展示失败任务，方便重试。点击上方统计可切换列表。</p>
+                <input type="hidden" id="statusFilter" value="interrupted">
+                <div class="download-table-panel">
+                    <div id="toolbar">
+                        <div class="download-toolbar" role="form">
+                            <label class="download-toolbar-label" for="moduleFilter">模块</label>
+                            <select id="moduleFilter" class="form-control form-control-sm" name="moduleFilter">
+                                <option value="all" selected>全部模块</option>
+                                <option value="Messages">说说</option>
+                                <option value="Blogs">日志</option>
+                                <option value="Diaries">日记</option>
+                                <option value="Photos">相册</option>
+                                <option value="Videos">视频</option>
+                                <option value="Boards">留言</option>
+                                <option value="Friends">好友</option>
+                                <option value="Favorites">收藏</option>
+                                <option value="Shares">分享</option>
+                                <option value="Visitors">访客</option>
+                                <option value="Common">其它</option>
+                            </select>
+                            <span id="selectedCount" class="download-selected-count">未勾选（将处理当前列表）</span>
                         </div>
                     </div>
+                    <table id="table"></table>
                 </div>
-                <table id="table"></table>
             </div>
-            <div class="modal-footer">
-                <button id="browserDownload" type="button" class="btn btn-outline-success" data-dismiss="modal"  title="使用浏览器下载">浏览器下载</button>
-                <button id="thunderDownload" type="button" class="btn btn-outline-secondary" data-dismiss="modal" title="使用迅雷下载">迅雷下载</button>
-                <button id="aria2rDownload" type="button" class="btn btn-outline-primary" data-dismiss="modal" title="使用Aria2下载">Aria2下载</button>
-                <button id="againDownload" type="button" class="btn btn-primary" data-dismiss="modal" title="用当前配置的下载工具继续重试">继续重试</button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+            <div class="modal-footer download-footer">
+                <p class="download-footer-hint">未勾选将处理当前列表 · 继续重试用当前方式 · 批量任务请换迅雷或 Aria2</p>
+                <div class="download-footer-actions">
+                    <button id="againDownload" type="button" class="btn btn-primary" title="用当前配置的下载工具继续重试">继续重试</button>
+                    <div class="download-alt-group">
+                        <span class="download-footer-alt-label">换工具</span>
+                        <button id="thunderDownload" type="button" class="btn btn-outline-secondary" title="改用迅雷批量添加所选任务">迅雷</button>
+                        <button id="aria2rDownload" type="button" class="btn btn-outline-secondary" title="改用 Aria2 批量添加所选任务">Aria2</button>
+                    </div>
+                    <button type="button" class="btn btn-light" data-dismiss="modal">关闭</button>
+                </div>
             </div>
+            <div id="downloadToast" class="download-toast" role="status" aria-live="polite"></div>
         </div>
     </div>
 </div>

@@ -23,32 +23,456 @@
     margin-left: 14px;
 }
 
-/* 下载管理对话框样式 - 确保在进度对话框之上 */
+/* 下载管理：固定高度，置于进度对话框之上 */
 #modalTable {
     z-index: 1060 !important;
+    --dm-text: #1f2937;
+    --dm-muted: #6b7280;
+    --dm-border: #e6ebf2;
+    --dm-surface: #f5f7fb;
+    --dm-primary: #3b6fd8;
+    --dm-success: #2f9d6a;
+    --dm-danger: #d94841;
+    --dm-warning: #e67e22;
+    --dm-info: #3b6fd8;
 }
 
-/* 当下载管理对话框显示时，确保其backdrop在正确的层级 */
 #modalTable.show ~ .modal-backdrop,
 .modal-backdrop + .modal-backdrop {
     z-index: 1055 !important;
 }
 
-/* 防止模态框内容被裁剪 */
-#modalTable .modal-body {
-    overflow: auto;
-    max-height: calc(100vh - 200px);
+#modalTable .modal-dialog {
+    height: min(86vh, 760px);
+    max-height: 86vh;
+    margin: 1.25rem auto;
 }
 
-/* 响应式表格高度 */
-@media (max-height: 700px) {
-    #modalTable .modal-body {
-        max-height: 350px;
+#modalTable .modal-content {
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 0;
+    border-radius: 12px;
+    box-shadow: 0 16px 48px rgba(31, 41, 55, 0.18);
+    color: var(--dm-text);
+}
+
+#modalTable a {
+    color: var(--dm-primary) !important;
+}
+
+#modalTable .modal-header {
+    flex: 0 0 auto;
+    align-items: flex-start;
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid var(--dm-border);
+    background: linear-gradient(180deg, #f8fafc 0%, #fff 100%);
+}
+
+#modalTable .download-header-title {
+    min-width: 0;
+}
+
+#modalTable .modal-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 17px;
+    font-weight: 650;
+    color: var(--dm-text);
+}
+
+#modalTable .download-type-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #e8f0fe;
+    color: var(--dm-primary);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+    vertical-align: middle;
+}
+
+#modalTable .download-header-desc {
+    margin: 6px 0 0;
+    font-size: 12px;
+    color: var(--dm-muted);
+    line-height: 1.4;
+}
+
+#modalTable .close {
+    margin: -4px -4px 0 0;
+    padding: 4px 8px;
+    opacity: 0.45;
+}
+
+#modalTable .close:hover {
+    opacity: 0.8;
+}
+
+#modalTable .modal-body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+    padding: 12px 20px 0;
+}
+
+#modalTable .download-stats {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+    flex: 0 0 auto;
+    margin-bottom: 8px;
+}
+
+#modalTable .download-stat {
+    appearance: none;
+    -webkit-appearance: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-width: 0;
+    margin: 0;
+    padding: 8px 12px;
+    border: 1px solid var(--dm-border);
+    border-radius: 8px;
+    background: var(--dm-surface);
+    color: var(--dm-text);
+    cursor: pointer;
+    line-height: 1.2;
+    font: inherit;
+    outline: none;
+    transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
+}
+
+#modalTable .download-stat:hover {
+    background: #fff;
+    border-color: #d5deea;
+}
+
+#modalTable .download-stat.is-active {
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(59, 111, 216, 0.12);
+}
+
+#modalTable .download-stat[data-status="all"].is-active {
+    border-color: var(--dm-primary);
+}
+
+#modalTable .download-stat.is-complete.is-active {
+    border-color: var(--dm-success);
+    box-shadow: 0 0 0 3px rgba(47, 157, 106, 0.12);
+}
+
+#modalTable .download-stat.is-failed.is-active {
+    border-color: var(--dm-danger);
+    box-shadow: 0 0 0 3px rgba(217, 72, 65, 0.12);
+}
+
+#modalTable .download-stat.is-progress.is-active {
+    border-color: var(--dm-info);
+}
+
+#modalTable .download-stat.is-skipped.is-active {
+    border-color: var(--dm-warning);
+    box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.12);
+}
+
+#modalTable .download-stat-label {
+    font-size: 12px;
+    color: var(--dm-muted);
+}
+
+#modalTable .download-stat-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--dm-text);
+}
+
+#modalTable .download-stat.is-complete .download-stat-value { color: var(--dm-success); }
+#modalTable .download-stat.is-failed .download-stat-value { color: var(--dm-danger); }
+#modalTable .download-stat.is-progress .download-stat-value { color: var(--dm-info); }
+#modalTable .download-stat.is-skipped .download-stat-value { color: var(--dm-warning); }
+
+#modalTable .download-filter-hint {
+    flex: 0 0 auto;
+    min-height: 18px;
+    margin: 0 0 10px;
+    font-size: 12px;
+    color: var(--dm-muted);
+    line-height: 18px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#modalTable .download-table-panel {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--dm-border);
+    border-radius: 10px 10px 0 0;
+    background: #fff;
+}
+
+#modalTable .bootstrap-table {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+#modalTable .fixed-table-toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 8px;
+    margin: 0;
+    padding: 8px 12px;
+    background: var(--dm-surface);
+    border-bottom: 1px solid var(--dm-border);
+}
+
+#modalTable .fixed-table-toolbar .bs-bars,
+#modalTable .fixed-table-toolbar .search {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+#modalTable .fixed-table-toolbar .search {
+    margin-left: auto;
+}
+
+#modalTable .fixed-table-toolbar .search input {
+    height: 32px;
+    border-radius: 6px;
+    border-color: var(--dm-border);
+    box-shadow: none;
+}
+
+#modalTable .download-toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+#modalTable .download-toolbar-label {
+    margin: 0;
+    font-size: 12px;
+    color: var(--dm-muted);
+}
+
+#modalTable #moduleFilter {
+    display: inline-block;
+    width: auto;
+    min-width: 120px;
+    height: 32px;
+    border-color: var(--dm-border);
+    border-radius: 6px;
+}
+
+#modalTable .download-selected-count {
+    font-size: 12px;
+    color: var(--dm-muted);
+}
+
+#modalTable .fixed-table-container {
+    border: 0 !important;
+}
+
+#modalTable .bootstrap-table .table {
+    margin-bottom: 0;
+}
+
+#modalTable .bootstrap-table .table thead th {
+    background: #f8fafc;
+    color: #4b5563;
+    font-size: 12px;
+    font-weight: 600;
+    border-bottom: 1px solid var(--dm-border) !important;
+}
+
+#modalTable .bootstrap-table .table td,
+#modalTable .bootstrap-table .table th {
+    padding: 8px 10px;
+    vertical-align: middle;
+    border-color: #eef2f6;
+}
+
+#modalTable .bootstrap-table .table tbody tr:hover {
+    background: #f7f9fc;
+}
+
+#modalTable .download-status {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+#modalTable .download-status.is-complete { background: #e4f6ed; color: #1b7a4d; }
+#modalTable .download-status.is-failed { background: #fdecea; color: #b42318; }
+#modalTable .download-status.is-progress { background: #e8f0fe; color: #1d4ed8; }
+#modalTable .download-status.is-skipped { background: #fff1e4; color: #c05612; }
+
+#modalTable .download-cell {
+    display: inline-block;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: bottom;
+}
+
+#modalTable .fixed-table-pagination {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    flex: 0 0 46px;
+    min-height: 46px;
+    margin: 0;
+    padding: 6px 12px;
+    border-top: 1px solid var(--dm-border);
+    background: #fafbfd;
+}
+
+#modalTable .fixed-table-pagination .pagination,
+#modalTable .fixed-table-pagination .page-list {
+    margin: 0;
+}
+
+#modalTable .fixed-table-pagination .page-link {
+    color: var(--dm-primary);
+    border-color: var(--dm-border);
+}
+
+#modalTable .fixed-table-pagination .page-item.active .page-link {
+    background: var(--dm-primary);
+    border-color: var(--dm-primary);
+    color: #fff;
+}
+
+#modalTable .no-records-found td {
+    height: 220px;
+    color: var(--dm-muted);
+    font-size: 13px;
+    vertical-align: middle;
+    background: #fcfdff;
+}
+
+#modalTable .modal-footer.download-footer {
+    flex: 0 0 auto;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 64px;
+    padding: 12px 20px;
+    border-top: 1px solid var(--dm-border);
+    background: #fff;
+}
+
+#modalTable .download-footer-hint {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    font-size: 12px;
+    color: var(--dm-muted);
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#modalTable .download-footer-actions {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+#modalTable .download-alt-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 4px 3px 8px;
+    border: 1px solid var(--dm-border);
+    border-radius: 8px;
+    background: var(--dm-surface);
+}
+
+#modalTable .download-footer-alt-label {
+    font-size: 12px;
+    color: var(--dm-muted);
+    white-space: nowrap;
+}
+
+#modalTable .download-footer .btn {
+    height: 32px;
+    padding: 0 12px;
+    font-size: 13px;
+    line-height: 30px;
+    border-radius: 6px;
+}
+
+#modalTable .download-alt-group .btn {
+    background: #fff;
+}
+
+#modalTable .download-footer .btn-primary {
+    background: var(--dm-primary);
+    border-color: var(--dm-primary);
+}
+
+#modalTable .download-footer .btn-light {
+    background: #f3f4f6;
+    border-color: #e5e7eb;
+    color: #374151;
+}
+
+#modalTable .download-toast {
+    display: none;
+    position: absolute;
+    left: 50%;
+    bottom: 76px;
+    transform: translateX(-50%);
+    z-index: 2;
+    padding: 8px 16px;
+    border-radius: 8px;
+    background: rgba(31, 41, 55, 0.92);
+    color: #fff;
+    font-size: 13px;
+    white-space: nowrap;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+}
+
+@media (max-width: 992px) {
+    #modalTable .download-stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    #modalTable .download-footer {
+        flex-wrap: wrap;
     }
 }
 
-@media (min-height: 900px) {
-    #modalTable .modal-body {
-        max-height: 600px;
+@media (max-height: 700px) {
+    #modalTable .modal-dialog {
+        height: min(92vh, 640px);
+        max-height: 92vh;
     }
 }

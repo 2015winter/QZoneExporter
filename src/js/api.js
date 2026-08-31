@@ -451,6 +451,40 @@ API.Utils = {
     },
 
     /**
+     * 列出 FileSystem 目录
+     * @param {string} path 目录路径
+     */
+    listEntries(path) {
+        return new Promise(function(resolve, reject) {
+            QZone.Common.Filer.ls(path, resolve, reject);
+        });
+    },
+
+    /**
+     * 读取 FileSystem 文本文件
+     * @param {string} filepath 文件路径
+     */
+    readText(filepath) {
+        return new Promise(function(resolve, reject) {
+            const openFile = function(path, onFail) {
+                QZone.Common.Filer.open(path, (file) => {
+                    const reader = new FileReader();
+                    reader.onload = function() {
+                        resolve(typeof reader.result === 'string' ? reader.result : '');
+                    };
+                    reader.onerror = reject;
+                    reader.readAsText(file);
+                }, onFail);
+            };
+            openFile(filepath, function() {
+                const parts = String(filepath).split('/');
+                const name = parts.pop();
+                openFile(parts.join('/') + '/' + encodeURIComponent(name), reject);
+            });
+        });
+    },
+
+    /**
      * 写入内容到Excel
      * @param {string} buffer 内容
      * @param {string} filepath FS的文件路径
@@ -1631,8 +1665,8 @@ API.Utils = {
     },
 
     /**
-     * 浏览器下载(发送消息给背景页下载)
-     * @param {BrowserTask} task
+     * 通过浏览器下载
+     * @param {BrowserTask} task 下载任务
      */
     downloadByBrowser(task) {
         return new Promise(async function(resolve, reject) {
@@ -1641,14 +1675,19 @@ API.Utils = {
                 type: 'download_browser',
                 downloadThread: QZone_Config.Common.downloadThread,
                 task: API.Utils.transformBrowserTask(task)
-            }, function(id) {
+            }, function(result) {
                 if (chrome.runtime.lastError) {
                     task.setId(0);
                     console.error('添加到下载器失败', chrome.runtime.lastError.message, task);
                     resolve(task);
                     return;
                 }
-                task.setId(id);
+                const id = result && typeof result === 'object' ? result.id : result;
+                task.setId(id || 0);
+                if (result && result.skipped) {
+                    task.setState('skipped');
+                    task.skipReason = result.reason || '目标文件已存在';
+                }
                 resolve(task);
             })
         });

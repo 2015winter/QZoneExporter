@@ -610,6 +610,7 @@ const MAX_MSG = {
         '正在添加多媒体文件下载任务到浏览器',
         '已添加 <span style="color: #1ca5fc;">{downloaded}</span> 条',
         '添加超时或失败 <span style="color: red;">{downloadFailed}</span> ',
+        '跳过已存在 <span style="color: #fd7e14;">{skip}</span> 条',
         '总共 <span style="color: #1ca5fc;">{total}</span> 条',
         '请稍候..'
     ],
@@ -1182,8 +1183,6 @@ class QZoneOperator {
         const $progressbar = $("#progressbar");
         const $downloadBtn = $('#downloadBtn');
         const $fileListBtn = $('#fileList');
-        // 浏览器下载
-        const $browserDownloadBtn = $("#browserDownload");
         // 迅雷下载
         const $thunderDownloadBtn = $("#thunderDownload");
         // Aria2下载
@@ -1193,9 +1192,28 @@ class QZoneOperator {
 
         // 下载方式
         const downloadType = QZone_Config.Common.downloadType;
+        const downloadTypeLabels = {
+            File: '助手下载',
+            Browser: '浏览器下载',
+            Aria2: 'Aria2',
+            Thunder: '迅雷',
+            Thunder_Clipboard: '迅雷（剪贴板）',
+            Thunder_Link: '迅雷（链接文件）',
+            QZone: '空间外链'
+        };
+        $('#downloadTypeLabel').text(downloadTypeLabels[downloadType] || downloadType || '未知');
         if (downloadType === 'Thunder_Link') {
-            // 隐藏重试按钮
             $againDownloadBtn.hide();
+        }
+        // 切换下载工具仅提供迅雷与 Aria2，避免浏览器逐项询问保存位置
+        if (downloadType === 'Thunder' || downloadType === 'Thunder_Clipboard') {
+            $thunderDownloadBtn.hide();
+        }
+        if (downloadType === 'Aria2') {
+            $aria2rDownloadBtn.hide();
+        }
+        if (!$thunderDownloadBtn.is(':visible') && !$aria2rDownloadBtn.is(':visible')) {
+            $('#modalTable .download-alt-group').hide();
         }
 
         // 【打包下载】按钮点击事件
@@ -1263,265 +1281,426 @@ class QZoneOperator {
             });
         })
 
+        const moduleNameMap = {
+            Messages: '说说',
+            Blogs: '日志',
+            Diaries: '日记',
+            Photos: '相册',
+            Videos: '视频',
+            Boards: '留言',
+            Friends: '好友',
+            Favorites: '收藏',
+            Shares: '分享',
+            Visitors: '访客',
+            Common: '其它'
+        };
+        const statusMeta = {
+            complete: { text: '已完成', cls: 'is-complete' },
+            interrupted: { text: '已失败', cls: 'is-failed' },
+            in_progress: { text: '下载中', cls: 'is-progress' },
+            skipped: { text: '已跳过', cls: 'is-skipped' }
+        };
+        let downloadTableReady = false;
+        let downloadTableOpened = false;
+        let downloadToastTimer = null;
+
+        const escapeDownloadHtml = function(value) {
+            return String(value == null ? '' : value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        };
+
+        const PAGINATION_RESERVE = 46;
+
+        const calcTableHeight = function() {
+            const $panel = $('#modalTable .download-table-panel');
+            const panelHeight = $panel.length ? $panel.height() : 0;
+            if (!panelHeight) {
+                const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+                return Math.min(Math.max(viewportHeight - 420, 260), 420);
+            }
+            const toolbarHeight = $panel.find('.fixed-table-toolbar').outerHeight(true) || 42;
+            return Math.max(Math.floor(panelHeight - toolbarHeight - PAGINATION_RESERVE), 240);
+        };
+
+        const syncTableHeight = function() {
+            if (!downloadTableReady || !$('#modalTable').hasClass('show')) {
+                return;
+            }
+            $('#table').bootstrapTable('resetView', { height: calcTableHeight() });
+        };
+
+        const showDownloadToast = function(message) {
+            const $toast = $('#downloadToast');
+            $toast.text(message).show();
+            if (downloadToastTimer) {
+                clearTimeout(downloadToastTimer);
+            }
+            downloadToastTimer = setTimeout(function() {
+                $toast.fadeOut(200);
+            }, 2200);
+        };
+
+        const getTaskStats = function() {
+            const all = API.Utils.getDownloadTasks() || [];
+            const stats = { all: all.length, complete: 0, interrupted: 0, in_progress: 0, skipped: 0 };
+            for (const task of all) {
+                const state = task.downloadState || 'in_progress';
+                if (stats[state] === undefined) {
+                    stats.in_progress++;
+                } else {
+                    stats[state]++;
+                }
+            }
+            return stats;
+        };
+
+        const updateDownloadStats = function() {
+            const stats = getTaskStats();
+            $('#stat-all').text(stats.all);
+            $('#stat-complete').text(stats.complete);
+            $('#stat-interrupted').text(stats.interrupted);
+            $('#stat-in_progress').text(stats.in_progress);
+            $('#stat-skipped').text(stats.skipped);
+            const current = $('#statusFilter').val() || 'all';
+            $('#downloadStats .download-stat').removeClass('is-active');
+            $('#downloadStats .download-stat[data-status="' + current + '"]').addClass('is-active');
+            if (current === 'interrupted') {
+                $('#downloadFilterHint').text(stats.interrupted > 0
+                    ? '当前展示失败任务，勾选后可重试或换工具下载。'
+                    : '没有失败任务。点击「全部」可查看完整下载列表。');
+            } else if (current === 'skipped') {
+                $('#downloadFilterHint').text('已跳过的任务通常是 Aria2 不支持的地址格式，可换用浏览器或迅雷下载。');
+            } else {
+                $('#downloadFilterHint').text('可按模块筛选，或搜索文件名、路径。未勾选时将处理当前列表。');
+            }
+        };
+
+        const updateRetryButton = function(status) {
+            if (downloadType === 'Thunder_Link') {
+                $againDownloadBtn.hide();
+                return;
+            }
+            if (status === 'interrupted' || (['Thunder', 'Thunder_Clipboard'].indexOf(downloadType) > -1 && status === 'all')) {
+                $againDownloadBtn.show();
+            } else {
+                $againDownloadBtn.hide();
+            }
+        };
+
+        const updateSelectedCount = function() {
+            if (!downloadTableReady) {
+                return;
+            }
+            const count = $('#table').bootstrapTable('getSelections').length;
+            $('#selectedCount').text(count > 0 ? '已选 ' + count + ' 项' : '未勾选（将处理当前列表）');
+        };
+
+        const formatDownloadCell = function(value) {
+            const text = escapeDownloadHtml(value);
+            return '<span class="download-cell" title="' + text + '">' + (text || '-') + '</span>';
+        };
+
+        const formatDownloadStatus = function(value, row) {
+            const meta = statusMeta[value] || statusMeta.in_progress;
+            const reason = row.skipReason ? ' title="' + escapeDownloadHtml(row.skipReason) + '"' : '';
+            return '<span class="download-status ' + meta.cls + '"' + reason + '>' + meta.text + '</span>';
+        };
+
+        const formatDownloadSource = function(value, row) {
+            const type = row.module || (value && API.Common.getSourceType(value)) || 'Common';
+            const uin = (QZone.Common.Target && QZone.Common.Target.uin) || '';
+            switch (type) {
+                case 'Messages':
+                    return value && value.tid ? API.Utils.getLink(API.Messages.getUniKey(value.tid), '查看说说') : '说说';
+                case 'Blogs':
+                    return value && (value.blogid || value.blogId) ? API.Utils.getLink(API.Blogs.getUniKey(value.blogid || value.blogId), '查看日志') : '日志';
+                case 'Diaries':
+                    return API.Utils.getLink('https://rc.qzone.qq.com/blog?catalog=private', '查看日记');
+                case 'Photos':
+                case 'Images':
+                    if (value && API.Photos.getImageKey(value)) {
+                        return API.Utils.getLink(API.Photos.getImageViewLink(value), '查看相片');
+                    }
+                    return '相册';
+                case 'Videos':
+                    return value && value.url ? API.Utils.getLink(value.url, '查看视频') : '视频';
+                case 'Boards':
+                    return API.Utils.getLink('https://user.qzone.qq.com/{0}/334'.format(uin), '查看留言');
+                case 'Favorites':
+                    return API.Utils.getLink('https://user.qzone.qq.com/{0}/favorite'.format(uin), '查看收藏');
+                case 'Shares':
+                    return API.Utils.getLink('https://user.qzone.qq.com/{0}/share'.format(uin), '查看分享');
+                case 'Friends':
+                    return value && value.uin ? API.Utils.getLink('https://user.qzone.qq.com/' + value.uin, '查看空间') : '好友';
+                case 'Visitors':
+                    return API.Utils.getLink('https://user.qzone.qq.com/{0}'.format(uin), '查看空间');
+                default:
+                    return moduleNameMap[type] || '其它';
+            }
+        };
+
         /**
-         * 筛选数据
+         * 按模块与状态筛选下载任务
          * @param {string} module 模块
          * @param {string} status 状态
          */
         const filterData = async function(module, status) {
             switch (downloadType) {
                 case 'Browser':
-                    // 下载方式为浏览器下载时
-                    // 查询全部下载列表
                     let downlist = await API.Utils.getDownloadList(undefined);
                     for (const task of browserTasks) {
-                        // 更新下载状态到表格
                         let index = downlist.getIndex(task.id, 'id');
                         if (index == -1) {
-                            // 根据ID找下载项没找到表示没成功添加到浏览器中
                             task.downloadState = 'interrupted';
                             continue;
                         }
-                        let downloadItem = downlist[index];
-                        task.downloadState = downloadItem.state;
+                        task.downloadState = downlist[index].state;
                     }
                     break;
                 default:
                     break;
             }
-            
-            // 获取所有数据
-            const allData = API.Utils.getDownloadTasks();
-            
-            // 如果两个条件都是"all"，显示所有数据
-            if (module === 'all' && status === 'all') {
-                $("#table").bootstrapTable('load', allData);
-                $("#table").bootstrapTable('resetView');
-                return;
-            }
-            
-            // 手动筛选数据
+
+            const allData = API.Utils.getDownloadTasks() || [];
             const filteredData = allData.filter(row => {
-                let match = true;
                 if (module !== 'all' && row.module !== module) {
-                    match = false;
+                    return false;
                 }
                 if (status !== 'all' && row.downloadState !== status) {
-                    match = false;
+                    return false;
                 }
-                return match;
+                return true;
             });
-            
-            $("#table").bootstrapTable('load', filteredData);
-            $("#table").bootstrapTable('resetView');
-        }
 
-        // 查看指定状态的数据
+            if (downloadTableReady) {
+                $("#table").bootstrapTable('load', filteredData);
+                syncTableHeight();
+            }
+            updateDownloadStats();
+            updateSelectedCount();
+        };
+
+        const refreshDownloadTable = function() {
+            return filterData($('#moduleFilter').val(), $('#statusFilter').val());
+        };
+
+        const resolveActionTasks = function(preferFailed) {
+            if (!downloadTableReady) {
+                return [];
+            }
+            let tasks = $('#table').bootstrapTable('getSelections') || [];
+            if (tasks.length > 0) {
+                return tasks;
+            }
+            tasks = $('#table').bootstrapTable('getData') || [];
+            if (preferFailed) {
+                const failed = tasks.filter(task => task.downloadState === 'interrupted');
+                return failed.length > 0 ? failed : tasks;
+            }
+            return tasks;
+        };
+
+        const runDownloadAction = async function($btn, handler, preferFailed) {
+            const tasks = resolveActionTasks(preferFailed);
+            if (!tasks.length) {
+                showDownloadToast('当前列表没有可处理的任务');
+                return;
+            }
+            const originText = $btn.text();
+            $btn.prop('disabled', true).text('处理中...');
+            try {
+                await handler(tasks);
+                showDownloadToast('已提交 ' + tasks.length + ' 个下载任务');
+            } catch (error) {
+                console.error('下载管理操作失败', error);
+                showDownloadToast('操作失败，请稍后重试');
+            } finally {
+                $btn.prop('disabled', false).text(originText);
+                await refreshDownloadTable();
+            }
+        };
+
         $('#moduleFilter').change(function() {
-            $('#statusFilter').val('interrupted').change();
-        })
+            refreshDownloadTable();
+        });
 
-        // 查看指定状态的数据
-        $('#statusFilter').change(function() {
-            const status = $(this).val();
-            if ('interrupted' === status || (['Thunder', 'Thunder_Clipboard'].indexOf(downloadType) > -1 && 'all' === status)) {
-                // 失败列表与迅雷下载全部列表时才展示【继续重试】按钮
-                $againDownloadBtn.show();
-            } else {
-                $againDownloadBtn.hide();
-            }
-            const module = $('#moduleFilter').val();
-            filterData(module, status);
-        })
+        $('#downloadStats').on('click', '.download-stat', function() {
+            const status = $(this).data('status');
+            $('#statusFilter').val(status);
+            updateRetryButton(status);
+            refreshDownloadTable();
+        });
 
-        // 【重试】按钮点击事件
         $againDownloadBtn.click(async function() {
-            const tasks = $('#table').bootstrapTable('getSelections');
-            switch (downloadType) {
-                case 'File':
-                    // 下载方式为助手下载时
-                    await API.Common.downloadsByAjax(tasks);
-                    // 重新压缩
-                    operator.next(OperatorType.ZIP);
-                    break;
-                case 'Browser':
-                    // 下载方式为浏览器下载时
-                    for (const task of tasks) {
-                        if (!task.id || task.id === 0) {
-                            // 无ID时表示添加到下载器失败，需要重新添加
-                            await API.Utils.downloadByBrowser(task);
-                            return;
+            await runDownloadAction($(this), async function(tasks) {
+                switch (downloadType) {
+                    case 'File':
+                        await API.Common.downloadsByAjax(tasks);
+                        operator.next(OperatorType.ZIP);
+                        break;
+                    case 'Browser':
+                        for (const task of tasks) {
+                            if (!task.id || task.id === 0) {
+                                await API.Utils.downloadByBrowser(task);
+                                continue;
+                            }
+                            await API.Utils.resumeDownload(task.id);
                         }
-                        await API.Utils.resumeDownload(task.id);
-                    }
-                    break;
-                case 'Aria2':
-                    // 下载方式为Aria2时
-                    await API.Common.downloadByAria2(tasks);
-                    break;
-                case 'Thunder':
-                    // 下载方式为迅雷（助手唤醒）
-                    const newThunderInfo = new ThunderInfo(API.Common.getRootFolderName(), QZone_Config.Common.downloadThread, tasks);
-                    await API.Common.invokeThunder(newThunderInfo);
-                    break;
-                case 'Thunder_Clipboard':
-                    // 下载方式为迅雷（剪切板唤醒）
-                    const copyNewThunderInfo = new ThunderInfo(API.Common.getRootFolderName(), QZone_Config.Common.downloadThread, tasks);
-                    await API.Common.copyThunderTasksToClipboard(copyNewThunderInfo);
-                    break;
-                default:
-                    break;
-            }
-        })
+                        break;
+                    case 'Aria2':
+                        await API.Common.downloadByAria2(tasks);
+                        break;
+                    case 'Thunder':
+                        await API.Common.invokeThunder(new ThunderInfo(API.Common.getRootFolderName(), QZone_Config.Common.downloadThread, tasks));
+                        break;
+                    case 'Thunder_Clipboard':
+                        await API.Common.copyThunderTasksToClipboard(new ThunderInfo(API.Common.getRootFolderName(), QZone_Config.Common.downloadThread, tasks));
+                        break;
+                    default:
+                        break;
+                }
+            }, true);
+        });
 
-        // 【迅雷下载】点击事件
         $thunderDownloadBtn.click(async function() {
-            const tasks = $('#table').bootstrapTable('getSelections');
-            const newThunderInfo = new ThunderInfo(API.Common.getRootFolderName(), QZone_Config.Common.downloadThread);
-            for (const task of tasks) {
-                newThunderInfo.tasks.push(new ThunderTask(task.module, task.dir, task.name, API.Utils.toHttp(task.url)));
-                task.setState('complete');
-            }
-            await API.Common.invokeThunder(newThunderInfo)
-        })
+            await runDownloadAction($(this), async function(tasks) {
+                const newThunderInfo = new ThunderInfo(API.Common.getRootFolderName(), QZone_Config.Common.downloadThread);
+                for (const task of tasks) {
+                    newThunderInfo.tasks.push(new ThunderTask(task.module, task.dir, task.name, API.Utils.toHttp(task.url)));
+                    task.setState('complete');
+                }
+                await API.Common.invokeThunder(newThunderInfo);
+            }, false);
+        });
 
-        // 【Aria2下载】点击事件
         $aria2rDownloadBtn.click(async function() {
-            const tasks = $('#table').bootstrapTable('getSelections');
-            // 下载方式为Aria2时
-            await API.Common.downloadByAria2(tasks);
-        })
+            await runDownloadAction($(this), async function(tasks) {
+                await API.Common.downloadByAria2(tasks);
+            }, false);
+        });
 
-        // 【浏览器下载】点击事件
-        $browserDownloadBtn.click(function() {
-            const tasks = $('#table').bootstrapTable('getSelections');
-            const newBrowserTasks = [];
-            for (const task of tasks) {
-                newBrowserTasks.push(new BrowserTask(task.module, API.Utils.toHttp(task.url), thunderInfo.taskGroupName, task.dir, task.name));
-                task.setState('in_progress');
-            }
-            API.Common.downloadsByBrowser(newBrowserTasks);
-        })
-
-        // 下载管理对话框显示前，调整z-index确保正确层级
         $('#modalTable').on('show.bs.modal', function() {
-            // 确保下载管理对话框及其backdrop在进度对话框之上
             setTimeout(function() {
-                // 调整最新创建的backdrop的z-index
                 const backdrops = $('.modal-backdrop');
                 if (backdrops.length > 0) {
                     backdrops.last().css('z-index', 1055);
                 }
             }, 10);
-        })
+        });
 
-        // 下载管理对话框隐藏时，恢复进度对话框的backdrop
         $('#modalTable').on('hidden.bs.modal', function() {
-            // 确保body的modal-open状态正确（因为进度对话框仍然打开）
             if ($('#progressModal').hasClass('show')) {
                 $('body').addClass('modal-open');
             }
-            // 清理可能多余的backdrop，只保留一个
             const backdrops = $('.modal-backdrop');
             if (backdrops.length > 1) {
                 backdrops.not(':first').remove();
             }
-        })
+        });
 
-        //显示下载任务列表
+        $(window).on('resize.downloadTable', syncTableHeight);
+
         $('#modalTable').on('shown.bs.modal', function() {
+            if (!downloadTableOpened) {
+                const stats = getTaskStats();
+                const defaultStatus = stats.interrupted > 0 ? 'interrupted' : 'all';
+                $('#statusFilter').val(defaultStatus);
+                updateRetryButton(defaultStatus);
+                downloadTableOpened = true;
+            }
 
-            // 重置筛选条件
-            $('#statusFilter').val('interrupted');
-            
-            // 计算自适应的表格高度
-            const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
-            const tableHeight = Math.min(Math.max(viewportHeight - 300, 300), 550);
-
-            $("#table").bootstrapTable('destroy').bootstrapTable({
-                undefinedText: '-',
-                toggle: 'table',
-                locale: 'zh-CN',
-                search: true,
-                searchAlign: 'right',
-                height: tableHeight,
-                pagination: true,
-                pageList: "[10, 20, 50, 100, 200, 500, 1000, 2000, 5000, All]",
-                paginationHAlign: 'left',
-                clickToSelect: true,
-                paginationDetailHAlign: 'right',
-                toolbar: '#toolbar',
-                columns: [{
-                    field: 'state',
-                    checkbox: true,
-                    align: 'left'
-                }, {
-                    field: 'name',
-                    title: '名称',
-                    titleTooltip: '名称',
-                    align: 'left',
-                    visible: true
-                }, {
-                    field: 'dir',
-                    title: '路径',
-                    titleTooltip: '路径',
-                    align: 'left',
-                    visible: true,
-                    sortable: true
-                }, {
-                    field: 'url',
-                    title: '地址（建议点击预览）',
-                    titleTooltip: '地址（建议点击预览）',
-                    align: 'left',
-                    visible: true,
-                    formatter: (value) => {
-                        return '<a target="_brank" href="{0}" >预览</a> '.format(API.Utils.makeViewUrl(value));
-                    }
-                }, {
-                    field: 'source',
-                    title: '来源',
-                    titleTooltip: '文件的来源，如说说的配置，点击时将跳转到说说',
-                    align: 'left',
-                    visible: true,
-                    formatter: (value, row, index, field) => {
-                        let type = API.Common.getSourceType(value);
-                        switch (type) {
-                            case 'Messages':
-                                // 说说
-                                return API.Utils.getLink(API.Messages.getUniKey(value.tid), '查看说说');
-                            case 'Blogs':
-                                // 日志
-                                return API.Utils.getLink(API.Blogs.getUniKey(value.blogid), '查看日志');
-                            case 'Diaries':
-                                // 日记
-                                return API.Utils.getLink('https://rc.qzone.qq.com/blog?catalog=private', '日记');
-                            case 'Photos':
-                                // 相册（暂无相册逻辑，直接查看照片即可）
-                                return API.Utils.getLink('#', '无');
-                            case 'Images':
-                                // 相片
-                                return API.Utils.getLink(API.Photos.getImageViewLink(value), '查看相片');
-                            case 'Videos':
-                                // 视频
-                                return API.Utils.getLink(value.url, '查看视频');
-                            case 'Boards':
-                                // 留言
-                                return API.Utils.getLink('https://user.qzone.qq.com/{0}/334'.format(QZone.Common.Target.uin), '查看留言');
-                            case 'Favorites':
-                                // 收藏
-                                return API.Utils.getLink('https://user.qzone.qq.com/{0}/favorite'.format(QZone.Common.Target.uin), '查看收藏');
-                            default:
-                                return API.Utils.getLink('#', '无');
+            if (!downloadTableReady) {
+                $("#table").bootstrapTable({
+                    undefinedText: '-',
+                    locale: 'zh-CN',
+                    search: true,
+                    searchAlign: 'right',
+                    searchPlaceholder: '搜索文件名或路径',
+                    height: calcTableHeight(),
+                    pagination: true,
+                    pageSize: 50,
+                    pageList: [10, 20, 50, 100, 200, 500, 1000, 'All'],
+                    paginationHAlign: 'left',
+                    clickToSelect: true,
+                    maintainSelected: true,
+                    paginationDetailHAlign: 'right',
+                    toolbar: '#toolbar',
+                    formatNoMatches: function() {
+                        const status = $('#statusFilter').val();
+                        if (status === 'interrupted') {
+                            return '当前没有失败任务，可点击上方「全部」查看完整列表';
                         }
-                    }
-                }],
-                data: API.Utils.getDownloadTasks()
-            })
-            $('#table').bootstrapTable('resetView')
+                        if (status === 'skipped') {
+                            return '当前没有已跳过的任务';
+                        }
+                        return '没有符合条件的下载任务';
+                    },
+                    columns: [{
+                        field: 'state',
+                        checkbox: true,
+                        align: 'center',
+                        width: 36
+                    }, {
+                        field: 'downloadState',
+                        title: '状态',
+                        titleTooltip: '下载状态，悬停可查看跳过原因',
+                        align: 'center',
+                        width: 88,
+                        formatter: formatDownloadStatus
+                    }, {
+                        field: 'module',
+                        title: '模块',
+                        align: 'center',
+                        width: 72,
+                        formatter: (value) => moduleNameMap[value] || value || '-'
+                    }, {
+                        field: 'name',
+                        title: '名称',
+                        titleTooltip: '文件名称',
+                        align: 'left',
+                        formatter: formatDownloadCell
+                    }, {
+                        field: 'dir',
+                        title: '路径',
+                        titleTooltip: '保存路径',
+                        align: 'left',
+                        sortable: true,
+                        formatter: formatDownloadCell
+                    }, {
+                        field: 'url',
+                        title: '预览',
+                        titleTooltip: '在新标签页打开原文件地址',
+                        align: 'center',
+                        width: 64,
+                        formatter: (value) => {
+                            const viewUrl = API.Utils.makeViewUrl(value);
+                            if (!viewUrl) {
+                                return '-';
+                            }
+                            return '<a target="_blank" rel="noopener noreferrer" href="{0}">预览</a>'.format(viewUrl);
+                        }
+                    }, {
+                        field: 'source',
+                        title: '来源',
+                        titleTooltip: '跳转到空间中的原始内容',
+                        align: 'center',
+                        width: 88,
+                        formatter: formatDownloadSource
+                    }],
+                    data: []
+                });
+                downloadTableReady = true;
+                $('#modalTable .fixed-table-toolbar .search input').attr('placeholder', '搜索文件名或路径');
+                $('#table').on('check.bs.table uncheck.bs.table check-all.bs.table uncheck-all.bs.table', updateSelectedCount);
+            }
 
-            // 默认加载失败的数据
-            filterData("all", "interrupted");
-        })
+            refreshDownloadTable().then(function() {
+                setTimeout(syncTableHeight, 50);
+            });
+        });
     }
 }
 
@@ -1754,8 +1933,7 @@ API.Utils.getDownloadTasks = () => {
             tasks = downloadTasks;
             break;
         case 'Thunder':
-            tasks = thunderInfo.tasks;
-            break;
+        case 'Thunder_Clipboard':
         case 'Thunder_Link':
             tasks = thunderInfo.tasks;
             break;
