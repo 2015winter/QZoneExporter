@@ -822,6 +822,8 @@ API.Common.safeTemplateRender = (tpl, data) => {
     // 解析赋值语句
     const parseAssignment = (stmt, ctx) => {
         stmt = stmt.trim();
+        // 去掉语句末尾的分号，避免被误当作属性路径的一部分（如 blog.comments[index];）
+        stmt = stmt.replace(/;+\s*$/, '');
         // 去掉 const/let/var
         if (stmt.startsWith('const ')) stmt = stmt.substring(6);
         else if (stmt.startsWith('let ')) stmt = stmt.substring(4);
