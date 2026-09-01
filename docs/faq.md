@@ -316,7 +316,8 @@ Chrome 将逐步停止支持 Manifest V2 扩展。建议升级到 V3 版本。
 | 渠道 | 链接 |
 |------|------|
 | **GitHub Issues** | [提交问题](https://github.com/2015winter/QZoneExporter/issues) |
-| **QQ 交流群** | 959828088 |
+
+> ℹ️ 如需原作者官方版，请自行前往原作者 [芷炫](https://github.com/ShunCai) 的项目。
 
 **提问时请提供：**
 - 浏览器名称和版本

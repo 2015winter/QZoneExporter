@@ -32,35 +32,11 @@
 
 ## 🚀 安装方式
 
-### 方式一：应用商店安装（推荐）
+> ℹ️ **关于应用商店：** 各大商店里搜到的同名「QQ空间导出助手」是原作者 [芷炫](https://github.com/ShunCai) 发布的官方版（近期已恢复维护并更新到 Manifest V3），与本仓库（社区维护版）为**不同发行**。本项目目前仅以**源码 / 开发者模式**分发，请按下方步骤安装。如需原作者官方版，请自行前往其项目 / 对应商店。
 
-**优点：** 安装简单，支持自动更新
+### 开发者模式安装（推荐）
 
-#### Chrome 网上应用店
-
-1. 访问 [Chrome 网上应用店](https://chrome.google.com/webstore/detail/aofadimegphfgllgjblddapiaojbglhf)
-2. 点击「添加至 Chrome」
-3. 确认安装权限
-
-> ⚠️ **注意：** 需要科学上网才能访问 Chrome 网上应用店
-
-#### Microsoft Edge 扩展商店
-
-1. 访问 [Edge 扩展商店](https://microsoftedge.microsoft.com/addons/detail/djfalpkpjgpkfnkfmnegbalnicdoljcn)
-2. 点击「获取」
-3. 确认安装权限
-
-#### 360 扩展商店
-
-1. 访问 [360 扩展中心](https://ext.chrome.360.cn/webstore/detail/dboplopmhoafmbcbmcecapkmcodhcegh)
-2. 点击「安装」
-3. 确认安装权限
-
----
-
-### 方式二：离线安装（开发者模式）
-
-**优点：** 不需要科学上网，兼容性强  
+**优点：** 获取的是本项目最新代码，兼容 Manifest V3，无需科学上网  
 **缺点：** 需手动更新
 
 #### 步骤 1：下载源码
@@ -159,9 +135,9 @@ QZoneExporter/
 2. 检查扩展是否已启用
 3. 将图标固定到工具栏
 
-### Q: 离线安装后无法自动更新
+### Q: 开发者模式安装后无法自动更新
 
-**解决方案：** 离线安装的扩展需要手动更新：
+**解决方案：** 开发者模式加载的扩展需要手动更新：
 1. 下载新版本源码
 2. 解压并覆盖旧文件
 3. 在扩展管理页面点击「重新加载」
@@ -183,7 +159,7 @@ QZoneExporter/
 助手主要面向 PC 端浏览器设计。移动端使用需满足：
 
 1. 使用支持扩展的浏览器（如 Kiwi Browser、Yandex Browser）
-2. 按照离线安装方式加载扩展
+2. 按照开发者模式方式加载扩展
 3. 可能存在兼容性问题，建议优先使用 PC 端
 
 ---

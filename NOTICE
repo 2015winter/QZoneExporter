@@ -1,0 +1,32 @@
+QQ空间导出助手 (QZone Exporter)
+Copyright 2025-2026 QZoneExporter Community
+
+本项目是「QQ空间导出助手」的社区维护版（Manifest V3），在原作者芷炫（ShunCai,
+https://github.com/ShunCai）创建并维护至 2023 年 3 月的原始项目基础上，依据
+Apache License, Version 2.0 继续开发与分发。
+
+- 原始作品的版权归原作者所有。
+- 社区维护版的修改部分版权归各自的贡献者所有。
+- 应用商店中由原作者发布的官方版与本社区版为不同发行，二者互不隶属。
+
+本产品包含以下第三方开源组件，各自遵循其对应的开源许可证：
+
+  - jQuery              (https://jquery.com/)
+  - Bootstrap           (https://getbootstrap.com/)
+  - Bootstrap Table
+  - bootstrap-select
+  - JSZip               (https://stuk.github.io/jszip/)
+  - FileSaver.js        (https://github.com/eligrey/FileSaver.js)
+  - Blob.js             (https://github.com/eligrey/Blob.js)
+  - Turndown            (https://github.com/domchristie/turndown)
+  - SheetJS             (https://sheetjs.com/)
+  - lightGallery        (https://www.lightgalleryjs.com/)
+  - ECharts             (https://echarts.apache.org/)
+  - Lodash              (https://lodash.com/)
+  - Moment.js           (https://momentjs.com/)
+  - Template.js
+  - Font Awesome        (https://fontawesome.com/)
+  - Filer               (https://github.com/eligrey/filer.js)
+  - tempusdominus-bootstrap-4
+
+上述组件的版权与许可证归其各自的作者与贡献者所有。

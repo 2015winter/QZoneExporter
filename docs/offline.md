@@ -171,7 +171,8 @@ QQ空间备份_123456/
 | 渠道 | 链接 |
 |------|------|
 | **GitHub Issues** | [提交问题](https://github.com/2015winter/QZoneExporter/issues) |
-| **QQ 交流群** | 959828088 |
+
+> ℹ️ 如需原作者官方版，请自行前往原作者 [芷炫](https://github.com/ShunCai) 的项目。
 
 ---
 

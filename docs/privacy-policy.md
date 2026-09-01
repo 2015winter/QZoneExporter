@@ -118,7 +118,8 @@
 如对本隐私政策有任何疑问，请通过以下方式联系：
 
 - **GitHub Issues：** [提交问题](https://github.com/2015winter/QZoneExporter/issues)
-- **QQ交流群：** 959828088
+
+> ℹ️ 如需原作者官方版，请自行前往原作者 [芷炫](https://github.com/ShunCai) 的项目。
 
 ---
 
