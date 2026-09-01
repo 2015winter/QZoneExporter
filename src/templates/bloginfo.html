@@ -31,7 +31,6 @@
 	<script type="text/javascript" src="../Common/json/config.js"></script>
 	<script type="text/javascript" src="json/blogs.js"></script>
 	<script type="text/javascript" src="../Common/js/common.js"></script>
-	<script type="text/javascript" src="js/bloginfo.js"></script>
 	
 	<style>
 		/* 日志详情页专属样式 - 与首页风格一致 */
@@ -609,6 +608,9 @@
 			</span>
 		</div>
 	</footer>
+
+	<!-- 首屏渲染优化：详情脚本置于 <body> 末尾并同步执行，确保首帧即渲染真实内容，避免占位骨架闪烁 -->
+	<script type="text/javascript" src="js/bloginfo.js"></script>
 </body>
 
 </html>

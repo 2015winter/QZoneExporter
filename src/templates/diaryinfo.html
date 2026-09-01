@@ -32,7 +32,6 @@
 	<script type="text/javascript" src="../Common/json/config.js"></script>
 	<script type="text/javascript" src="json/diaries.js"></script>
 	<script type="text/javascript" src="../Common/js/common.js"></script>
-	<script type="text/javascript" src="js/diaryinfo.js"></script>
 </head>
 
 <body>
@@ -156,6 +155,9 @@
 			</div>
 		</div>
 	</main>
+
+	<!-- 首屏渲染优化：详情脚本置于 <body> 末尾并同步执行，确保首帧即渲染真实内容，避免占位骨架闪烁 -->
+	<script type="text/javascript" src="js/diaryinfo.js"></script>
 </body>
 
 </html>

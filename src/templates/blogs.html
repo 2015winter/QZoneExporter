@@ -589,7 +589,10 @@
 	</footer>
 	
 	<script>
-	$(function() {
+	// 首屏渲染优化：脚本位于 <body> 末尾，DOM 已就绪，数据（blogs）亦已在 <head> 中同步加载，
+	// 因此采用 IIFE 同步执行，替代原 jQuery DOM-ready 回调，确保首帧即渲染真实内容，
+	// 避免页面切换时先绘制占位骨架（如“共 0 篇日志”、空列表）而产生内容闪烁。
+	(function() {
 		// 日志数据
 		const allBlogs = typeof blogs !== 'undefined' ? blogs : [];
 		let filteredBlogs = [...allBlogs];
@@ -795,7 +798,7 @@
 		// 初始化
 		renderCategories();
 		filterAndSort();
-	});
+	})();
 	</script>
 </body>
 

@@ -1,4 +1,7 @@
-$(function() {
+// 首屏渲染优化：脚本已置于 <body> 末尾，DOM 结构与依赖数据（diaries、API 等）均已就绪，
+// 因此采用 IIFE 同步执行，替代原 jQuery DOM-ready 回调，确保首帧即渲染真实内容，
+// 避免页面切换时先绘制占位骨架而产生内容闪烁。
+(function() {
     let blogId = API.Utils.getUrlParam('blogId');
 
     // 获取指定ID的日志
@@ -57,4 +60,4 @@ $(function() {
 
     // 最近访问
     API.Common.registerShowLikeWin(diaries);
-});
+})();
