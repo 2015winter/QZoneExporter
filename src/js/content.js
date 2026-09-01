@@ -692,8 +692,8 @@ class StatusIndicator {
         }
 
         if ($tip_dom.is('details')) {
-            // 展开
-            $tip_dom.find('summary').click();
+            // 展开：直接设置 open 属性，避免模拟点击带来的副作用
+            $tip_dom.attr('open', 'open');
         }
     }
 
@@ -711,8 +711,8 @@ class StatusIndicator {
         $tip_dom.html(showTip.replace('正在', '已').replace('请稍候', '已完成').replace('...', ''));
 
         if ($tip_dom.is('details') && this.id !== 'Common_Row_Infos_Tips') {
-            // 收起
-            $tip_dom.find('summary').click();
+            // 收起：直接移除 open 属性，避免模拟点击带来的副作用
+            $tip_dom.removeAttr('open');
         }
 
         $("#progressModal .modal-body").animate({ scrollTop: 1000 });
@@ -978,6 +978,8 @@ class QZoneOperator {
                 this.init();
                 break;
             case OperatorType.SHOW:
+                // 记录采集起始时间，用于统计总耗时
+                QZone.Common.startTime = Date.now();
                 // 显示模态对话框
                 await this.showProcess();
                 // 初始化FS文件夹
@@ -989,12 +991,15 @@ class QZoneOperator {
                 API.Common.resetQZoneBackupItems();
                 // 初始化上次备份信息
                 await API.Common.initBackedUpItems();
+                // 初始化顶部总进度（依据启用的采集模块数）
+                this.initOverallProgress();
                 this.next(OperatorType.Messages);
                 break;
             case OperatorType.Messages:
                 // 获取说说列表
                 if (API.Common.isExport(moduleType)) {
                     await API.Messages.export();
+                    this.advanceProgress();
                 }
                 this.next(OperatorType.Blogs);
                 break;
@@ -1002,6 +1007,7 @@ class QZoneOperator {
                 // 获取日志列表
                 if (API.Common.isExport(moduleType)) {
                     await API.Blogs.export();
+                    this.advanceProgress();
                 }
                 this.next(OperatorType.Diaries);
                 break;
@@ -1009,6 +1015,7 @@ class QZoneOperator {
                 // 获取日记列表
                 if (API.Common.isExport(moduleType)) {
                     await API.Diaries.export();
+                    this.advanceProgress();
                 }
                 this.next(OperatorType.Boards);
                 break;
@@ -1016,6 +1023,7 @@ class QZoneOperator {
                 // 获取留言列表
                 if (API.Common.isExport(moduleType)) {
                     await API.Boards.export();
+                    this.advanceProgress();
                 }
                 this.next(OperatorType.Friends);
                 break;
@@ -1023,6 +1031,7 @@ class QZoneOperator {
                 // 获取QQ好友列表
                 if (API.Common.isExport(moduleType)) {
                     await API.Friends.export();
+                    this.advanceProgress();
                 }
                 this.next(OperatorType.Favorites);
                 break;
@@ -1030,6 +1039,7 @@ class QZoneOperator {
                 // 获取收藏列表
                 if (API.Common.isExport(moduleType)) {
                     await API.Favorites.export();
+                    this.advanceProgress();
                 }
                 this.next(OperatorType.Shares);
                 break;
@@ -1037,6 +1047,7 @@ class QZoneOperator {
                 // 获取分享列表
                 if (API.Common.isExport(moduleType)) {
                     await API.Shares.export();
+                    this.advanceProgress();
                 }
                 this.next(OperatorType.Visitors);
                 break;
@@ -1044,6 +1055,7 @@ class QZoneOperator {
                 // 获取访客
                 if (API.Common.isExport(moduleType)) {
                     await API.Visitors.export();
+                    this.advanceProgress();
                 }
                 this.next(OperatorType.Photos);
                 break;
@@ -1051,6 +1063,7 @@ class QZoneOperator {
                 // 获取相册列表
                 if (API.Common.isExport(moduleType)) {
                     await API.Photos.export();
+                    this.advanceProgress();
                 }
                 this.next(OperatorType.Videos);
                 break;
@@ -1058,18 +1071,22 @@ class QZoneOperator {
                 // 获取视频列表
                 if (API.Common.isExport(moduleType)) {
                     await API.Videos.export();
+                    this.advanceProgress();
                 }
                 this.next(OperatorType.OTHERS_INFO);
                 break;
             case OperatorType.OTHERS_INFO:
                 // 其它信息导出
                 await API.Common.exportOthers();
+                this.advanceProgress();
                 this.next(OperatorType.ZIP);
                 break;
             case OperatorType.ZIP:
                 if (API.Common.isOnlyFileExport()) {
                     // 仅文件导出，无需压缩文件
                     console.log('仅文件导出，无需压缩文件');
+                    QZone.Common.progressDone = QZone.Common.progressTotal;
+                    this.updateOverallProgress();
                     $("#fileList").show();
                 } else {
                     // 压缩文件
@@ -1081,6 +1098,62 @@ class QZoneOperator {
             case OperatorType.COMPLETE:
                 // 延迟3秒，确保压缩完
                 await API.Utils.sleep(1000);
+                // 渲染采集完成概览；数据读取均做容错处理，异常不影响后续打包流程
+                try {
+                    const safeLen = (v) => Array.isArray(v) ? v.length : 0;
+                    const summaryStats = [
+                        { name: '说说', count: safeLen(QZone.Messages && QZone.Messages.Data) },
+                        { name: '日志', count: safeLen(QZone.Blogs && QZone.Blogs.Data) },
+                        { name: '日记', count: safeLen(QZone.Diaries && QZone.Diaries.Data) },
+                        { name: '留言', count: safeLen(QZone.Boards && QZone.Boards.Data && QZone.Boards.Data.items) },
+                        { name: '相册', count: safeLen(QZone.Photos && QZone.Photos.Album && QZone.Photos.Album.Data) },
+                        { name: '视频', count: safeLen(QZone.Videos && QZone.Videos.Data) },
+                        { name: '好友', count: safeLen(QZone.Friends && QZone.Friends.Data) },
+                        { name: '收藏', count: safeLen(QZone.Favorites && QZone.Favorites.Data) },
+                        { name: '分享', count: safeLen(QZone.Shares && QZone.Shares.Data) },
+                        { name: '访客', count: safeLen(QZone.Visitors && QZone.Visitors.Data && QZone.Visitors.Data.items) }
+                    ].filter(s => s.count > 0);
+
+                    // 汇总各模块的多媒体文件下载任务数
+                    let fileCount = 0;
+                    for (const key in QZone) {
+                        const mod = QZone[key];
+                        if (mod && mod.FILE_URLS && typeof mod.FILE_URLS.size === 'number') {
+                            fileCount += mod.FILE_URLS.size;
+                        }
+                    }
+
+                    // 计算采集总耗时
+                    let costText = '';
+                    if (QZone.Common.startTime) {
+                        const cost = Math.max(0, Math.round((Date.now() - QZone.Common.startTime) / 1000));
+                        const m = Math.floor(cost / 60);
+                        const s = cost % 60;
+                        costText = m > 0 ? (m + ' 分 ' + s + ' 秒') : (s + ' 秒');
+                    }
+
+                    let cells = summaryStats.map(s =>
+                        '<div class="summary-cell"><span class="summary-val">' + s.count + '</span><span class="summary-label">' + s.name + '</span></div>'
+                    ).join('');
+                    if (fileCount > 0) {
+                        cells += '<div class="summary-cell"><span class="summary-val">' + fileCount + '</span><span class="summary-label">媒体文件</span></div>';
+                    }
+
+                    const summaryHtml = '<div id="backupSummary" class="backup-summary">' +
+                        '<div class="backup-summary-head">' +
+                        '<span class="backup-summary-title">采集完成</span>' +
+                        (costText ? '<span class="backup-summary-time">用时 ' + costText + '</span>' : '') +
+                        '</div>' +
+                        (cells ? '<div class="backup-summary-grid">' + cells + '</div>' : '') +
+                        '</div>';
+
+                    $('#backupSummary').remove();
+                    $('#backupIndicator').before(summaryHtml);
+                    // 采集完成后隐藏顶部总进度条，改由概览卡片呈现结果
+                    $('#overallProgress').hide();
+                } catch (e) {
+                    console.warn('渲染采集完成概览失败：', e);
+                }
                 $("#fileList").show();
                 if (API.Common.isOnlyFileExport()) {
                     API.Utils.notification("QQ空间导出助手通知", "不涉及文案内容备份，多媒体文件下载任务已添加完成！");
@@ -1093,6 +1166,45 @@ class QZoneOperator {
             default:
                 break;
         }
+    }
+
+    /**
+     * 初始化顶部总进度（按启用的采集模块数量 + 1 个收尾步骤）
+     */
+    initOverallProgress() {
+        const backupModules = ['Messages', 'Blogs', 'Diaries', 'Boards', 'Friends', 'Favorites', 'Shares', 'Visitors', 'Photos', 'Videos'];
+        const enabled = backupModules.filter(m => API.Common.isExport(m)).length;
+        // 额外 +1 表示导出其它信息的收尾步骤
+        QZone.Common.progressTotal = enabled + 1;
+        QZone.Common.progressDone = 0;
+        this.updateOverallProgress();
+    }
+
+    /**
+     * 完成一个步骤并刷新总进度
+     */
+    advanceProgress() {
+        QZone.Common.progressDone = (QZone.Common.progressDone || 0) + 1;
+        this.updateOverallProgress();
+    }
+
+    /**
+     * 刷新顶部总进度条
+     */
+    updateOverallProgress() {
+        const total = QZone.Common.progressTotal || 0;
+        if (total <= 0) {
+            return;
+        }
+        const done = Math.min(QZone.Common.progressDone || 0, total);
+        const pct = Math.round(done / total * 100);
+        const $wrap = $('#overallProgress');
+        if ($wrap.length === 0) {
+            return;
+        }
+        $wrap.show();
+        $('#overallProgressBar').css('width', pct + '%');
+        $('#overallProgressText').text('已完成 ' + done + '/' + total + ' 模块 · ' + pct + '%');
     }
 
     /**
@@ -1281,6 +1393,36 @@ class QZoneOperator {
             });
         })
 
+        // 明暗主题：auto 跟随系统，可手动锁定为 light/dark；采集弹窗与下载管理弹窗同步
+        const applyTheme = function(theme) {
+            const value = (theme === 'light' || theme === 'dark') ? theme : 'auto';
+            $('#progressModal, #modalTable').attr('data-theme', value);
+        };
+        const getEffectiveTheme = function() {
+            const current = $('#progressModal').attr('data-theme') || 'auto';
+            if (current === 'auto') {
+                return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+            }
+            return current;
+        };
+        // 恢复已持久化的主题偏好
+        try {
+            chrome.storage.local.get(['qzexportTheme'], function(res) {
+                applyTheme(res && res.qzexportTheme);
+            });
+        } catch (e) {
+            console.warn('读取主题偏好失败：', e);
+        }
+        $('#themeToggle').on('click', function() {
+            const next = getEffectiveTheme() === 'dark' ? 'light' : 'dark';
+            applyTheme(next);
+            try {
+                chrome.storage.local.set({ qzexportTheme: next });
+            } catch (e) {
+                console.warn('保存主题偏好失败：', e);
+            }
+        });
+
         const moduleNameMap = {
             Messages: '说说',
             Blogs: '日志',
@@ -1312,17 +1454,17 @@ class QZoneOperator {
                 .replace(/"/g, '&quot;');
         };
 
-        const PAGINATION_RESERVE = 46;
-
         const calcTableHeight = function() {
+            // bootstrap-table 的 height 选项代表组件的总高度，其内部会自动扣减工具栏
+            // 与分页高度（源码：body = height - toolbar - pagination）。因此此处返回面板
+            // 的可用高度即可，无需重复扣减，否则表格正文将偏矮并在分页下方留出空白。
             const $panel = $('#modalTable .download-table-panel');
             const panelHeight = $panel.length ? $panel.height() : 0;
             if (!panelHeight) {
                 const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
-                return Math.min(Math.max(viewportHeight - 420, 260), 420);
+                return Math.min(Math.max(viewportHeight - 320, 320), 620);
             }
-            const toolbarHeight = $panel.find('.fixed-table-toolbar').outerHeight(true) || 42;
-            return Math.max(Math.floor(panelHeight - toolbarHeight - PAGINATION_RESERVE), 240);
+            return Math.max(Math.floor(panelHeight), 260);
         };
 
         const syncTableHeight = function() {

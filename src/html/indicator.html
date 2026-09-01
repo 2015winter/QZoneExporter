@@ -1,28 +1,42 @@
-<div class="modal fade" id="progressModal" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="progress-modal-label" aria-hidden="true">
+<div class="modal fade" id="progressModal" data-theme="auto" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="progress-modal-label" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title h5" id="exampleModalLongTitle">QQ空间导出助手</h5>
+                <h5 class="modal-title h5" id="progress-modal-label">QQ空间导出助手</h5>
                 <div class="skipLink ml-2" data-link="html/about.html" style="cursor: pointer;margin-top: 6px">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-question-circle" viewBox="0 0 16 16">
 						<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"></path>
 						<path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"></path>
 					</svg>
                 </div>
+                <button type="button" id="themeToggle" class="pm-theme-toggle" title="切换明暗主题" aria-label="切换明暗主题">
+					<svg class="pm-icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+						<path d="M6 .278a.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277q.792-.001 1.533-.16a.79.79 0 0 1 .81.316.73.73 0 0 1-.031.893A8.35 8.35 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.75.75 0 0 1 6 .278"></path>
+					</svg>
+					<svg class="pm-icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+						<path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6m0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8M8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0m0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13m8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5M3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8m10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0m-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0m9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707M4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708"></path>
+					</svg>
+				</button>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
             </div>
             <div class="modal-body">
-                <h6 class="h6" id="backupStatus">正在采集QQ空间数据，请不要<span style="color:red">关闭、刷新、或打开新的</span>QQ空间页面。</h6>
-                <h6 class="h6">如若初次使用，请先查看
+                <h6 class="h6 progress-status" id="backupStatus">正在采集QQ空间数据，请不要<span style="color:red">关闭、刷新、或打开新的</span>QQ空间页面。</h6>
+                <div id="overallProgress" class="overall-progress" style="display: none;">
+                    <div class="overall-progress-track">
+                        <div id="overallProgressBar" class="overall-progress-fill"></div>
+                    </div>
+                    <span id="overallProgressText" class="overall-progress-text"></span>
+                </div>
+                <h6 class="h6 progress-note">如若初次使用，请先查看
                     <a href="javascript:void(0)" class="skipLink" data-link="https://github.com/2015winter/QZoneExporter/blob/main/docs/privacy-policy.md">隐私政策</a> 与
                     <a class="skipLink" href="javascript:void(0)" data-link="https://github.com/2015winter/QZoneExporter/blob/main/docs/faq.md">常见问题</a> ！
                 </h6>
-                <h6 class="h6">如遇长时间无动静、卡死等，可点击<a class="skipLink" href="javascript:void(0)" data-link="html/about.html">这里</a>查看反馈渠道并反馈问题！</h6>
-                <h6 class="h6" id="backupCurrentTab">备份过程中，建议浏览器停留在当前页面，可加快备份速度！</h6>
-                <h6 class="h6" id="errorTips" style="display: none;"></h6>
-                <hr />
+                <h6 class="h6 progress-note">如遇长时间无动静、卡死等，可点击<a class="skipLink" href="javascript:void(0)" data-link="html/about.html">这里</a>查看反馈渠道并反馈问题！</h6>
+                <h6 class="h6 progress-note" id="backupCurrentTab">备份过程中，建议浏览器停留在当前页面，可加快备份速度！</h6>
+                <h6 class="h6 progress-error" id="errorTips" style="display: none;"></h6>
+                <hr class="progress-divider" />
                 <div id="backupIndicator" class="container">
                     <p id="InitIncrement_Tips"></p>
                     <details id="Messages_Row_Infos_Tips" class="row">
@@ -149,7 +163,7 @@
         </div>
     </div>
 </div>
-<div id="modalTable" data-backdrop="static" data-keyboard="false" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="file-list-label" aria-hidden="true">
+<div id="modalTable" data-theme="auto" data-backdrop="static" data-keyboard="false" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="file-list-label" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
         <div class="modal-content">
             <div class="modal-header">

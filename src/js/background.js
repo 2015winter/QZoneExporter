@@ -186,6 +186,30 @@ const resumeDownload = function(downloadId) {
 }
 
 /**
+ * 定位备份压缩包在文件管理器中的位置。
+ * chrome.downloads.show() 不接受回调，若传入无效 downloadId 会触发无法捕获的
+ * "Invalid downloadId" 运行时错误；因此先校验下载项存在，否则回退至默认下载目录。
+ */
+const openExportZip = function() {
+    if (!QZoneDownloadId) {
+        chrome.downloads.showDefaultFolder();
+        return;
+    }
+    chrome.downloads.search({ id: QZoneDownloadId }, function(results) {
+        if (chrome.runtime.lastError) {
+            console.warn('查询备份压缩包下载项失败：', chrome.runtime.lastError.message);
+            chrome.downloads.showDefaultFolder();
+            return;
+        }
+        if (!results || results.length === 0) {
+            chrome.downloads.showDefaultFolder();
+            return;
+        }
+        chrome.downloads.show(QZoneDownloadId);
+    });
+}
+
+/**
  * 消息监听器，监听来自其他页面的消息
  */
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
@@ -224,8 +248,8 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
                     });
                     return true;
                 case 'show_export_zip':
-                    // 打开下载的ZIP文件
-                    chrome.downloads.show(QZoneDownloadId);
+                    // 定位已下载的备份压缩包
+                    openExportZip();
                     sendResponse(true);
                     break;
                 case 'skipLink':

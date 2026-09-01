@@ -3,38 +3,638 @@
 }
 
 #progressModal {
-    color: #333;
+    color: var(--pm-text);
+    /* ---- 设计令牌（亮色） ---- */
+    --pm-text: #1f2937;
+    --pm-muted: #6b7280;
+    --pm-p-text: #4b5563;
+    --pm-border: #e6ebf2;
+    --pm-border-strong: #d5deea;
+    --pm-hair: #f0f3f8;
+    --pm-surface: #f5f7fb;
+    --pm-surface-solid: #ffffff;
+    --pm-elevated: #fcfdff;
+    --pm-track: #e6ebf2;
+    --pm-primary: #3b6fd8;
+    --pm-primary-grad: linear-gradient(90deg, #3b6fd8 0%, #5b8def 100%);
+    --pm-success: #2f9d6a;
+    --pm-danger: #d94841;
+    --pm-danger-bg: #fdecea;
+    --pm-danger-strong: #b42318;
+    --pm-warning: #e67e22;
+    --pm-warn-bg: #fff5e6;
+    --pm-warn-strong: #b45309;
+    --pm-info-bg: #eef3fc;
+    --pm-header-bg: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+    --pm-success-bg: linear-gradient(180deg, #f1faf5 0%, #fbfefc 100%);
+    --pm-success-border: #cdeadd;
+    --pm-scroll: #d5deea;
+    --pm-scroll-hover: #c2cede;
+    --pm-shadow: 0 16px 48px rgba(31, 41, 55, 0.18);
+    --pm-shadow-sm: 0 2px 10px rgba(31, 41, 55, 0.06);
+    --pm-radius: 12px;
+    --pm-radius-sm: 8px;
 }
 
 #progressModal a {
-    color: rgb(0, 123, 255) !important;
+    color: var(--pm-primary) !important;
 }
 
-#progressModal p {
-    font-size: medium;
+/* 弹窗外观：圆角 + 阴影，与下载管理弹窗统一 */
+#progressModal .modal-content {
+    border: 0;
+    border-radius: var(--pm-radius);
+    box-shadow: var(--pm-shadow);
+    overflow: hidden;
+    color: var(--pm-text);
+    background: var(--pm-surface-solid);
 }
 
+#progressModal .modal-header {
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--pm-border);
+    background: var(--pm-header-bg);
+}
+
+#progressModal .modal-title {
+    font-size: 17px;
+    font-weight: 650;
+    color: var(--pm-text);
+}
+
+#progressModal .skipLink.ml-2 {
+    display: inline-flex;
+    align-items: center;
+    color: var(--pm-muted);
+    opacity: 0.65;
+    transition: opacity .15s ease, color .15s ease;
+}
+
+#progressModal .skipLink.ml-2:hover {
+    opacity: 1;
+    color: var(--pm-primary);
+}
+
+#progressModal .close {
+    opacity: 0.45;
+    transition: opacity .15s ease;
+}
+
+#progressModal .close:hover {
+    opacity: 0.85;
+}
+
+#progressModal .modal-body {
+    padding: 16px 20px;
+}
+
+/* 自定义滚动条 */
+#progressModal .modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+#progressModal .modal-body::-webkit-scrollbar-thumb {
+    background: var(--pm-scroll);
+    border-radius: 8px;
+}
+
+#progressModal .modal-body::-webkit-scrollbar-thumb:hover {
+    background: var(--pm-scroll-hover);
+}
+
+/* 顶部状态横幅 */
+#progressModal .progress-status {
+    margin: 0 0 12px;
+    padding: 10px 14px;
+    border-radius: var(--pm-radius-sm);
+    border-left: 3px solid var(--pm-primary);
+    background: var(--pm-info-bg);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.5;
+    color: var(--pm-text);
+}
+
+/* 顶部总进度条 */
+#progressModal .overall-progress {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 12px;
+}
+
+#progressModal .overall-progress-track {
+    flex: 1 1 auto;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--pm-track);
+    overflow: hidden;
+}
+
+#progressModal .overall-progress-fill {
+    width: 0;
+    height: 100%;
+    border-radius: 999px;
+    background: var(--pm-primary-grad);
+    transition: width .4s ease;
+}
+
+#progressModal .overall-progress-text {
+    flex: 0 0 auto;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--pm-primary);
+    white-space: nowrap;
+}
+
+/* 说明性文字：弱化为次要信息 */
+#progressModal .progress-note {
+    margin: 0 0 4px;
+    font-size: 12.5px;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--pm-muted);
+}
+
+/* 错误提示条：醒目警示样式 */
+#progressModal .progress-error {
+    margin: 8px 0 0;
+    padding: 10px 14px;
+    border-radius: var(--pm-radius-sm);
+    border-left: 3px solid var(--pm-danger);
+    background: var(--pm-danger-bg);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--pm-danger-strong);
+}
+
+#progressModal .progress-error span {
+    color: var(--pm-danger-strong) !important;
+}
+
+/* 提示条：可自动恢复的限流或重试状态（警告态，非致命错误） */
+#progressModal .progress-warn {
+    margin: 8px 0 0;
+    padding: 10px 14px;
+    border-radius: var(--pm-radius-sm);
+    border-left: 3px solid var(--pm-warning);
+    background: var(--pm-warn-bg);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--pm-warn-strong);
+}
+
+#progressModal .progress-warn span {
+    color: var(--pm-warn-strong) !important;
+}
+
+#progressModal .progress-divider {
+    margin: 14px 0;
+    border: 0;
+    border-top: 1px solid var(--pm-border);
+}
+
+#progressModal #backupIndicator.container {
+    width: auto;
+    max-width: none;
+    padding: 0;
+}
+
+/* 完成汇总概览卡片 */
+#progressModal .backup-summary {
+    margin: 0 0 14px;
+    padding: 14px 16px;
+    border: 1px solid var(--pm-success-border);
+    border-radius: var(--pm-radius);
+    background: var(--pm-success-bg);
+}
+
+#progressModal .backup-summary-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+#progressModal .backup-summary-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--pm-success);
+}
+
+#progressModal .backup-summary-title::before {
+    content: "";
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--pm-success);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 8.5l2.5 2.5L12 5.5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+#progressModal .backup-summary-time {
+    font-size: 12.5px;
+    color: var(--pm-muted);
+}
+
+#progressModal .backup-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(78px, 1fr));
+    gap: 8px;
+}
+
+#progressModal .summary-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 10px 6px;
+    border: 1px solid var(--pm-border);
+    border-radius: var(--pm-radius-sm);
+    background: var(--pm-surface-solid);
+}
+
+#progressModal .summary-val {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--pm-primary);
+    line-height: 1.2;
+}
+
+#progressModal .summary-label {
+    font-size: 12px;
+    color: var(--pm-muted);
+}
+
+#progressModal #InitIncrement_Tips:not(:empty) {
+    margin: 0 0 10px;
+    font-size: 13px;
+    color: var(--pm-muted);
+}
+
+/* 模块行：卡片化 */
 #progressModal details {
-    font-size: medium;
+    display: none;
+    margin: 0 0 10px;
+    padding: 0;
+    border: 1px solid var(--pm-border);
+    border-radius: 10px;
+    background: var(--pm-surface-solid);
+    font-size: 13.5px;
+    overflow: hidden;
+    transition: box-shadow .15s ease, border-color .15s ease;
+}
+
+#progressModal details:hover {
+    border-color: var(--pm-border-strong);
+    box-shadow: var(--pm-shadow-sm);
+}
+
+#progressModal details[open] {
+    background: var(--pm-elevated);
+}
+
+/* 模块标题（summary）：可点击 + 折叠箭头 */
+#progressModal summary {
+    position: relative;
+    list-style: none;
+    cursor: pointer;
+    padding: 11px 16px 11px 34px;
+    font-weight: 600;
+    color: var(--pm-text);
+    user-select: none;
+    transition: background .15s ease;
+}
+
+#progressModal summary:hover {
+    background: var(--pm-surface);
+}
+
+#progressModal summary::-webkit-details-marker {
     display: none;
 }
 
-#progressModal details>p {
-    margin-left: 14px;
+#progressModal summary::before {
+    content: "";
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    border-right: 2px solid var(--pm-muted);
+    border-bottom: 2px solid var(--pm-muted);
+    transform: translateY(-60%) rotate(-45deg);
+    transition: transform .2s ease;
+}
+
+#progressModal details[open] summary::before {
+    transform: translateY(-50%) rotate(45deg);
+}
+
+#progressModal summary .text-primary {
+    color: var(--pm-primary) !important;
+}
+
+/* 模块子项 */
+#progressModal details > p {
+    margin: 0;
+    padding: 6px 16px 6px 34px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--pm-p-text);
+    border-top: 1px solid var(--pm-hair);
+}
+
+#progressModal details > p:empty {
+    display: none;
+}
+
+#progressModal details > p .text-primary {
+    color: var(--pm-primary) !important;
+    font-weight: 600;
+}
+
+/* 进度条 */
+#progressModal .progress {
+    height: 20px;
+    border-radius: 999px;
+    background: var(--pm-surface);
+    overflow: hidden;
+}
+
+#progressModal .progress-bar {
+    background: var(--pm-primary);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* 底部按钮 */
+#progressModal .modal-footer {
+    padding: 12px 20px;
+    border-top: 1px solid var(--pm-border);
+    background: var(--pm-surface-solid);
+}
+
+#progressModal .modal-footer .btn {
+    height: 34px;
+    padding: 0 16px;
+    font-size: 13px;
+    line-height: 32px;
+    border-radius: 6px;
+}
+
+#progressModal .modal-footer .btn-primary {
+    background: var(--pm-primary);
+    border-color: var(--pm-primary);
+}
+
+/* 统一模板内联着色的色调，让成功/失败语义更一致 */
+#progressModal summary span[style*="1ca5fc"],
+#progressModal details > p span[style*="1ca5fc"] {
+    color: var(--pm-primary) !important;
+    font-weight: 600;
+}
+
+#progressModal details > p span[style*="red"] {
+    color: var(--pm-danger) !important;
+    font-weight: 700;
+}
+
+/*
+ * 暗色令牌集：
+ * - 手动选择：#progressModal[data-theme="dark"]
+ * - 自动跟随系统：[data-theme="auto"] 且系统为暗色
+ * 令牌整体切换，仅作用于进度弹窗自身，不影响宿主 QQ 空间页面。
+ */
+#progressModal[data-theme="dark"] {
+    --pm-text: #e6e8ee;
+    --pm-muted: #9aa4b2;
+    --pm-p-text: #c2c9d4;
+    --pm-border: #333846;
+    --pm-border-strong: #454b5a;
+    --pm-hair: #2b303c;
+    --pm-surface: #262a36;
+    --pm-surface-solid: #1e212b;
+    --pm-elevated: #242835;
+    --pm-track: #333846;
+    --pm-primary: #6f9bff;
+    --pm-primary-grad: linear-gradient(90deg, #5b8def 0%, #7aa7ff 100%);
+    --pm-success: #46c88a;
+    --pm-danger: #ff6b63;
+    --pm-danger-bg: rgba(217, 72, 65, 0.16);
+    --pm-danger-strong: #ff8a82;
+    --pm-warning: #f0a04b;
+    --pm-warn-bg: rgba(230, 126, 34, 0.16);
+    --pm-warn-strong: #f0b070;
+    --pm-info-bg: rgba(59, 111, 216, 0.18);
+    --pm-header-bg: linear-gradient(180deg, #232733 0%, #1e212b 100%);
+    --pm-success-bg: linear-gradient(180deg, rgba(47, 157, 106, 0.16) 0%, rgba(30, 33, 43, 0.6) 100%);
+    --pm-success-border: rgba(47, 157, 106, 0.42);
+    --pm-scroll: #3a404e;
+    --pm-scroll-hover: #4a5162;
+    --pm-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+    --pm-shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+#progressModal[data-theme="dark"] .close {
+    color: #e6e8ee;
+    text-shadow: none;
+}
+
+@media (prefers-color-scheme: dark) {
+    #progressModal[data-theme="auto"] {
+        --pm-text: #e6e8ee;
+        --pm-muted: #9aa4b2;
+        --pm-p-text: #c2c9d4;
+        --pm-border: #333846;
+        --pm-border-strong: #454b5a;
+        --pm-hair: #2b303c;
+        --pm-surface: #262a36;
+        --pm-surface-solid: #1e212b;
+        --pm-elevated: #242835;
+        --pm-track: #333846;
+        --pm-primary: #6f9bff;
+        --pm-primary-grad: linear-gradient(90deg, #5b8def 0%, #7aa7ff 100%);
+        --pm-success: #46c88a;
+        --pm-danger: #ff6b63;
+        --pm-danger-bg: rgba(217, 72, 65, 0.16);
+        --pm-danger-strong: #ff8a82;
+        --pm-warning: #f0a04b;
+        --pm-warn-bg: rgba(230, 126, 34, 0.16);
+        --pm-warn-strong: #f0b070;
+        --pm-info-bg: rgba(59, 111, 216, 0.18);
+        --pm-header-bg: linear-gradient(180deg, #232733 0%, #1e212b 100%);
+        --pm-success-bg: linear-gradient(180deg, rgba(47, 157, 106, 0.16) 0%, rgba(30, 33, 43, 0.6) 100%);
+        --pm-success-border: rgba(47, 157, 106, 0.42);
+        --pm-scroll: #3a404e;
+        --pm-scroll-hover: #4a5162;
+        --pm-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+        --pm-shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.35);
+    }
+
+    #progressModal[data-theme="auto"] .close {
+        color: #e6e8ee;
+        text-shadow: none;
+    }
+}
+
+/* 明暗切换按钮 */
+#progressModal .pm-theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    margin-left: auto;
+    padding: 0;
+    border: 1px solid var(--pm-border);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--pm-muted);
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+
+#progressModal .pm-theme-toggle:hover {
+    background: var(--pm-surface);
+    color: var(--pm-primary);
+    border-color: var(--pm-border-strong);
+}
+
+#progressModal .pm-theme-toggle svg {
+    display: block;
+    width: 16px;
+    height: 16px;
+}
+
+#progressModal .modal-header .close {
+    margin-left: 8px;
+}
+
+/* 图标随生效主题切换：亮色显示月亮（可切暗），暗色显示太阳（可切亮） */
+#progressModal .pm-icon-sun {
+    display: none;
+}
+
+#progressModal .pm-icon-moon {
+    display: block;
+}
+
+#progressModal[data-theme="dark"] .pm-icon-sun {
+    display: block;
+}
+
+#progressModal[data-theme="dark"] .pm-icon-moon {
+    display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+    #progressModal[data-theme="auto"] .pm-icon-sun {
+        display: block;
+    }
+
+    #progressModal[data-theme="auto"] .pm-icon-moon {
+        display: none;
+    }
+}
+
+/* 小屏响应式：收窄内边距、汇总网格降列、折叠缩进对齐 */
+@media (max-width: 576px) {
+    #progressModal .modal-header,
+    #progressModal .modal-body,
+    #progressModal .modal-footer {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    #progressModal .modal-title {
+        font-size: 16px;
+    }
+
+    #progressModal .overall-progress {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    #progressModal .overall-progress-text {
+        width: 100%;
+        text-align: right;
+    }
+
+    #progressModal .backup-summary-grid {
+        grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+    }
+
+    #progressModal summary {
+        padding: 10px 12px 10px 30px;
+    }
+
+    #progressModal summary::before {
+        left: 12px;
+    }
+
+    #progressModal details > p {
+        padding-left: 30px;
+        padding-right: 12px;
+    }
+
+    #progressModal .modal-footer {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
 }
 
 /* 下载管理：固定高度，置于进度对话框之上 */
 #modalTable {
     z-index: 1060 !important;
+    /* ---- 设计令牌（亮色） ---- */
     --dm-text: #1f2937;
     --dm-muted: #6b7280;
     --dm-border: #e6ebf2;
+    --dm-border-strong: #d5deea;
+    --dm-hair: #eef2f6;
     --dm-surface: #f5f7fb;
+    --dm-surface-solid: #ffffff;
+    --dm-elevated: #fcfdff;
+    --dm-input-bg: #ffffff;
     --dm-primary: #3b6fd8;
     --dm-success: #2f9d6a;
     --dm-danger: #d94841;
     --dm-warning: #e67e22;
     --dm-info: #3b6fd8;
+    --dm-header-bg: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+    --dm-thead-bg: #f8fafc;
+    --dm-thead-text: #4b5563;
+    --dm-row-hover: #f7f9fc;
+    --dm-pagination-bg: #fafbfd;
+    --dm-badge-bg: #e8f0fe;
+    --dm-shadow: 0 16px 48px rgba(31, 41, 55, 0.18);
+    --dm-ring-primary: rgba(59, 111, 216, 0.12);
+    --dm-ring-success: rgba(47, 157, 106, 0.12);
+    --dm-ring-danger: rgba(217, 72, 65, 0.12);
+    --dm-ring-warning: rgba(230, 126, 34, 0.12);
+    --dm-status-complete-bg: #e4f6ed;
+    --dm-status-complete-text: #1b7a4d;
+    --dm-status-failed-bg: #fdecea;
+    --dm-status-failed-text: #b42318;
+    --dm-status-progress-bg: #e8f0fe;
+    --dm-status-progress-text: #1d4ed8;
+    --dm-status-skipped-bg: #fff1e4;
+    --dm-status-skipped-text: #c05612;
+    --dm-btn-light-bg: #f3f4f6;
+    --dm-btn-light-border: #e5e7eb;
+    --dm-btn-light-text: #374151;
+    --dm-on-primary: #ffffff;
+    --dm-toast-bg: rgba(31, 41, 55, 0.92);
+    --dm-toast-text: #ffffff;
 }
 
 #modalTable.show ~ .modal-backdrop,
@@ -56,8 +656,9 @@
     overflow: hidden;
     border: 0;
     border-radius: 12px;
-    box-shadow: 0 16px 48px rgba(31, 41, 55, 0.18);
+    box-shadow: var(--dm-shadow);
     color: var(--dm-text);
+    background: var(--dm-surface-solid);
 }
 
 #modalTable a {
@@ -69,7 +670,7 @@
     align-items: flex-start;
     padding: 16px 20px 12px;
     border-bottom: 1px solid var(--dm-border);
-    background: linear-gradient(180deg, #f8fafc 0%, #fff 100%);
+    background: var(--dm-header-bg);
 }
 
 #modalTable .download-header-title {
@@ -89,7 +690,7 @@
     display: inline-block;
     padding: 2px 8px;
     border-radius: 999px;
-    background: #e8f0fe;
+    background: var(--dm-badge-bg);
     color: var(--dm-primary);
     font-size: 12px;
     font-weight: 600;
@@ -153,13 +754,13 @@
 }
 
 #modalTable .download-stat:hover {
-    background: #fff;
-    border-color: #d5deea;
+    background: var(--dm-surface-solid);
+    border-color: var(--dm-border-strong);
 }
 
 #modalTable .download-stat.is-active {
-    background: #fff;
-    box-shadow: 0 0 0 3px rgba(59, 111, 216, 0.12);
+    background: var(--dm-surface-solid);
+    box-shadow: 0 0 0 3px var(--dm-ring-primary);
 }
 
 #modalTable .download-stat[data-status="all"].is-active {
@@ -168,12 +769,12 @@
 
 #modalTable .download-stat.is-complete.is-active {
     border-color: var(--dm-success);
-    box-shadow: 0 0 0 3px rgba(47, 157, 106, 0.12);
+    box-shadow: 0 0 0 3px var(--dm-ring-success);
 }
 
 #modalTable .download-stat.is-failed.is-active {
     border-color: var(--dm-danger);
-    box-shadow: 0 0 0 3px rgba(217, 72, 65, 0.12);
+    box-shadow: 0 0 0 3px var(--dm-ring-danger);
 }
 
 #modalTable .download-stat.is-progress.is-active {
@@ -182,13 +783,33 @@
 
 #modalTable .download-stat.is-skipped.is-active {
     border-color: var(--dm-warning);
-    box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.12);
+    box-shadow: 0 0 0 3px var(--dm-ring-warning);
 }
 
 #modalTable .download-stat-label {
+    display: inline-flex;
+    align-items: center;
     font-size: 12px;
     color: var(--dm-muted);
 }
+
+/* 分类标识色：各统计分类标签前置一枚对应主题色圆点，用于区分类别 */
+#modalTable .download-stat-label::before {
+    content: "";
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: 6px;
+    border-radius: 50%;
+    background: var(--dm-muted);
+    flex: 0 0 auto;
+}
+
+#modalTable .download-stat[data-status="all"] .download-stat-label::before { background: var(--dm-primary); }
+#modalTable .download-stat.is-complete .download-stat-label::before { background: var(--dm-success); }
+#modalTable .download-stat.is-failed .download-stat-label::before { background: var(--dm-danger); }
+#modalTable .download-stat.is-progress .download-stat-label::before { background: var(--dm-info); }
+#modalTable .download-stat.is-skipped .download-stat-label::before { background: var(--dm-warning); }
 
 #modalTable .download-stat-value {
     font-size: 16px;
@@ -221,7 +842,7 @@
     overflow: hidden;
     border: 1px solid var(--dm-border);
     border-radius: 10px 10px 0 0;
-    background: #fff;
+    background: var(--dm-surface-solid);
 }
 
 #modalTable .bootstrap-table {
@@ -295,8 +916,8 @@
 }
 
 #modalTable .bootstrap-table .table thead th {
-    background: #f8fafc;
-    color: #4b5563;
+    background: var(--dm-thead-bg);
+    color: var(--dm-thead-text);
     font-size: 12px;
     font-weight: 600;
     border-bottom: 1px solid var(--dm-border) !important;
@@ -306,11 +927,12 @@
 #modalTable .bootstrap-table .table th {
     padding: 8px 10px;
     vertical-align: middle;
-    border-color: #eef2f6;
+    border-color: var(--dm-hair);
 }
 
 #modalTable .bootstrap-table .table tbody tr:hover {
-    background: #f7f9fc;
+    background: var(--dm-row-hover);
+    color: var(--dm-text);
 }
 
 #modalTable .download-status {
@@ -322,10 +944,10 @@
     white-space: nowrap;
 }
 
-#modalTable .download-status.is-complete { background: #e4f6ed; color: #1b7a4d; }
-#modalTable .download-status.is-failed { background: #fdecea; color: #b42318; }
-#modalTable .download-status.is-progress { background: #e8f0fe; color: #1d4ed8; }
-#modalTable .download-status.is-skipped { background: #fff1e4; color: #c05612; }
+#modalTable .download-status.is-complete { background: var(--dm-status-complete-bg); color: var(--dm-status-complete-text); }
+#modalTable .download-status.is-failed { background: var(--dm-status-failed-bg); color: var(--dm-status-failed-text); }
+#modalTable .download-status.is-progress { background: var(--dm-status-progress-bg); color: var(--dm-status-progress-text); }
+#modalTable .download-status.is-skipped { background: var(--dm-status-skipped-bg); color: var(--dm-status-skipped-text); }
 
 #modalTable .download-cell {
     display: inline-block;
@@ -345,7 +967,7 @@
     margin: 0;
     padding: 6px 12px;
     border-top: 1px solid var(--dm-border);
-    background: #fafbfd;
+    background: var(--dm-pagination-bg);
 }
 
 #modalTable .fixed-table-pagination .pagination,
@@ -353,15 +975,27 @@
     margin: 0;
 }
 
+/* 分页文字对比度处理：覆盖模态框内链接的全局主色规则，确保页码清晰可读 */
 #modalTable .fixed-table-pagination .page-link {
-    color: var(--dm-primary);
+    color: var(--dm-text) !important;
+    font-weight: 600;
     border-color: var(--dm-border);
+}
+
+#modalTable .fixed-table-pagination .page-link:hover {
+    color: var(--dm-primary) !important;
+    background: var(--dm-surface);
+    border-color: var(--dm-border-strong);
+}
+
+#modalTable .fixed-table-pagination .page-item.disabled .page-link {
+    color: var(--dm-muted) !important;
 }
 
 #modalTable .fixed-table-pagination .page-item.active .page-link {
     background: var(--dm-primary);
     border-color: var(--dm-primary);
-    color: #fff;
+    color: var(--dm-on-primary) !important;
 }
 
 #modalTable .no-records-found td {
@@ -369,7 +1003,7 @@
     color: var(--dm-muted);
     font-size: 13px;
     vertical-align: middle;
-    background: #fcfdff;
+    background: var(--dm-elevated);
 }
 
 #modalTable .modal-footer.download-footer {
@@ -382,7 +1016,7 @@
     min-height: 64px;
     padding: 12px 20px;
     border-top: 1px solid var(--dm-border);
-    background: #fff;
+    background: var(--dm-surface-solid);
 }
 
 #modalTable .download-footer-hint {
@@ -430,7 +1064,7 @@
 }
 
 #modalTable .download-alt-group .btn {
-    background: #fff;
+    background: var(--dm-surface-solid);
 }
 
 #modalTable .download-footer .btn-primary {
@@ -439,9 +1073,9 @@
 }
 
 #modalTable .download-footer .btn-light {
-    background: #f3f4f6;
-    border-color: #e5e7eb;
-    color: #374151;
+    background: var(--dm-btn-light-bg);
+    border-color: var(--dm-btn-light-border);
+    color: var(--dm-btn-light-text);
 }
 
 #modalTable .download-toast {
@@ -453,11 +1087,125 @@
     z-index: 2;
     padding: 8px 16px;
     border-radius: 8px;
-    background: rgba(31, 41, 55, 0.92);
-    color: #fff;
+    background: var(--dm-toast-bg);
+    color: var(--dm-toast-text);
     font-size: 13px;
     white-space: nowrap;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+}
+
+/*
+ * 令牌驱动的基础规则：使表单控件、表格文字、关闭按钮、分页按钮
+ * 随主题令牌自动切换，无需在暗色下重复声明。
+ */
+#modalTable .close {
+    color: var(--dm-text);
+    text-shadow: none;
+}
+
+#modalTable .bootstrap-table .table {
+    color: var(--dm-text);
+}
+
+#modalTable .fixed-table-toolbar .search input,
+#modalTable #moduleFilter {
+    background: var(--dm-input-bg);
+    color: var(--dm-text);
+}
+
+#modalTable .fixed-table-pagination .page-link {
+    background: var(--dm-surface-solid);
+}
+
+/*
+ * 暗色令牌集：与采集弹窗共用同一主题开关。
+ * - 手动选择：#modalTable[data-theme="dark"]
+ * - 自动跟随系统：[data-theme="auto"] 且系统为暗色
+ */
+#modalTable[data-theme="dark"] {
+    --dm-text: #e6e8ee;
+    --dm-muted: #9aa4b2;
+    --dm-border: #333846;
+    --dm-border-strong: #454b5a;
+    --dm-hair: #2b303c;
+    --dm-surface: #262a36;
+    --dm-surface-solid: #1e212b;
+    --dm-elevated: #242835;
+    --dm-input-bg: #232733;
+    --dm-primary: #6f9bff;
+    --dm-success: #46c88a;
+    --dm-danger: #ff6b63;
+    --dm-warning: #f0a04b;
+    --dm-info: #6f9bff;
+    --dm-header-bg: linear-gradient(180deg, #232733 0%, #1e212b 100%);
+    --dm-thead-bg: #232733;
+    --dm-thead-text: #b6bdca;
+    --dm-row-hover: #242a38;
+    --dm-pagination-bg: #1c1f28;
+    --dm-badge-bg: rgba(111, 155, 255, 0.16);
+    --dm-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+    --dm-ring-primary: rgba(111, 155, 255, 0.24);
+    --dm-ring-success: rgba(70, 200, 138, 0.24);
+    --dm-ring-danger: rgba(255, 107, 99, 0.24);
+    --dm-ring-warning: rgba(240, 160, 75, 0.24);
+    --dm-status-complete-bg: rgba(70, 200, 138, 0.16);
+    --dm-status-complete-text: #6bdca6;
+    --dm-status-failed-bg: rgba(255, 107, 99, 0.16);
+    --dm-status-failed-text: #ff8a82;
+    --dm-status-progress-bg: rgba(111, 155, 255, 0.16);
+    --dm-status-progress-text: #93b4ff;
+    --dm-status-skipped-bg: rgba(240, 160, 75, 0.16);
+    --dm-status-skipped-text: #f0b070;
+    --dm-btn-light-bg: #2a2f3c;
+    --dm-btn-light-border: #3a4150;
+    --dm-btn-light-text: #d4d9e2;
+    --dm-on-primary: #0f1420;
+    --dm-toast-bg: rgba(10, 12, 18, 0.95);
+    --dm-toast-text: #f0f2f6;
+}
+
+@media (prefers-color-scheme: dark) {
+    #modalTable[data-theme="auto"] {
+        --dm-text: #e6e8ee;
+        --dm-muted: #9aa4b2;
+        --dm-border: #333846;
+        --dm-border-strong: #454b5a;
+        --dm-hair: #2b303c;
+        --dm-surface: #262a36;
+        --dm-surface-solid: #1e212b;
+        --dm-elevated: #242835;
+        --dm-input-bg: #232733;
+        --dm-primary: #6f9bff;
+        --dm-success: #46c88a;
+        --dm-danger: #ff6b63;
+        --dm-warning: #f0a04b;
+        --dm-info: #6f9bff;
+        --dm-header-bg: linear-gradient(180deg, #232733 0%, #1e212b 100%);
+        --dm-thead-bg: #232733;
+        --dm-thead-text: #b6bdca;
+        --dm-row-hover: #242a38;
+        --dm-pagination-bg: #1c1f28;
+        --dm-badge-bg: rgba(111, 155, 255, 0.16);
+        --dm-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+        --dm-ring-primary: rgba(111, 155, 255, 0.24);
+        --dm-ring-success: rgba(70, 200, 138, 0.24);
+        --dm-ring-danger: rgba(255, 107, 99, 0.24);
+        --dm-ring-warning: rgba(240, 160, 75, 0.24);
+        --dm-status-complete-bg: rgba(70, 200, 138, 0.16);
+        --dm-status-complete-text: #6bdca6;
+        --dm-status-failed-bg: rgba(255, 107, 99, 0.16);
+        --dm-status-failed-text: #ff8a82;
+        --dm-status-progress-bg: rgba(111, 155, 255, 0.16);
+        --dm-status-progress-text: #93b4ff;
+        --dm-status-skipped-bg: rgba(240, 160, 75, 0.16);
+        --dm-status-skipped-text: #f0b070;
+        --dm-btn-light-bg: #2a2f3c;
+        --dm-btn-light-border: #3a4150;
+        --dm-btn-light-text: #d4d9e2;
+        --dm-on-primary: #0f1420;
+        --dm-toast-bg: rgba(10, 12, 18, 0.95);
+        --dm-toast-text: #f0f2f6;
+    }
 }
 
 @media (max-width: 992px) {

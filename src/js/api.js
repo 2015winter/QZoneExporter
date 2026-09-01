@@ -623,8 +623,9 @@ API.Utils = {
         const retryRequest = (ajax, reject, error) => {
             if (ajax.retries > 0) {
                 console.warn('请求接口异常，正在重试，接口：%s，参数：%o，剩余重试次数：%i', url, params, ajax.retries);
-                $('#errorTips').show();
-                $('#errorTips').html("<span style='color:red'>请求发生错误，错误信息：{0}，将会在{1}重试，剩余次数：{2}</span>".format(ajax.customMessage || '未知错误', API.Utils.formatDate((Date.now() + ajax.retryInterval) / 1000, 'MM-dd hh:mm:ss'), ajax.retries));
+                // 重试阶段为可自动恢复状态，采用警告样式提示，以免被误判为致命错误
+                $('#errorTips').removeClass('progress-error').addClass('progress-warn').show();
+                $('#errorTips').html("<span>接口暂时繁忙：{0}；将于 {1} 自动重试（剩余 {2} 次），无需手动操作</span>".format(ajax.customMessage || '未知错误', API.Utils.formatDate((Date.now() + ajax.retryInterval) / 1000, 'MM-dd hh:mm:ss'), ajax.retries));
                 ajax.retries--;
                 // 指定秒数后继续请求
                 setTimeout(function() {
@@ -633,8 +634,9 @@ API.Utils = {
                 return;
             }
             console.warn('重试次数已用完，准备回调，接口：%s，参数：%o', this.url, params);
-            $('#errorTips').show();
-            $('#errorTips').html("<span style='color:red'>请求发生错误，错误信息：{0}，重试次数用完，已取消</span>".format(ajax.customMessage || '未知错误', API.Utils.formatDate((Date.now() + ajax.retryInterval) / 1000, 'MM-dd hh:mm:ss'), ajax.retries));
+            // 重试次数耗尽后判定为失败，采用错误样式提示
+            $('#errorTips').removeClass('progress-warn').addClass('progress-error').show();
+            $('#errorTips').html("<span>请求失败：{0}；重试次数已用完，已跳过该项</span>".format(ajax.customMessage || '未知错误'));
             reject(error);
         }
         return new Promise(function(resolve, reject) {
