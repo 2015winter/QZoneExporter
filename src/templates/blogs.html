@@ -32,6 +32,29 @@
 			overflow-y: scroll;
 		}
 		
+		/* 滚动条常驻于 html，禁用 Bootstrap 弹窗对 body 的 padding-right 补偿，避免布局右移 */
+		body.modal-open {
+			padding-right: 0 !important;
+		}
+		
+		/* 滚动边界隔离：阻断滚动链，避免弹窗滚动传导至背景页 */
+		#blogModal,
+		#blogModal .modal-body {
+			overscroll-behavior: contain;
+		}
+		
+		/* 提升为独立合成层并隔离堆叠上下文，避免滚动时与背景模糊层相互重绘 */
+		#blogModal .modal-content {
+			transform: translateZ(0);
+			isolation: isolate;
+		}
+		
+		#blogModal .modal-body {
+			transform: translateZ(0);
+			-webkit-backface-visibility: hidden;
+			backface-visibility: hidden;
+		}
+		
 		/* 日志页面专属样式 - 与首页风格一致 */
 		body.blogs-page {
 			background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
@@ -504,6 +527,207 @@
 			color: #fff;
 			border-color: transparent;
 		}
+		
+		/* 日志详情弹窗正文样式 */
+		#blogModalContent {
+			line-height: 1.8;
+			font-size: 16px;
+			color: #2d3748;
+		}
+		
+		#blogModalContent img {
+			max-width: 100%;
+			height: auto;
+			border-radius: 8px;
+			margin: 10px 0;
+		}
+		
+		#blogModalContent p {
+			margin-bottom: 12px;
+		}
+		
+		/* 弹窗内评论区样式 */
+		#blogModalComments .comments-section {
+			margin-top: 32px;
+			padding-top: 24px;
+			border-top: 1px solid rgba(0, 0, 0, 0.08);
+		}
+		
+		#blogModalComments .comments-header {
+			margin-bottom: 20px;
+		}
+		
+		#blogModalComments .comments-title {
+			font-size: 18px;
+			font-weight: 600;
+			color: #2d3748;
+			display: flex;
+			align-items: center;
+			gap: 10px;
+		}
+		
+		#blogModalComments .comments-count {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			min-width: 26px;
+			height: 26px;
+			padding: 0 10px;
+			background: linear-gradient(135deg, #667eea, #764ba2);
+			border-radius: 13px;
+			font-size: 13px;
+			font-weight: 600;
+			color: #fff;
+		}
+		
+		#blogModalComments .comment-card {
+			background: linear-gradient(145deg, #f8fafc, #fff);
+			border-radius: 14px;
+			padding: 18px;
+			margin-bottom: 14px;
+			border: 1px solid rgba(0, 0, 0, 0.05);
+		}
+		
+		#blogModalComments .comment-header {
+			display: flex;
+			align-items: flex-start;
+			margin-bottom: 10px;
+		}
+		
+		#blogModalComments .comment-avatar {
+			width: 44px;
+			height: 44px;
+			flex-shrink: 0;
+		}
+		
+		#blogModalComments .comment-avatar img {
+			width: 100%;
+			height: 100%;
+			border-radius: 50%;
+			object-fit: cover;
+			border: 2px solid rgba(102, 126, 234, 0.2);
+		}
+		
+		#blogModalComments .comment-info {
+			margin-left: 12px;
+			flex: 1;
+		}
+		
+		#blogModalComments .comment-author {
+			font-weight: 600;
+			color: #2d3748;
+			text-decoration: none;
+		}
+		
+		#blogModalComments .comment-author:hover {
+			color: #667eea;
+		}
+		
+		#blogModalComments .comment-floor {
+			display: inline-block;
+			padding: 2px 8px;
+			background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+			border-radius: 10px;
+			font-size: 11px;
+			font-weight: 600;
+			color: #667eea;
+			margin-left: 8px;
+		}
+		
+		#blogModalComments .comment-private {
+			display: inline-block;
+			padding: 2px 8px;
+			background: linear-gradient(135deg, #feca57, #f093fb);
+			border-radius: 10px;
+			font-size: 11px;
+			font-weight: 600;
+			color: #fff;
+			margin-left: 8px;
+		}
+		
+		#blogModalComments .comment-time {
+			font-size: 12px;
+			color: #a0aec0;
+			margin-top: 4px;
+		}
+		
+		#blogModalComments .comment-body {
+			color: #4a5568;
+			line-height: 1.7;
+			padding-left: 56px;
+		}
+		
+		#blogModalComments .comment-body p {
+			margin-bottom: 8px;
+		}
+		
+		#blogModalComments .comment-lightgallery {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 10px;
+			margin-top: 10px;
+		}
+		
+		#blogModalComments .comment-img {
+			max-width: 140px;
+			max-height: 140px;
+			border-radius: 8px;
+		}
+		
+		#blogModalComments .reply-list {
+			margin-top: 14px;
+			padding-left: 56px;
+		}
+		
+		#blogModalComments .reply-card {
+			background: rgba(102, 126, 234, 0.05);
+			border-radius: 12px;
+			padding: 14px;
+			margin-bottom: 10px;
+			border-left: 3px solid rgba(102, 126, 234, 0.3);
+		}
+		
+		#blogModalComments .reply-header {
+			display: flex;
+			align-items: center;
+			margin-bottom: 8px;
+		}
+		
+		#blogModalComments .reply-avatar {
+			width: 34px;
+			height: 34px;
+			flex-shrink: 0;
+		}
+		
+		#blogModalComments .reply-avatar img {
+			width: 100%;
+			height: 100%;
+			border-radius: 50%;
+			object-fit: cover;
+		}
+		
+		#blogModalComments .reply-info {
+			margin-left: 10px;
+		}
+		
+		#blogModalComments .reply-body {
+			padding-left: 44px;
+			color: #4a5568;
+			font-size: 14px;
+		}
+		
+		#blogModalComments .no-comments {
+			text-align: center;
+			padding: 30px 20px;
+			color: #a0aec0;
+		}
+		
+		#blogModalComments .no-comments i {
+			font-size: 40px;
+			margin-bottom: 12px;
+			opacity: 0.5;
+			display: block;
+		}
 	</style>
 </head>
 
@@ -579,6 +803,127 @@
 			</div>
 		</div>
 	</main>
+	
+	<!-- 日志详情弹窗 -->
+	<div class="modal fade" id="blogModal" tabindex="-1">
+		<div class="modal-dialog modal-lg modal-dialog-scrollable">
+			<div class="modal-content" style="border-radius: 20px; overflow: hidden;">
+				<div class="modal-header" style="background: linear-gradient(135deg, #667eea, #764ba2); color: #fff;">
+					<h5 class="modal-title" id="blogModalTitle">日志标题</h5>
+					<button type="button" class="close text-white" data-dismiss="modal">
+						<span>&times;</span>
+					</button>
+				</div>
+				<div class="modal-body" style="padding: 30px;">
+					<!-- 日志正文 -->
+					<div id="blogModalContent"></div>
+					<!-- 评论区 -->
+					<div id="blogModalComments"></div>
+				</div>
+				<div class="modal-footer">
+					<span class="text-muted mr-auto" id="blogModalMeta"></span>
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<!-- 弹窗评论区模板 -->
+	<script id="blog_comments_tpl" type="text/html">
+		<div class="comments-section">
+			<div class="comments-header">
+				<div class="comments-title">
+					<i class="fa fa-comments"></i>
+					评论
+					<span class="comments-count"><%:=blog.comments && blog.comments.length || 0%></span>
+				</div>
+			</div>
+			<%if(blog.comments && blog.comments.length > 0){%>
+				<%for (let index = 0; index < blog.comments.length; index++) {%>
+					<%const comment = blog.comments[index];%>
+					<div class="comment-card">
+						<div class="comment-header">
+							<div class="comment-avatar">
+								<a target="_blank" href="<%:=API.Common.getUserUrl(API.Common.getCommentUser(comment).uin)%>">
+									<img src="<%:=API.Common.getUserLogoLocalUrl(API.Common.getCommentUser(comment).uin, true)%>" alt="avatar">
+								</a>
+							</div>
+							<div class="comment-info">
+								<div>
+									<a class="comment-author" target="_blank" href="<%:=API.Common.getUserUrl(API.Common.getCommentUser(comment).uin)%>">
+										<%:=API.Common.formatContent(API.Common.getCommentUser(comment).name, 'HTML', false, false, false, false, true)%>
+									</a>
+									<span class="comment-floor">#<%:=index + 1 %></span>
+									<%if(comment.private){%>
+										<span class="comment-private">私密评论</span>
+									<%}%>
+								</div>
+								<div class="comment-time">
+									<i class="fa fa-clock-o mr-1"></i><%:=API.Utils.formatDate(comment.postTime || comment.create_time)%>
+								</div>
+							</div>
+						</div>
+						<div class="comment-body">
+							<p><%:=API.Common.formatContent(comment.content, 'HTML', false, false, false, false, true)%></p>
+							<%if(comment.pic){%>
+								<div class="comment-lightgallery">
+									<%for (let cmIdx = 0; cmIdx < comment.pic.length; cmIdx++) {%>
+										<%const image = comment.pic[cmIdx];%>
+										<img src="<%:=(image.custom_filepath || image.custom_url || image.o_url || image.hd_url || image.b_url || image.s_url || image.url)%>" class="comment-img">
+									<%}%>
+								</div>
+							<%}%>
+						</div>
+						<% const replies = comment.replies || comment.list_3 || []%>
+						<%if(replies.length > 0){%>
+							<div class="reply-list">
+								<%for(const reply of replies){%>
+									<div class="reply-card">
+										<div class="reply-header">
+											<div class="reply-avatar">
+												<a target="_blank" href="<%:=API.Common.getUserUrl(API.Common.getCommentUser(reply).uin)%>">
+													<img src="<%:=API.Common.getUserLogoLocalUrl(API.Common.getCommentUser(reply).uin, true)%>" alt="avatar">
+												</a>
+											</div>
+											<div class="reply-info">
+												<div>
+													<a class="comment-author" target="_blank" href="<%:=API.Common.getUserUrl(API.Common.getCommentUser(reply).uin)%>">
+														<%:=API.Common.formatContent(API.Common.getCommentUser(reply).name, 'HTML', false, false, false, false, true)%>
+													</a>
+													<%if(reply.private){%>
+														<span class="comment-private">私密回复</span>
+													<%}%>
+												</div>
+												<div class="comment-time">
+													<i class="fa fa-clock-o mr-1"></i><%:=API.Utils.formatDate(reply.postTime || reply.create_time)%>
+												</div>
+											</div>
+										</div>
+										<div class="reply-body">
+											<p><%:=API.Common.formatContent(reply.content, 'HTML', false, false, false, false, true)%></p>
+											<%if(reply.pic){%>
+												<div class="comment-lightgallery">
+													<%for (let cmIdx = 0; cmIdx < reply.pic.length; cmIdx++) {%>
+														<%const image = reply.pic[cmIdx];%>
+														<img src="<%:=(image.custom_filepath || image.custom_url || image.o_url || image.hd_url || image.b_url || image.s_url || image.url)%>" class="comment-img">
+													<%}%>
+												</div>
+											<%}%>
+										</div>
+									</div>
+								<%}%>
+							</div>
+						<%}%>
+					</div>
+				<%}%>
+			<%}else{%>
+				<div class="no-comments">
+					<i class="fa fa-comment-o"></i>
+					<p>暂无评论</p>
+				</div>
+			<%}%>
+		</div>
+	</script>
 	
 	<footer class="footer mt-auto py-3 page-footer blogs-footer">
 		<div class="container text-center">
@@ -693,7 +1038,7 @@
 				const replyNum = blog.replynum || 0;
 				const isRepost = isRepostBlog(blog);
 				
-				html += '<a href="info.html?blogId=' + blogId + '" class="blog-card">';
+				html += '<div class="blog-card" data-blog-id="' + blogId + '" style="cursor: pointer;">';
 				
 				// 标签
 				html += '<div class="blog-labels">';
@@ -713,11 +1058,72 @@
 				html += '<span><i class="fa fa-comment"></i>' + replyNum + '</span>';
 				html += '</div>';
 				html += '</div>';
-				html += '</a>';
+				html += '</div>';
 			});
 			
 			$('#blogs-grid').html(html);
 		}
+		
+		// 解析正文：优先 base64 编码的 custom_html，回退 content
+		function getBlogContent(blog) {
+			if (blog.custom_html && typeof API !== 'undefined' && API.Utils && API.Utils.base64ToUtf8) {
+				try {
+					return $('<div></div>').html(API.Utils.base64ToUtf8(blog.custom_html)).html();
+				} catch (e) {
+					// 解析失败回退
+				}
+			}
+			return blog.content || '';
+		}
+		
+		// 打开日志详情弹窗
+		function showBlog(blogId) {
+			const blog = allBlogs.find(b => String(b.blogid || b.blogId) === String(blogId));
+			if (!blog) return;
+			
+			const title = blog.custom_title || blog.title || '无标题';
+			const category = blog.category || '未分类';
+			const pubTime = formatBlogDate(blog.pubTime, blog.pubtime);
+			const viewCount = (blog.custom_visitor && blog.custom_visitor.viewCount) || 0;
+			const replyNum = blog.replynum || 0;
+			const isRepost = isRepostBlog(blog);
+			const content = getBlogContent(blog);
+			
+			$('#blogModalTitle').text(title);
+			$('#blogModalContent').html(content || '<p class="text-muted">暂无内容</p>');
+			$('#blogModalMeta').html(
+				'<i class="fa fa-tag mr-1"></i>' + (isRepost ? '转载' : '原创') + ' · ' +
+				'<i class="fa fa-folder-o mr-1"></i>' + category + ' · ' +
+				'<i class="fa fa-clock-o mr-1"></i>' + pubTime + ' · ' +
+				'<i class="fa fa-eye mr-1"></i>' + viewCount + ' · ' +
+				'<i class="fa fa-comment mr-1"></i>' + replyNum
+			);
+			
+			// 渲染评论区
+			renderBlogComments(blog);
+			
+			$('#blogModal').modal('show');
+		}
+		
+		// 渲染评论区
+		function renderBlogComments(blog) {
+			const $container = $('#blogModalComments');
+			// 依赖缺失时降级为空
+			if (typeof template !== 'function' || typeof API === 'undefined' || !API.Common) {
+				$container.empty();
+				return;
+			}
+			try {
+				const tpl = document.getElementById('blog_comments_tpl').innerHTML;
+				$container.html(template(tpl, { blog: blog }));
+			} catch (e) {
+				console.warn('评论区渲染失败', e);
+				$container.empty();
+			}
+		}
+		
+		// 暴露给表格视图行内调用
+		window.showBlog = showBlog;
 		
 		// 筛选和排序
 		function filterAndSort() {
@@ -759,6 +1165,11 @@
 			$(this).addClass('active');
 			currentCategory = $(this).data('category');
 			filterAndSort();
+		});
+		
+		// 卡片点击打开详情弹窗
+		$(document).on('click', '.blog-card', function() {
+			showBlog($(this).data('blog-id'));
 		});
 		
 		// 排序点击

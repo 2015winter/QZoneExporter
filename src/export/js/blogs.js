@@ -29,7 +29,8 @@ API.Blogs.showTableList = function() {
         widthUnit: "%",
         sortable: true,
         formatter: (value, row) => {
-            return '<a href="info.html?blogId={0}" >{1}</a> '.format(row.blogid || row.blogId, value);
+            // 点击标题打开详情弹窗；stopPropagation 阻止触发行选中
+            return '<a href="javascript:void(0);" onclick="event.stopPropagation(); showBlog(\'{0}\');">{1}</a> '.format(row.blogid || row.blogId, value);
         }
     }, {
         field: 'category',

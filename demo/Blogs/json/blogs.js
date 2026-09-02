@@ -24,9 +24,33 @@ var blogs = [
 <p>感谢大学四年遇到的每一个人，是你们让我的青春如此精彩。未来的路还很长，但我会带着这份回忆，勇敢前行。</p>
 
 <p><em>愿我们都能成为更好的自己。</em></p>`,
-        replynum: 12,
+        replynum: 3,
         effect: 0,
-        custom_visitor: { viewCount: 856 }
+        custom_visitor: { viewCount: 856 },
+        comments: [
+            {
+                name: "老同学",
+                time: "2024-03-01 12:30:00",
+                content: "写得太真实了，仿佛看到了自己的大学时光，满满的回忆杀！",
+                replies: [
+                    {
+                        name: "博主",
+                        time: "2024-03-01 13:00:00",
+                        content: "哈哈，青春不散场，常回来看看～"
+                    }
+                ]
+            },
+            {
+                name: "小林",
+                time: "2024-03-02 09:15:00",
+                content: "军训那段太有共鸣了，站军姿的日子一辈子忘不了。"
+            },
+            {
+                name: "阿May",
+                time: "2024-03-02 20:40:00",
+                content: "愿我们都能成为更好的自己，共勉！"
+            }
+        ]
     },
     {
         blogid: "blog002",
@@ -58,9 +82,28 @@ var blogs = [
 
 <h2>总结</h2>
 <p>编程是一项需要持续学习的技能，技术更新很快，但基础知识是相通的。只要保持学习的热情，就一定能取得进步。</p>`,
-        replynum: 8,
+        replynum: 2,
         effect: 0,
-        custom_visitor: { viewCount: 1234 }
+        custom_visitor: { viewCount: 1234 },
+        comments: [
+            {
+                name: "编程小白",
+                time: "2024-02-15 16:00:00",
+                content: "受教了，正准备入门，请问 JavaScript 有推荐的学习资料吗？",
+                replies: [
+                    {
+                        name: "博主",
+                        time: "2024-02-15 18:20:00",
+                        content: "可以先从 MDN 文档 + 小项目练手开始，边写边学效果最好。"
+                    }
+                ]
+            },
+            {
+                name: "Coder_Wang",
+                time: "2024-02-16 10:05:00",
+                content: "「编程最重要的是动手实践」这句话说到点子上了！"
+            }
+        ]
     },
     {
         blogid: "blog003",
@@ -92,7 +135,7 @@ var blogs = [
     <li>《人类简史》- 尤瓦尔·赫拉利</li>
     <li>《思考，快与慢》- 丹尼尔·卡尼曼</li>
 </ul>`,
-        replynum: 5,
+        replynum: 0,
         effect: 1,
         custom_visitor: { viewCount: 567 }
     },
@@ -122,7 +165,7 @@ var blogs = [
 </ul>
 
 <p>期待下次的旅行！</p>`,
-        replynum: 15,
+        replynum: 0,
         effect: 0,
         custom_visitor: { viewCount: 2048 }
     },
@@ -153,7 +196,7 @@ var blogs = [
 </ul>
 
 <p>如果你还没看过这部电影，强烈推荐！</p>`,
-        replynum: 22,
+        replynum: 0,
         effect: 0,
         custom_visitor: { viewCount: 1567 }
     }
