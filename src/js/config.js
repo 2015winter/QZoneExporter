@@ -42,8 +42,8 @@ const Default_Config = {
         tryFixDeprecatedUrls: false,
         // 自动识别文件后缀
         isAutoFileSuffix: true,
-        // 后缀识别超时秒数
-        autoFileSuffixTimeOut: 30,
+        // 后缀识别超时秒数（仅读取响应头判断类型，无需下载文件，过大会拖慢整体导出）
+        autoFileSuffixTimeOut: 8,
         // 迅雷任务数        
         thunderTaskNum: 1500,
         // 唤起迅雷间隔        
@@ -349,6 +349,7 @@ const Default_Config = {
             max: 2
         },
         showType: '1', // HTML查看方式，0:表格视图，1:列表视图
+        concurrentNum: 5, // 好友互动/空间权限的并发请求数
         Interactive: true, // 是否获取好友互动信息，如亲密度、添加时间、共同好友、共同群组等
         ZoneAccess: true, // 是否判断空间权限
         SpecialCare: true, // 是否获取特别关心

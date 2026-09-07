@@ -620,18 +620,34 @@ API.Blogs.handerContentImages = async(item, images) => {
     }
     // 导出类型
     const exportType = QZone_Config.Blogs.exportType;
+
+    // 收集图片信息（保持原始顺序）
+    const imgInfos = [];
     for (let i = 0; i < images.length; i++) {
         const $img = $(images[i]);
         // 处理相对协议
         let url = $img.attr('orgsrc') || $img.attr('src');
         url = API.Utils.toHttp(url);
+        imgInfos.push({ $img: $img, url: url });
+    }
+
+    // 阶段一：并发识别图片后缀（只读操作，避免逐张 HEAD 请求串行阻塞）
+    if (!API.Common.isQzoneUrl()) {
+        await Promise.all(imgInfos.map(async(info) => {
+            info.suffix = await API.Utils.autoFileSuffix(info.url);
+        }));
+    }
+
+    // 阶段二：按原始顺序改写 DOM 并添加下载任务
+    for (let i = 0; i < imgInfos.length; i++) {
+        const $img = imgInfos[i].$img;
+        let url = imgInfos[i].url;
 
         // 添加下载任务
         if (!API.Common.isQzoneUrl()) {
             // 非QQ空间外链
             const uid = API.Utils.newSimpleUid(8, 16);
-            const suffix = await API.Utils.autoFileSuffix(url);
-            const custom_filename = uid + suffix;
+            const custom_filename = uid + (imgInfos[i].suffix || '');
 
             // 添加下载任务
             API.Utils.newDownloadTask('Blogs', url, 'Blogs/images', custom_filename, item);

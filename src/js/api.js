@@ -335,39 +335,6 @@ API.Utils = {
     /**
      * 获取文件类型
      * @param {string} url 文件URL
-     * @param {funcation} doneFun 回调函数
-     */
-    getMimeTypeOnContent(url) {
-        return new Promise(function(resolve, reject) {
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', url, true);
-            // 超时设置
-            xhr.timeout = (QZone_Config.Common.autoFileSuffixTimeOut || 20) * 1000;
-            xhr.onreadystatechange = function() {
-                if (2 == xhr.readyState) {
-                    let contentType = xhr.getResponseHeader('content-type') || xhr.getResponseHeader('Content-Type') || '';
-                    let suffix = '';
-                    if (contentType.indexOf('/') > -1) {
-                        suffix = contentType.split('/')[1];
-                    }
-                    this.abort();
-                    resolve(suffix);
-                }
-            }
-            xhr.onerror = function(e) {
-                reject(e);
-            }
-            xhr.ontimeout = function(e) {
-                this.abort();
-                reject(e);
-            }
-            xhr.send();
-        });
-    },
-
-    /**
-     * 获取文件类型
-     * @param {string} url 文件URL
      */
     getMimeType(url) {
         return new Promise(function(resolve, reject) {
@@ -427,7 +394,8 @@ API.Utils = {
      */
     async autoFileSuffix(url) {
         let suffix = API.Utils.getFileSuffixByUrl(url);
-        if (!QZone_Config.Common.isAutoFileSuffix) {
+        if (!QZone_Config.Common.isAutoFileSuffix || suffix) {
+            // 已关闭识别或 URL 可直接解析出后缀时直接返回，避免额外的 HEAD 请求
             return suffix;
         }
         // 转换HTTPS
@@ -866,7 +834,18 @@ API.Utils = {
      * @param {integer} ms 毫秒
      */
     sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms))
+        const start = Date.now();
+        return new Promise(resolve => setTimeout(function() {
+            // 系统休眠检测：实际等待远超预期（超过 5 倍且多出 30 秒以上）时，累计疑似休眠时长
+            const actual = Date.now() - start;
+            const overshoot = actual - ms;
+            if (ms > 0 && actual > ms * 5 && overshoot > 30000) {
+                try {
+                    QZone.Common.SuspendMs = (QZone.Common.SuspendMs || 0) + overshoot;
+                } catch (e) {}
+            }
+            resolve();
+        }, ms))
     },
 
     /**

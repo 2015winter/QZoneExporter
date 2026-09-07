@@ -274,6 +274,77 @@
     color: var(--pm-muted);
 }
 
+#progressModal .backup-cost {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--pm-success-border);
+}
+
+#progressModal .backup-cost-head {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--pm-muted);
+    margin-bottom: 8px;
+}
+
+#progressModal .backup-cost-warn {
+    margin-bottom: 10px;
+    padding: 8px 10px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #92600a;
+    background: #fff7e6;
+    border: 1px solid #ffe0a3;
+    border-left: 3px solid #f0a020;
+    border-radius: var(--pm-radius-sm);
+}
+
+#progressModal .backup-cost-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+#progressModal .cost-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 3px 0;
+}
+
+#progressModal .cost-name {
+    flex: 0 0 84px;
+    font-size: 12.5px;
+    color: var(--pm-text, #374151);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#progressModal .cost-bar {
+    flex: 1 1 auto;
+    height: 8px;
+    border-radius: 4px;
+    background: var(--pm-border);
+    overflow: hidden;
+}
+
+#progressModal .cost-bar > i {
+    display: block;
+    height: 100%;
+    border-radius: 4px;
+    background: var(--pm-primary-grad);
+}
+
+#progressModal .cost-time {
+    flex: 0 0 auto;
+    min-width: 52px;
+    text-align: right;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    color: var(--pm-muted);
+}
+
 #progressModal #InitIncrement_Tips:not(:empty) {
     margin: 0 0 10px;
     font-size: 13px;

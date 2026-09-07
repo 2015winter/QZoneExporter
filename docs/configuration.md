@@ -66,6 +66,34 @@ Aria2 是推荐的下载方式，v3.0 版本新增了队列控制功能：
 
 > 💡 **Motrix 用户：** Motrix 内置 Aria2，RPC 地址为 `http://127.0.0.1:16800/jsonrpc`，密钥在 Motrix 设置中查看
 
+#### 突破 Motrix 的 10 并发上限
+
+Motrix 稳定版（1.x，含最新 1.8.19）在界面上将「同时下载的最大任务数」**上限锁定为 10**，这是其界面刻意施加的限制，任何稳定版本都无法在界面中调至更高。底层 Aria2 引擎的 `max-concurrent-downloads` 本身并无此上限（默认 5，可自定义为任意值）。
+
+当备份包含**大量小文件**（如相册图片）时，可通过以下两种方式突破该限制以提升下载消化速度：
+
+**方式一（推荐）：使用独立 Aria2 替代 Motrix**
+
+本助手通过 Aria2 RPC 提交下载任务，Motrix 仅是带界面的 Aria2 封装。可直接运行独立的 Aria2 实例，并发数完全自定义：
+
+```bash
+brew install aria2   # macOS 示例，其他平台请参考 Aria2 官方文档
+
+aria2c --enable-rpc --rpc-listen-all=false \
+  --rpc-listen-port=16800 \
+  --max-concurrent-downloads=64 \
+  --max-connection-per-server=16 \
+  --continue=true
+```
+
+随后在助手选项中将 Aria2 RPC 地址指向 `http://localhost:16800/jsonrpc`（与默认端口一致）即可。
+
+**方式二：修改 Motrix 引擎配置**
+
+Motrix 将并发数持久化在其数据目录（macOS 位于 `~/Library/Application Support/Motrix/` 下的配置文件，字段为 `max-concurrent-downloads`）。手动改为更高数值后，**请勿再从界面点击保存**，否则会被界面重新限制回 10。此方式较不稳定，建议优先采用方式一。
+
+> ⚠️ **已知限制（[Motrix Issue #1585](https://github.com/agalwood/Motrix/issues/1585)）：** 通过 RPC 提交任务时，Motrix 界面中的「每台服务器最大连接数」等设置对 RPC 任务不一定生效，实际以引擎全局配置为准。这也是推荐使用独立 Aria2 的原因。
+
 #### 迅雷说明
 
 > ⚠️ **V3 版本变更：** 由于 Manifest V3 限制，迅雷下载方式已改为**链接复制模式**，不再支持自动唤起迅雷。使用时需要手动将链接粘贴到迅雷中。

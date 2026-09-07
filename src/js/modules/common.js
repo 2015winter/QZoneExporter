@@ -1124,9 +1124,9 @@ API.Common.downloadByAria2 = async(tasks) => {
             await API.Utils.waitForAria2QueueSlot(maxWaiting, checkInterval);
         }
         
-        for (let j = 0; j < list.length; j++) {
-            const task = list[j];
-            await API.Utils.downloadByAria2(task).then((result) => {
+        // 同批任务并发提交至 Aria2；addUri 为轻量 RPC，串行往返是主要耗时来源
+        await Promise.all(list.map(task =>
+            API.Utils.downloadByAria2(task).then((result) => {
                 if (result.error) {
                     console.error('添加到Aria2异常', result, task);
                     task.setState('interrupted');
@@ -1141,7 +1141,7 @@ API.Common.downloadByAria2 = async(tasks) => {
                 task.setState('interrupted');
                 indicator.addFailed(task);
             })
-        }
+        ));
         
         // 定期清理卡住的任务
         batchCount++;
@@ -1157,8 +1157,9 @@ API.Common.downloadByAria2 = async(tasks) => {
             }
         }
         
-        // 等待指定秒数再继续添加
-        await API.Utils.sleep((QZone_Config.Common.downloadSleep || 1) * 1000);
+        // 批次间隔：启用队列控制时已按 Aria2 队列长度动态节流，此处仅作轻微间隔
+        const batchSleep = enableQueueControl ? 300 : (QZone_Config.Common.downloadSleep || 1) * 1000;
+        await API.Utils.sleep(batchSleep);
     }
     
     // 最后再清理一次卡住的任务
@@ -1438,10 +1439,10 @@ API.Common.isPreBackupPos = (new_items, moduleConfig) => {
     // 新获取到的最后一条数据
     const lastTime = API.Utils.parseDate(_.last(new_items)[field]);
 
-    // 情况一、第一条是符合增量时间的
-    // 情况二、最后一条是符合增量时间的
-    // 情况三、不是第一也不是最后
-    return firstTime <= incrementTime || incrementTime >= lastTime || (firstTime <= incrementTime && incrementTime >= lastTime);
+    // 数据从新到旧排列：firstTime 为最新、lastTime 为最旧
+    // 情况一、整页都早于增量时间（最新的一条都 <= 增量时间）
+    // 情况二、增量时间落在本页范围内（最旧的一条 <= 增量时间）
+    return firstTime <= incrementTime || incrementTime >= lastTime;
 }
 
 /**
@@ -1504,8 +1505,9 @@ API.Common.removeNewItems = (new_items, moduleConfig) => {
     for (let i = new_items.length - 1; i >= 0; i--) {
         const item = new_items[i];
         const time = API.Utils.parseDate(item[field]).getTime();
-        if (time < incrementTime) {
-            // 如果集合中的元素存在小于增量备份时间的，则移除
+        // 注意：边界（等于增量时间）的数据归属旧数据，避免与 removeOldItems 保留的边界数据重复
+        if (time <= incrementTime) {
+            // 如果集合中的元素存在小于等于增量备份时间的，则移除
             new_items.splice(i, 1);
             continue;
         }
@@ -1516,6 +1518,68 @@ API.Common.removeNewItems = (new_items, moduleConfig) => {
 }
 
 /**
+ * 获取备份条目的唯一标识，用于增量合并去重
+ * 优先使用原始 id 字段（tid/blogid/vid/picKey 等，新旧数据都稳定存在，保证键一致），
+ * 其次通用 id、派生 uniKey，最后对留言/访客等无单一 id 的数据使用 uin+time 复合键。
+ * 无法生成唯一键时返回 undefined（调用方应保留该条目，避免误删）。
+ * @param {object} item 备份条目
+ */
+API.Common.getUniqueKey = (item) => {
+    if (item == null) {
+        return undefined;
+    }
+    // 优先使用原始唯一 id 字段（新旧数据都稳定存在，保证键一致）
+    // 说说 tid、日志/日记 blogid、视频 vid/shuoshuoid、相片 picKey/lloc/sloc
+    const idFields = ['tid', 'blogid', 'blogId', 'vid', 'shuoshuoid', 'picKey', 'lloc', 'sloc'];
+    for (const field of idFields) {
+        if (item[field] != null && item[field] !== '') {
+            return field + ':' + item[field];
+        }
+    }
+    // 通用 id 字段（相册、留言、收藏、分享）
+    if (item.id != null && item.id !== '') {
+        return 'id:' + item.id;
+    }
+    // 派生的统一 uniKey（作为兜底）
+    if (item.uniKey != null && item.uniKey !== '') {
+        return 'uniKey:' + item.uniKey;
+    }
+    // 留言/访客等无单一 id，使用 uin + time 复合键
+    if (item.uin != null && item.time != null) {
+        return 'uin_time:' + item.uin + '_' + item.time;
+    }
+    return undefined;
+}
+
+/**
+ * 按唯一标识去重，保留首次出现的条目（合并时新数据在前，优先保留新数据）
+ * 无法生成唯一键的条目原样保留，避免误删
+ * @param {Array} items 条目列表
+ */
+API.Common.dedupItems = (items) => {
+    if (_.isEmpty(items)) {
+        return items;
+    }
+    const seen = new Set();
+    const result = [];
+    for (const item of items) {
+        const key = API.Common.getUniqueKey(item);
+        if (key === undefined) {
+            // 无法生成唯一键，保留该条目
+            result.push(item);
+            continue;
+        }
+        if (seen.has(key)) {
+            // 已存在，跳过重复项
+            continue;
+        }
+        seen.add(key);
+        result.push(item);
+    }
+    return result;
+}
+
+/**
  * 合并已备份数据
  * @param {object} moduleConfig 模块配置
  * @param {Array} old_items 已备份数据
@@ -1523,8 +1587,8 @@ API.Common.removeNewItems = (new_items, moduleConfig) => {
  */
 API.Common.unionBackedUpItems = (moduleConfig, old_items, new_items) => {
     if (_.isEmpty(old_items)) {
-        // 如果已备份数据为空，直接返回新数据
-        return new_items;
+        // 如果已备份数据为空，直接返回新数据（仍需去重，避免同次抓取产生重复）
+        return API.Common.dedupItems(new_items);
     }
     // 移除已备份数据中不符合条件的数据
     old_items = API.Common.removeOldItems(old_items, moduleConfig);
@@ -1532,8 +1596,8 @@ API.Common.unionBackedUpItems = (moduleConfig, old_items, new_items) => {
     // 移除新数据中不符合条件的数据
     new_items = API.Common.removeNewItems(new_items, moduleConfig);
 
-    // 合并新老数据
-    return API.Utils.unionItems(new_items, old_items);
+    // 合并新老数据（新数据在前），并按唯一标识去重，优先保留新数据
+    return API.Common.dedupItems(API.Utils.unionItems(new_items, old_items));
 }
 
 /**
@@ -1561,7 +1625,7 @@ API.Common.saveBackupItems = () => {
 
         for (const moduleName of MODULE_NAME_LIST) {
 
-            if (QZone_Config[moduleName].IncrementType === 'Last') {
+            if (QZone_Config[moduleName].IncrementType === 'LastTime') {
                 // 备份方式为上次备份时，配置的备份时间，刷新为当前时间
                 QZone_Config[moduleName].IncrementTime = API.Utils.formatDate(Date.now() / 1000);
             }

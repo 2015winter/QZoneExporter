@@ -649,6 +649,80 @@ const MAX_MSG = {
 }
 
 /**
+ * 采集步骤耗时统计的中文名映射（key 为 StatusIndicator 的 type）
+ * 未命中时回退为原始 type，便于定位耗时较长的步骤
+ */
+const STEP_COST_NAME_MAPS = {
+    // 说说
+    Messages: '说说列表',
+    Messages_Full_Content: '说说全文',
+    Messages_More_Images: '说说多图',
+    Messages_Voices: '说说语音',
+    Messages_Comments: '说说评论',
+    Messages_Like: '说说点赞',
+    Messages_Visitor: '说说访客',
+    Messages_Images_Mime: '说说媒体入队',
+    // 日志
+    Blogs: '日志列表',
+    Blogs_Content: '日志正文',
+    Blogs_Comments: '日志评论',
+    Blogs_Like: '日志点赞',
+    Blogs_Visitor: '日志访客',
+    // 日记
+    Diaries: '日记列表',
+    Diaries_Content: '日记正文',
+    Diaries_Comments: '日记评论',
+    Diaries_Like: '日记点赞',
+    Diaries_Visitor: '日记访客',
+    // 相册
+    Photos_Album: '相册列表',
+    Photos_Images: '相片列表',
+    Photos_Images_Info: '相片详情',
+    Photos_Comments: '相册评论',
+    Photos_Images_Comments: '相片评论',
+    Photos_Like: '相册点赞',
+    Photos_Visitor: '相册访客',
+    // 其它模块
+    Videos: '视频列表',
+    Boards: '留言列表',
+    Friends: '好友列表',
+    Friends_Time: '好友互动',
+    Friends_Access: '好友空间权限',
+    Friends_Care: '好友特别关心',
+    Favorites: '收藏列表',
+    Shares: '分享列表',
+    Visitors: '访客列表',
+    // 下载与收尾
+    Common_Aria2: '下载任务(Aria2)'
+};
+
+/**
+ * 获取步骤的展示名称
+ * @param {string} type StatusIndicator 的 type
+ */
+const getStepCostName = (type) => {
+    if (STEP_COST_NAME_MAPS[type]) {
+        return STEP_COST_NAME_MAPS[type];
+    }
+    // 回退：去掉 _Row_Infos 等后缀并把下划线转空格，尽量可读
+    return String(type || '').replace(/_/g, ' ');
+};
+
+/**
+ * 格式化耗时（毫秒 -> 可读文本）
+ * @param {number} ms 毫秒
+ */
+const formatStepCost = (ms) => {
+    const sec = ms / 1000;
+    if (sec >= 60) {
+        const m = Math.floor(sec / 60);
+        const s = Math.round(sec % 60);
+        return m + ' 分 ' + s + ' 秒';
+    }
+    return sec.toFixed(1) + ' 秒';
+};
+
+/**
  * 备份进度
  */
 class StatusIndicator {
@@ -671,6 +745,8 @@ class StatusIndicator {
         this.downloadFailed = 0
         this.skip = 0;
         this.skipUnsupported = 0; // 跳过不支持格式的数量
+        // 记录本步骤开始时间，complete() 时统计耗时
+        this.startTime = Date.now();
     }
 
     /**
@@ -713,6 +789,17 @@ class StatusIndicator {
         if ($tip_dom.is('details') && this.id !== 'Common_Row_Infos_Tips') {
             // 收起：直接移除 open 属性，避免模拟点击带来的副作用
             $tip_dom.removeAttr('open');
+        }
+
+        // 按 type 累计各步骤耗时，供采集完成后展示耗时明细；异常不影响主流程
+        try {
+            if (this.startTime) {
+                const cost = Date.now() - this.startTime;
+                QZone.Common.StepCosts = QZone.Common.StepCosts || {};
+                QZone.Common.StepCosts[this.type] = (QZone.Common.StepCosts[this.type] || 0) + cost;
+            }
+        } catch (e) {
+            console.warn('记录步骤耗时失败：', this.type, e);
         }
 
         $("#progressModal .modal-body").animate({ scrollTop: 1000 });
@@ -980,6 +1067,9 @@ class QZoneOperator {
             case OperatorType.SHOW:
                 // 记录采集起始时间，用于统计总耗时
                 QZone.Common.startTime = Date.now();
+                // 重置每步耗时统计与疑似休眠时长
+                QZone.Common.StepCosts = {};
+                QZone.Common.SuspendMs = 0;
                 // 显示模态对话框
                 await this.showProcess();
                 // 初始化FS文件夹
@@ -1139,12 +1229,53 @@ class QZoneOperator {
                         cells += '<div class="summary-cell"><span class="summary-val">' + fileCount + '</span><span class="summary-label">媒体文件</span></div>';
                     }
 
+                    // 生成耗时明细（耗时最长的若干步骤），用于定位瓶颈
+                    let costDetailHtml = '';
+                    const stepCosts = QZone.Common.StepCosts || {};
+                    // Friends 进度器包裹互动、权限、关心等子步骤，耗时与子步骤重叠，故予以排除
+                    const WRAPPED_STEPS = new Set(['Friends']);
+                    const costList = Object.keys(stepCosts)
+                        // 排除模块级汇总（_Row_Infos 后缀、包裹型步骤，会与子步骤耗时重叠）与极短步骤
+                        .filter(type => !/_Row_Infos$/.test(type) && !WRAPPED_STEPS.has(type) && stepCosts[type] >= 500)
+                        .map(type => ({ name: getStepCostName(type), cost: stepCosts[type] }))
+                        .sort((a, b) => b.cost - a.cost)
+                        .slice(0, 8);
+                    // 系统休眠提示：休眠时间会计入当时正在执行的步骤，使该步骤耗时偏高
+                    let suspendNote = '';
+                    const suspendMs = QZone.Common.SuspendMs || 0;
+                    if (suspendMs > 60000) {
+                        suspendNote = '<div class="backup-cost-warn">⚠ 备份期间检测到系统休眠约 ' + formatStepCost(suspendMs) +
+                            '，该时间会计入上方对应步骤（多为耗时最长的一项），并非实际处理耗时。建议插电并防止息屏后重试。</div>';
+                    }
+
+                    let rows = '';
+                    if (costList.length > 0) {
+                        const maxCost = costList[0].cost || 1;
+                        rows = costList.map(c => {
+                            const percent = Math.max(4, Math.round(c.cost / maxCost * 100));
+                            return '<li class="cost-row">' +
+                                '<span class="cost-name">' + c.name + '</span>' +
+                                '<span class="cost-bar"><i style="width:' + percent + '%"></i></span>' +
+                                '<span class="cost-time">' + formatStepCost(c.cost) + '</span>' +
+                                '</li>';
+                        }).join('');
+                    }
+
+                    if (rows || suspendNote) {
+                        costDetailHtml = '<div class="backup-cost">' +
+                            '<div class="backup-cost-head">耗时明细（最慢步骤）</div>' +
+                            suspendNote +
+                            (rows ? '<ul class="backup-cost-list">' + rows + '</ul>' : '') +
+                            '</div>';
+                    }
+
                     const summaryHtml = '<div id="backupSummary" class="backup-summary">' +
                         '<div class="backup-summary-head">' +
                         '<span class="backup-summary-title">采集完成</span>' +
                         (costText ? '<span class="backup-summary-time">用时 ' + costText + '</span>' : '') +
                         '</div>' +
                         (cells ? '<div class="backup-summary-grid">' + cells + '</div>' : '') +
+                        costDetailHtml +
                         '</div>';
 
                     $('#backupSummary').remove();

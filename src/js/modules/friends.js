@@ -146,15 +146,9 @@ API.Friends.getFriendsTime = async(data, friends) => {
     const indicator = new StatusIndicator('Friends_Time');
     indicator.setTotal(friends.length);
 
-    // 将QQ分组进行分组
-    let groups = data.gpnames;
-    let groupMap = new Map();
-    for (const group of groups) {
-        groupMap.set(group.gpid, group.gpname);
-    }
-    // 遍历
+    // 分离出需要请求的好友：自己或非新好友（增量）直接跳过
+    const newFriends = [];
     for (const friend of friends) {
-        // 设置默认值
         friend.isMe = friend.uin === QZone.Common.Owner.uin;
         if (friend.isMe || !API.Friends.isNewItem(friend)) {
             // 好友号为自己号或非新好友，跳过
@@ -166,16 +160,22 @@ API.Friends.getFriendsTime = async(data, friends) => {
             indicator.addSkip(friend);
             continue;
         }
-        await API.Friends.getFriendshipTime(friend.uin).then((data) => {
+        newFriends.push(friend);
+    }
+
+    // 获取单个好友互动信息，异常在内部捕获，避免中断整批并发请求
+    const fetchOne = async(friend) => {
+        try {
+            let resp = await API.Friends.getFriendshipTime(friend.uin);
             // JSON转换
-            data = API.Utils.toJson(data, /^_Callback\(/);
-            if (data.code && data.code != 0) {
-                console.warn('获取互动信息异常：', friend, data);
-                indicator.addFailed(friend);
+            resp = API.Utils.toJson(resp, /^_Callback\(/);
+            const isErr = resp.code && resp.code != 0;
+            if (isErr) {
+                console.warn('获取互动信息异常：', friend, resp);
             }
 
             // 互动信息
-            const infoData = data = data.data || {};
+            const infoData = resp.data || {};
 
             // 添加时间
             friend.addFriendTime = infoData['addFriendTime'] || 0;
@@ -183,24 +183,34 @@ API.Friends.getFriendsTime = async(data, friends) => {
             friend.isFriend = infoData['isFriend'] || -1;
             // 亲密度
             friend.intimacyScore = infoData['intimacyScore'] || 0;
-
             // 共同信息(共同好友，共同群组)
             friend.common = infoData['common'] || {};
 
-            // 成功
-            indicator.addSuccess(friend);
-        }).catch((e) => {
+            if (isErr) {
+                indicator.addFailed(friend);
+            } else {
+                indicator.addSuccess(friend);
+            }
+        } catch (e) {
             // 失败
             indicator.addFailed(friend);
             console.error("获取好友添加时间异常", friend, e);
-        })
+        }
+    };
 
-        // 等待一下再请求
-        const min = QZone_Config.Friends.randomSeconds.min;
-        const max = QZone_Config.Friends.randomSeconds.max;
-        const seconds = API.Utils.randomSeconds(min, max);
-        await API.Utils.sleep(seconds * 1000);
+    // 分批并发处理，批次间保留随机间隔以控制请求频率
+    const concurrentNum = QZone_Config.Friends.concurrentNum || 5;
+    const chunks = _.chunk(newFriends, concurrentNum);
+    for (let i = 0; i < chunks.length; i++) {
+        await Promise.all(chunks[i].map(fetchOne));
+        if (i < chunks.length - 1) {
+            const min = QZone_Config.Friends.randomSeconds.min;
+            const max = QZone_Config.Friends.randomSeconds.max;
+            const seconds = API.Utils.randomSeconds(min, max);
+            await API.Utils.sleep(seconds * 1000);
+        }
     }
+
     // 完成
     indicator.complete();
     return friends;
@@ -425,32 +435,46 @@ API.Friends.getZoneAccessList = async(friends) => {
     const indicator = new StatusIndicator('Friends_Access');
     indicator.setTotal(friends.length);
 
-    // 遍历
+    // 分离出需要请求的好友：自己或非新好友（增量）直接跳过
+    const newFriends = [];
     for (const friend of friends) {
         if (friend.isMe || !API.Friends.isNewItem(friend)) {
             indicator.addSkip(friend);
             continue;
         }
-        // 设置默认值
-        await API.Friends.getZoneAccess(friend.uin).then((data) => {
+        newFriends.push(friend);
+    }
+
+    // 获取单个好友空间访问权限，异常在内部捕获，避免中断整批并发请求
+    const fetchOne = async(friend) => {
+        try {
+            let resp = await API.Friends.getZoneAccess(friend.uin);
             // 转换JSON
-            data = API.Utils.toJson(data, /^_Callback\(/);
-            if (data.code && data.code != 0 && data.code != -4009) {
+            resp = API.Utils.toJson(resp, /^_Callback\(/);
+            if (resp.code && resp.code != 0 && resp.code != -4009) {
                 // 获取异常
-                console.warn('获取好友空间访问权限异常：', friend, data);
+                console.warn('获取好友空间访问权限异常：', friend, resp);
             }
 
-            // 状态码慰-4009表示无权限
-            friend.access = data.code !== -4009;
+            // 状态码为 -4009 表示无权限
+            friend.access = resp.code !== -4009;
 
             // 成功
             indicator.addSuccess(friend);
-        }).catch((e) => {
+        } catch (e) {
             // 失败
             indicator.addFailed(friend);
             console.error("获取好友空间权限异常", friend, e);
-        })
+        }
+    };
+
+    // 分批并发处理；该接口原本无请求间隔，故不额外增加批次等待
+    const concurrentNum = QZone_Config.Friends.concurrentNum || 5;
+    const chunks = _.chunk(newFriends, concurrentNum);
+    for (const chunk of chunks) {
+        await Promise.all(chunk.map(fetchOne));
     }
+
     // 完成
     indicator.complete();
     return friends;
