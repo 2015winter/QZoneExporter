@@ -1,18 +1,353 @@
+:root {
+    --qz-primary: #2f9e63;
+    --qz-primary-dark: #24824f;
+    --qz-primary-soft: #eef7f1;
+    --qz-primary-line: #cfe9d9;
+    --qz-text: #1f2329;
+    --qz-muted: #8a9099;
+    --qz-border: #ebedf0;
+    --qz-bg-soft: #f6f7f9;
+}
+
 body {
-    width: 450px;
-    padding: 20px;
+    width: 460px;
+    padding: 20px 22px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--qz-text);
+    background: #fff;
 }
 
-#export_albums_div .dropdown-header {
-    background-color: #dae0e5;
-    color: black;
-    font-size: medium;
-    text-align: center;
+h5 {
+    font-weight: 700;
+    font-size: 17px;
+    margin-bottom: 14px;
+    letter-spacing: .2px;
 }
 
-#export_albums_div .dropdown-item {
-    font-size: small;
+hr {
+    margin: 14px 0;
+    border-top-color: var(--qz-border);
+}
+
+/* 顶部账户信息区 */
+.qz-info {
+    background: var(--qz-bg-soft);
+    border: 1px solid var(--qz-border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+}
+
+.qz-info p {
+    margin: 0;
+    font-size: 13.5px;
+    line-height: 2;
+    color: #4e5969;
+}
+
+/* 分区小标题 */
+.qz-section-title {
+    font-weight: 600;
+    font-size: 15px;
+    margin: 0 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* 模块勾选区：等宽 4 列铺满，消除右侧空白 */
+.qz-modules {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px 8px;
+    margin-bottom: 12px;
+}
+
+.qz-modules .custom-control {
+    min-width: 0;
+    margin-right: 0;
+    padding-left: 1.7rem;
+}
+
+.qz-modules .custom-control-label,
+.qz-media-modules .custom-control-label {
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.qz-modules .custom-control-input:checked ~ .custom-control-label::before,
+.qz-media-modules .custom-control-input:checked ~ .custom-control-label::before {
+    background-color: var(--qz-primary);
+    border-color: var(--qz-primary);
+}
+
+/* 媒体导出内的两个勾选项：横向紧凑排列 */
+.qz-media-modules {
+    display: flex;
+    gap: 22px;
+    margin-bottom: 12px;
+}
+
+.qz-media-modules .custom-control {
+    padding-left: 1.7rem;
+}
+
+/* 提示文案 */
+.qz-tips {
+    font-size: 12.5px;
+    color: var(--qz-muted);
+    line-height: 1.75;
+    display: block;
+}
+
+.qz-tips a {
+    color: #e5484d;
+    cursor: pointer;
+}
+
+/* ============ 相册列表下拉框（bootstrap-select） ============ */
+#export_albums_div {
+    margin: 4px 0 2px;
+}
+
+#export_albums_div > label,
+#media_albums_div > label {
+    font-weight: 500;
+    color: #4e5969;
+}
+
+.bootstrap-select {
+    width: 100% !important;
+}
+
+/* 选择框按钮 */
+.bootstrap-select > .dropdown-toggle {
+    border: 1px solid #d5dae0 !important;
+    border-radius: 9px !important;
+    padding: 8px 14px;
+    background: #fff !important;
+    color: var(--qz-text) !important;
+    box-shadow: none !important;
+    font-size: 14px;
+    transition: border-color .15s, box-shadow .15s;
+}
+
+.bootstrap-select > .dropdown-toggle:hover {
+    border-color: var(--qz-primary) !important;
+}
+
+.bootstrap-select > .dropdown-toggle:focus,
+.bootstrap-select.show > .dropdown-toggle {
+    border-color: var(--qz-primary) !important;
+    box-shadow: 0 0 0 3px rgba(47, 158, 99, .15) !important;
+    outline: none !important;
+}
+
+.bootstrap-select > .dropdown-toggle.bs-placeholder {
+    color: var(--qz-muted) !important;
+}
+
+/* 下拉面板 */
+.bootstrap-select .dropdown-menu {
+    border: 1px solid var(--qz-border);
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(15, 18, 26, .16);
+    padding: 6px;
+    margin-top: 6px;
+    overflow: hidden;
+}
+
+.bootstrap-select .dropdown-menu .inner {
+    max-height: 240px !important;
+    overflow-y: auto;
+}
+
+.bootstrap-select .dropdown-menu .inner::-webkit-scrollbar {
+    width: 8px;
+}
+
+.bootstrap-select .dropdown-menu .inner::-webkit-scrollbar-thumb {
+    background: #d5dae0;
+    border-radius: 8px;
+}
+
+/* 面板顶部标题（data-header 选择相册） */
+.bootstrap-select .popover-header {
+    background: var(--qz-bg-soft);
+    color: var(--qz-text);
+    font-weight: 600;
+    font-size: 13.5px;
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin: -6px -6px 6px;
+    display: flex;
+    align-items: center;
+}
+
+.bootstrap-select .popover-header .close {
+    margin-left: auto;
+    font-size: 18px;
+    opacity: .5;
+}
+
+/* 搜索框 */
+.bootstrap-select .bs-searchbox {
+    padding: 2px 2px 8px;
+}
+
+.bootstrap-select .bs-searchbox .form-control {
+    border-radius: 8px;
+    border: 1px solid #d5dae0;
+    font-size: 13.5px;
+    padding: 7px 12px;
+    height: auto;
+    box-shadow: none;
+}
+
+.bootstrap-select .bs-searchbox .form-control:focus {
+    border-color: var(--qz-primary);
+    box-shadow: 0 0 0 3px rgba(47, 158, 99, .12);
+}
+
+/* 全选 / 取消全选 */
+.bootstrap-select .bs-actionsbox {
+    padding: 0 2px 8px;
+}
+
+.bootstrap-select .bs-actionsbox .btn-group button {
+    border-radius: 8px;
+    font-size: 12px;
+    padding: 6px 0;
+    background: var(--qz-bg-soft);
+    border: 1px solid var(--qz-border);
+    color: #4e5969;
+    transition: background .15s, color .15s;
+}
+
+.bootstrap-select .bs-actionsbox .btn-group button:hover {
+    background: var(--qz-primary-soft);
+    color: var(--qz-primary-dark);
+    border-color: var(--qz-primary-line);
+}
+
+/* 分类分组标题 */
+.bootstrap-select .dropdown-header {
+    color: var(--qz-muted);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .5px;
+    text-transform: none;
+    padding: 8px 12px 4px;
+}
+
+.bootstrap-select .dropdown-header .text-muted {
+    color: var(--qz-muted) !important;
+}
+
+/* 每个相册项 */
+.bootstrap-select .dropdown-item {
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
     color: #333538;
+    display: flex;
+    align-items: center;
+    transition: background .12s;
+}
+
+.bootstrap-select .dropdown-item:hover,
+.bootstrap-select .dropdown-item:focus {
+    background: var(--qz-bg-soft);
+}
+
+/* 项内文本容器：让文字占满、数量胶囊靠右 */
+.bootstrap-select .dropdown-item .text {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.bootstrap-select .dropdown-item.active,
+.bootstrap-select .dropdown-item.selected {
+    background: var(--qz-primary-soft);
+    color: var(--qz-primary-dark);
+    font-weight: 500;
+}
+
+.bootstrap-select .dropdown-item .check-mark {
+    color: var(--qz-primary);
+}
+
+/* 相册照片数量（data-subtext）显示为右侧胶囊 */
+.bootstrap-select .dropdown-item .text-muted,
+.bootstrap-select .dropdown-item small {
+    margin-left: auto;
+    padding: 1px 8px;
+    background: #eef0f2;
+    color: #6b7280 !important;
+    border-radius: 999px;
+    font-size: 11px;
+    flex: 0 0 auto;
+}
+
+.bootstrap-select .dropdown-item.selected small,
+.bootstrap-select .dropdown-item.active small {
+    background: var(--qz-primary-line);
+    color: var(--qz-primary-dark) !important;
+}
+
+/* ============ 一键导出媒体卡片 ============ */
+.qz-media-card {
+    background: var(--qz-bg-soft);
+    border: 1px solid var(--qz-border);
+    border-left: 3px solid var(--qz-primary);
+    border-radius: 12px;
+    padding: 15px 17px;
+    margin-top: 4px;
+}
+
+.qz-media-card .qz-section-title {
+    color: var(--qz-primary-dark);
+}
+
+/* 主按钮 */
+.btn-block-lg {
+    width: 100%;
+    padding: 11px 0;
+    font-weight: 600;
+    border-radius: 10px;
+    font-size: 15px;
+    transition: background .15s, border-color .15s, box-shadow .15s;
+}
+
+.btn-primary.btn-block-lg {
+    background: var(--qz-primary);
+    border-color: var(--qz-primary);
+    box-shadow: 0 4px 12px rgba(47, 158, 99, .22);
+}
+
+.btn-primary.btn-block-lg:hover {
+    background: var(--qz-primary-dark);
+    border-color: var(--qz-primary-dark);
+}
+
+/* 媒体导出按钮：与主备份按钮区分，采用描边风格更显“辅助操作” */
+.btn-success.btn-block-lg {
+    background: #fff;
+    border: 1px solid var(--qz-primary);
+    color: var(--qz-primary-dark);
+    box-shadow: none;
+}
+
+.btn-success.btn-block-lg:hover {
+    background: var(--qz-primary-soft);
+    border-color: var(--qz-primary-dark);
+    color: var(--qz-primary-dark);
 }
 
 .download_tool {

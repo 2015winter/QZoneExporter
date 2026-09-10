@@ -173,12 +173,18 @@
                 contents.push('</optgroup>');
             }
             let content = contents.join('\n');
-            let $export_albums = $('#export_albums');
-            $export_albums.empty();
-            $export_albums.append(content);
-            $export_albums.selectpicker('refresh');
-            // 默认选择全部相册
-            $export_albums.selectpicker('selectAll');
+            // 备份与媒体导出各自独立的相册选择框，分别填充相同选项
+            ['#export_albums', '#media_albums'].forEach((selector) => {
+                let $select = $(selector);
+                if (!$select.length) {
+                    return;
+                }
+                $select.empty();
+                $select.append(content);
+                $select.selectpicker('refresh');
+                // 默认选择全部相册
+                $select.selectpicker('selectAll');
+            });
         });
     }
 
@@ -202,17 +208,54 @@
         checkDiaries();
     });
 
-    // 相册选择事件
-    $("#Photos").change(function() {
-        let isCheck = $(this).prop('checked');
-        let $export_albums_div = $('#export_albums_div');
-        if (isCheck) {
-            $export_albums_div.show();
-        } else {
-            $export_albums_div.hide();
+    // 备份相册选择：仅在勾选“相册”模块时显示
+    const toggleAlbumSelector = function() {
+        $('#export_albums_div').toggle($("#Photos").prop('checked'));
+    };
+    $("#Photos").change(toggleAlbumSelector);
+    toggleAlbumSelector();
+
+    // 媒体导出相册选择：独立于备份，仅在勾选“相册照片”时显示
+    const toggleMediaAlbumSelector = function() {
+        $('#media_albums_div').toggle($("#media_photos").prop('checked'));
+    };
+    $("#media_photos").change(toggleMediaAlbumSelector);
+    toggleMediaAlbumSelector();
+
+    // 一键导出媒体到本地目录
+    $('#mediaExport').click(() => {
+        const includePhotos = $('#media_photos').prop('checked');
+        const includeVideos = $('#media_videos').prop('checked');
+        if (!includePhotos && !includeVideos) {
+            alert('请至少选择“相册照片”或“视频”其中一项');
+            return;
         }
+
+        // 媒体导出使用独立的相册选择，与备份互不影响；未选相册时导出全部
+        let _albums = [];
+        if (includePhotos) {
+            let albumValues = $('#media_albums').val() || [];
+            for (const albumId of albumValues) {
+                let index = window.albums ? window.albums.findIndex((obj) => obj.id === albumId) : -1;
+                if (index > -1) {
+                    _albums.push(window.albums[index]);
+                }
+            }
+        }
+
+        sendMessage({
+            from: 'popup',
+            subject: 'startMediaExport',
+            includePhotos: includePhotos,
+            includeVideos: includeVideos,
+            albums: _albums
+        }, (res) => {
+            console.info('媒体导出已启动', res);
+        });
+
+        // 关闭 popup，让用户在页面弹窗中选择文件夹并查看进度
+        window.close();
     });
-    $("#Photos").change();
 
     // 绑定备份按钮事件
     $('#backup').click(() => {

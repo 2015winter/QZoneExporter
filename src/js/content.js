@@ -2007,6 +2007,12 @@ const browserTasks = new Array();
                             operator.next(OperatorType.SHOW);
                             port.postMessage(QZone.Common.ExportTypes);
                             break;
+                        case 'startMediaExport':
+                            // 一键导出媒体（相册/视频）到本地目录，独立于常规备份流程
+                            QZone.Photos.Album.Select = request.albums || [];
+                            API.MediaExport.show(request);
+                            port.postMessage({ ok: true });
+                            break;
                         case 'initUin':
                             // 获取QQ号
                             let res = API.Utils.initUin();

@@ -299,6 +299,14 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
                         sendResponse(e);
                     });
                     return true;
+                case 'download_media':
+                    // 媒体一键导出：由后台跨域抓取文件，base64 回传内容脚本写盘（规避 MV3 内容脚本 CORS 限制）
+                    fetchMediaAsBase64(request.url).then((data) => {
+                        sendResponse(data);
+                    }).catch((e) => {
+                        sendResponse({ ok: false, error: String((e && e.message) || e) });
+                    });
+                    return true;
                 default:
                     console.warn('Background 接收到消息，但未识别类型！', request);
                     sendResponse(null);
@@ -415,6 +423,32 @@ const getMimeType = function(url, timeout) {
         }
     });
 }
+
+/**
+ * 由后台跨域抓取媒体文件并转为 base64
+ * background service worker 拥有 host 权限，可跨域 fetch，规避内容脚本的 CORS 限制；
+ * 结果以 base64 字符串回传（chrome.runtime 消息在低版本仅可靠传输 JSON，二进制走 base64 最稳）。
+ * @param {string} url 文件地址
+ * @returns {Promise<{ok:boolean, base64?:string, mime?:string, size?:number, error?:string}>}
+ */
+const fetchMediaAsBase64 = async function(url) {
+    const response = await fetch(url, { credentials: 'include' });
+    if (!response.ok) {
+        throw new Error('HTTP ' + response.status);
+    }
+    const buffer = await response.arrayBuffer();
+    const bytes = new Uint8Array(buffer);
+
+    // 分块转 base64，避免 String.fromCharCode 参数过多导致的栈溢出
+    let binary = '';
+    const chunkSize = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+        binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+    }
+    const base64 = btoa(binary);
+    const mime = response.headers.get('content-type') || 'application/octet-stream';
+    return { ok: true, base64: base64, mime: mime, size: bytes.length };
+};
 
 /**
  * 获取GeoJson (使用fetch替代XMLHttpRequest)

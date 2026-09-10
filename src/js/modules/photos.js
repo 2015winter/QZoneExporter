@@ -313,6 +313,9 @@ API.Photos.getAllAlbumList = async() => {
 
     await nextPage(0, indicator);
 
+    // 按相册ID去重，避免函数被多次调用时（如媒体导出与备份共用）重复累积相册
+    QZone.Photos.Album.Data = _.uniqBy(QZone.Photos.Album.Data, 'id');
+
     // 更新相册类别
     for (const album of QZone.Photos.Album.Data) {
         album.className = QZone.Photos.Class[album.classid] || '其他';

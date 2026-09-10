@@ -2012,7 +2012,10 @@ API.Utils = {
      * @param {string} e 
      */
     trimDownloadUrl(url) {
-        url = url || '';
+        // 非字符串入参归一化为空串，避免非法类型触发 indexOf 异常
+        if (typeof url !== 'string') {
+            url = '';
+        }
         if (url && url.indexOf("?t=5&") > 0) {
             url = url.replace("?t=5&", "?")
         } else if (url && url.indexOf("?t=5") > 0) {
@@ -2028,7 +2031,10 @@ API.Utils = {
      * @param {string} e 
      */
     makeDownloadUrl(url, isDownload) {
-        url = url || '';
+        // 非字符串入参归一化为空串，避免非法类型触发 indexOf 异常
+        if (typeof url !== 'string') {
+            url = '';
+        }
         var d = "save=1" + (isDownload ? '&d=1' : '');
         if (url && url.indexOf("?") > 0) {
             url = url + "&" + d
