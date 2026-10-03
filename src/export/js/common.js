@@ -305,7 +305,17 @@ API.Utils = {
      * @param {string} str base64字符串
      */
     base64ToUtf8(str) {
-        return decodeURIComponent(escape(atob(str)));
+        // 入参非字符串或为空时返回空字符串，避免 atob 接收无效参数抛出 DOMException
+        if (typeof str !== 'string' || str === '') {
+            return '';
+        }
+        try {
+            return decodeURIComponent(escape(atob(str)));
+        } catch (e) {
+            // 解码失败时返回空字符串，确保单条数据异常不影响页面渲染
+            console.warn('Base64解码失败，已忽略', e);
+            return '';
+        }
     },
 
     /**
@@ -390,7 +400,17 @@ API.Utils = {
      * @param {string} str base64字符串
      */
     base64ToUtf8(str) {
-        return decodeURIComponent(escape(atob(str)));
+        // 入参非字符串或为空时返回空字符串，避免 atob 接收无效参数抛出 DOMException
+        if (typeof str !== 'string' || str === '') {
+            return '';
+        }
+        try {
+            return decodeURIComponent(escape(atob(str)));
+        } catch (e) {
+            // 解码失败时返回空字符串，确保单条数据异常不影响页面渲染
+            console.warn('Base64解码失败，已忽略', e);
+            return '';
+        }
     },
 
     /**

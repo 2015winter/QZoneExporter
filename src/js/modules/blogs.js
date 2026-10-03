@@ -68,21 +68,22 @@ API.Blogs.getItemContent = async(item, retryCount = 3) => {
                 Object.assign(item, detailItem);
             }
 
-            // 获得网页中的日志正文
+            // 获取页面中的日志正文容器
             const $detailBlog = blogPage.find("#blogDetailDiv:first");
 
-            // 检查是否成功获取到内容
-            if (!$detailBlog.length || !$detailBlog.html()) {
-                throw new Error('日志内容为空');
-            }
-
-            // 是否为模板日志
+            // 处理模板日志正文
+            // 模板日志（样式日志）的正文内容存储于页面的 g_oBlogContent 变量中，而非 #blogDetailDiv 容器。
+            // 需在内容校验前将其回填至容器，否则后续的空内容校验会将所有模板日志误判为内容为空。
             if (API.Blogs.isTemplateBlog(item)) {
-                // 模板日志，日志内容在变量中
-                let tplContent = API.Blogs.readTemplateContent(blogPage);
-                if (tplContent) {
+                const tplContent = API.Blogs.readTemplateContent(blogPage);
+                if (tplContent && $detailBlog.length) {
                     $detailBlog.html(tplContent);
                 }
+            }
+
+            // 校验日志正文是否获取成功（模板日志正文已完成回填）
+            if (!$detailBlog.length || !$detailBlog.html()) {
+                throw new Error('日志内容为空');
             }
 
             // 添加原始HTML
@@ -488,33 +489,39 @@ API.Blogs.exportToMarkdown = async(items) => {
 
     for (let index = 0; index < items.length; index++) {
         const item = items[index];
-        // 获取日志MD内容
-        const content = await API.Blogs.getMarkdown(item);
-        // 写入内容到文件
-        // 标签
-        const labels = API.Blogs.getBlogLabel(item);
-        // const date = new Date(item.pubtime * 1000).format('yyyyMMddhhmmss');
-        const date = (item.pubTime || new Date(item.pubtime * 1000).format('yyyyMMddhhmmss')).replace(' ', '');
-        // 序号
-        const orderNum = API.Utils.prefixNumber(index + 1, QZone.Blogs.total.toString().length);
-        // 文件名
-        let filename = API.Utils.filenameValidate(orderNum + "_" + date + "_【" + item.title + "】");
-        if (labels && labels.length > 0) {
-            filename = API.Utils.filenameValidate(orderNum + "_" + date + "_" + labels.join("_") + "【" + item.title + "】");
-        }
-        // 文件夹路径
-        const categoryFolder = API.Common.getModuleRoot('Blogs') + "/" + item.category;
-        // 创建文件夹
-        await API.Utils.createFolder(categoryFolder);
-        // 日志文件路径
-        const filepath = categoryFolder + '/' + filename + ".md";
-        await API.Utils.writeText(content, filepath).then(() => {
-            // 更新成功信息
-            indicator.addSuccess(item);
-        }).catch((e) => {
+        try {
+            // 获取日志MD内容
+            const content = await API.Blogs.getMarkdown(item);
+            // 写入内容到文件
+            // 标签
+            const labels = API.Blogs.getBlogLabel(item);
+            // const date = new Date(item.pubtime * 1000).format('yyyyMMddhhmmss');
+            const date = (item.pubTime || new Date(item.pubtime * 1000).format('yyyyMMddhhmmss')).replace(' ', '');
+            // 序号
+            const orderNum = API.Utils.prefixNumber(index + 1, QZone.Blogs.total.toString().length);
+            // 文件名
+            let filename = API.Utils.filenameValidate(orderNum + "_" + date + "_【" + item.title + "】");
+            if (labels && labels.length > 0) {
+                filename = API.Utils.filenameValidate(orderNum + "_" + date + "_" + labels.join("_") + "【" + item.title + "】");
+            }
+            // 文件夹路径
+            const categoryFolder = API.Common.getModuleRoot('Blogs') + "/" + item.category;
+            // 创建文件夹
+            await API.Utils.createFolder(categoryFolder);
+            // 日志文件路径
+            const filepath = categoryFolder + '/' + filename + ".md";
+            await API.Utils.writeText(content, filepath).then(() => {
+                // 更新成功信息
+                indicator.addSuccess(item);
+            }).catch((e) => {
+                indicator.addFailed(item);
+                console.error('写入日志文件异常', item, e);
+            })
+        } catch (e) {
+            // 单篇日志导出失败时仅记录该项，不中断整体导出流程
             indicator.addFailed(item);
-            console.error('写入日志文件异常', item, e);
-        })
+            console.error('导出日志到MarkDown异常', item, e);
+        }
     }
     // 更新完成信息
     indicator.complete();
@@ -534,8 +541,14 @@ API.Blogs.getMarkdown = async(item) => {
     contents.push('\r\n');
     // 内容
     // 根据HTML获取MD内容
-    let markdown = QZone.Common.MD.turndown(API.Utils.base64ToUtf8(item.custom_html));
-    contents.push(markdown.replace(/\n/g, "\r\n"));
+    const customHtml = API.Utils.base64ToUtf8(item.custom_html);
+    if (customHtml) {
+        let markdown = QZone.Common.MD.turndown(customHtml);
+        contents.push(markdown.replace(/\n/g, "\r\n"));
+    } else {
+        // 正文获取失败时输出占位提示，确保导出流程正常完成
+        contents.push("> ⚠️ 日志正文获取失败，内容为空");
+    }
 
     // 评论
     contents.push("> 评论({0})".format(item.replynum));

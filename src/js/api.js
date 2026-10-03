@@ -1997,14 +1997,24 @@ API.Utils = {
      * @param {string} str base64字符串
      */
     base64ToUtf8(str) {
-        // 使用 TextDecoder 处理 Unicode 字符
-        const binary = atob(str);
-        const bytes = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) {
-            bytes[i] = binary.charCodeAt(i);
+        // 入参非字符串或为空时返回空字符串，避免 atob 接收无效参数抛出 DOMException
+        if (typeof str !== 'string' || str === '') {
+            return '';
         }
-        const decoder = new TextDecoder();
-        return decoder.decode(bytes);
+        try {
+            // 使用 TextDecoder 处理 Unicode 字符
+            const binary = atob(str);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            const decoder = new TextDecoder();
+            return decoder.decode(bytes);
+        } catch (e) {
+            // 解码失败时返回空字符串，确保单条数据异常不影响整体导出流程
+            console.warn('Base64解码失败，已忽略', e);
+            return '';
+        }
     },
 
     /**

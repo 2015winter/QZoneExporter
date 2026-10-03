@@ -687,9 +687,15 @@ API.Diaries.getMarkdown = async(item) => {
     contents.push("\r\n");
 
     // 根据HTML获取MD内容
-    let markdown = QZone.Common.MD.turndown(API.Utils.base64ToUtf8(item.custom_html));
-    markdown = markdown.replace(/\n/g, "\r\n");
-    contents.push(markdown);
+    const customHtml = API.Utils.base64ToUtf8(item.custom_html);
+    if (customHtml) {
+        let markdown = QZone.Common.MD.turndown(customHtml);
+        markdown = markdown.replace(/\n/g, "\r\n");
+        contents.push(markdown);
+    } else {
+        // 正文获取失败时输出占位提示，确保导出流程正常完成
+        contents.push("> ⚠️ 日记正文获取失败，内容为空");
+    }
     contents.push("\r\n");
 
     // 拼接评论
