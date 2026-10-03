@@ -173,4 +173,4 @@ QZoneExporter/
 
 ---
 
-*本文档适用于 v3.1 版本（Manifest V3）。*
+*本文档适用于 v3.1.1 版本（Manifest V3）。*

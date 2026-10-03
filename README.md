@@ -8,7 +8,7 @@
 
 [![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-green?logo=googlechrome)](https://github.com/2015winter/QZoneExporter)
 [![Manifest V3](https://img.shields.io/badge/Manifest-V3-blue)](https://developer.chrome.com/docs/extensions/mv3/)
-[![Version](https://img.shields.io/badge/Version-3.1-orange)](https://github.com/2015winter/QZoneExporter)
+[![Version](https://img.shields.io/badge/Version-3.1.1-orange)](https://github.com/2015winter/QZoneExporter)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue)](./LICENSE)
 
 落叶随风，青春稍纵即逝。QQ空间承载了很多人的青春记忆。随着新浪博客、网易相册、腾讯微博相继停运，互联网产品都有自己的生命周期。为保存这些珍贵回忆，QQ空间导出助手应运而生。
